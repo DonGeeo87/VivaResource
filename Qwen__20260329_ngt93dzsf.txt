@@ -1,0 +1,711 @@
+CONTEXTO: Estás migrando el sitio web de Viva Resource Foundation desde Google Stitch a Next.js 14 + Tailwind CSS. Organización 501(c)(3) en Colorado, USA. Sitio bilingüe ES/EN enfocado en comunidades rurales.
+
+=====================================================================
+FASE 1: DESCARGAR ASSETS (EJECUTAR ESTOS COMANDOS)
+=====================================================================
+
+mkdir -p public/assets/home
+
+curl -L -o "public/assets/home/hero-1.webp" "https://lh3.googleusercontent.com/aida-public/AB6AXuACzrVpMy56dwyiM6XyGE5tw2d6MOUE4haIQHDgUOfF81Ubr-rWzfTWHD1J2QJcxDd-FfxNzNtJ0A_wMhzApWQG03mj1UFd9a_u9VyUzr_1CVXJtp92tX7ybPR99o8cEKnCKVKtKmyVgnv1ZfKFn5JQEUNoOcvy6mjrQceNnEgjYSqJxBJhMrVYAmO1454MMJ65EpsJ-5HwEEjodKP4ik4eQG2UhhsTWtxx4TsVEhrottpTxBZFN2ny8H7VIxFS1Uv47vLkGWBTwW8"
+
+curl -L -o "public/assets/home/hero-2.webp" "https://lh3.googleusercontent.com/aida-public/AB6AXuDD2_X_hc7VAtH8xoo68p2rM886-5FsRwpaRNohamZ2DisevB7wFwX1gN4H3e-z-S2wjqS2UGq3O_RD53owy9c7yhcAJC69_M2TdWQweeBlOgrdIzfXMGz2fp6okUfc-VmhGYl8cVQydRYlatJWZJOg5gkxPVsfyyvrU0EILY8VImtL6aKFBlaUYnyyy56l-LW1R2ePOTcxO36YhW9ucijAWMYHBhHH6Z4B6kegKBct4iTTfZhlhRi7xmrt_g_o4QsgMSc-UYbDDGw"
+
+curl -L -o "public/assets/home/hero-3.webp" "https://lh3.googleusercontent.com/aida-public/AB6AXuC08k16sAUbHinOS5lQssSyDSBge1AlGguG0ZiJjYZ4fkRAqRRMI6n7TrV0lupGbH9vRNG3SWXJjjYtWtEKjLNpj1r_FZ_-e4UU0Aep86jrZLoy5p1rgy_GmxaslLFIvqRsrU_aBAXBesFNIf-gJBpGjOZjA4YJ9VK5r_H7VI4jd7N4yT2WIZZrAPXLUpaHTI5NBvOBYHU--Kza2oOPzDiZLKOQCgnNzGBNPue06v5ed_1LCeKZLF-KLxEnVRKg96ZtLiNahirSmBE"
+
+curl -L -o "public/assets/home/get-help.webp" "https://lh3.googleusercontent.com/aida-public/AB6AXuC8zyptKqJNePZ4ujbc48M0KVVScvp6NyIx4d6-MmW-Xis3L28_KwyfOK8FwiOAwSyDPqOpBbUswn518F6OK9ePY_Wq-P0_JqTOlQLQ7DNl9IN8Lffglx_8z4baCBpyg1jOBgTCrrsz-wlJzfar_8cTeWMheCDOubt0XV-MCxwN0b0a42Hm_BMff8LNiqTY7xmwBZ7QwQE9oh-qUVATC1gjHwUwdT9B1MgidJxzC_jUshsn7sen27e6sIXp86UwzwWaJsCuDImaWuY"
+
+curl -L -o "public/assets/home/founders-eva.webp" "https://lh3.googleusercontent.com/aida-public/AB6AXuB40vyNLrkU9MrRQFIvtnHwGQIk_yzFQ11OoWAByO3804L8LU4u1afTJG-fsXFI3nE0G6Q1KlcI9xqRl2w9Kf01HkxIcEHrl80hbhQYG0360cs3BonWQsQYKaLQKzi2jCld7mUI-RQ3Q7Im5Fri8pL5cTnqPdC3A8TkwiGTSVf3EfnJKRnXmk1XXTkKocu9jlwMSYGLO532qBJwjnlPzDjg0uD1w4nGpFa5oYlNHlMTOWbyPRC5E4RgP0Caj1D8aW7FnItPR1KbM1k"
+
+curl -L -o "public/assets/home/founders-monserrat.webp" "https://lh3.googleusercontent.com/aida-public/AB6AXuDj2p4Pczlbdq2UnRfBaXUAI-X6RrY6NmCTiqkCrqQMuP8129fwLyLIscmUgDLWd5gMF_1u_nx1i8N9WlCvrjbC8bcyy8z04wUZMU2R77xIK35CAZgiT-VqGva7tCsCKqGhQGVJKapUH7rciiD1OLY-iEun3A7SGoiNAS1LA7PLooXPnxzWx3ECmBL1mGFbmqjA5DMdOgwLW6sIx2bu5NYJkNj67O2Zn1Pa1TdYz9pLkM5w0UHCgg3ZfCVrxahbzMr83cgeyvwIiJA"
+
+curl -L -o "public/assets/home/ambassador.webp" "https://lh3.googleusercontent.com/aida-public/AB6AXuCbELa4pJq5K8plEddqxI3LuX-Lc5wQuqEKY0Z2eQ9iUnUj2g032eDUXprGZZpZ9-FnRvSd16uuXmoyWQPk8LXxBW1_OUmv6t-hAkf13w3fn7Ekeg-6FEKJmT2hd07GtUvouqjX9je9u4TT8CMlL-iv29UEHblEtJu8g2eI-0B4L-dJbBR1gFdSwXHtVff9f3rPMX-iDj-xffVCBkdTRPIqbhmpWA79kXQAYlWUc1HkXyTP775MUUSwNOlIugcsCI4JhVnq-3nbj8c"
+
+curl -L -o "public/assets/home/volunteer.webp" "https://lh3.googleusercontent.com/aida-public/AB6AXuCoAD_qDoct_eHEQITGPzwgcVP7nMQadEx570MX67r5VIxXIt_7sLShVj3b6xwFiOeWeElElFD4euxEMl4kgFsA-OnYcLLna1XBNF6Md7NjOC6ceOjqLG9eyU1eDcVTHwrrcxrB7c-Ij8E0dqv_C0vlNlg-MZhQM6Y85Rb7kvX9rvdRney5bprh02lpC1CTG3gIw2VavzLdOMI1pBtObDhMbyzaYynGy0DEt8SyWT-oZlau35JwM-YI1Fqi1fHMB0fp_T9XqldT40Y"
+
+curl -L -o "public/assets/home/get-involved.webp" "https://lh3.googleusercontent.com/aida-public/AB6AXuCBMdbiTC7yx5xhGQrdQvB8c5aAmRebaE7M-K24OdJDdatjXkKLcgw4ypqhqLmTpEFIZZACAl0rDGun8lUUmhraPwK8JIcPGJIByw3njg8eWW02iASzdyiHeXXAnsA5Kt0jIaCBBI2Imf8AwUYm_7OKvBzyePOgFMsvV5an7gtc9vuX6lqw8icUhqvAsRs1rO7fGAG2zJcG75WbM6JnLWu-LUKTDTUJtaLEC8nLjfQY29pNeXjRz2hbwaU6cPvjo867XugDqAOCAC0"
+
+curl -L -o "public/assets/home/about-us.webp" "https://lh3.googleusercontent.com/aida-public/AB6AXuAhlNFXpKXPoBIbturq16XhOwCpjyU-T1q50kVxHVp0M9SYVHp7MAfkoZ734QoU4tmWYdOPHoKWhSMpjU3yd764-H4E_RY5vnTAhUgnjVrKV1w5m7ZjAf943B-cPKtUKEoG8Ga8oqHhcvvc9_h1BSYtmhVbP72mDZoemX5rGzaPn6j5g47ozYRzAzSqiasHOjchDqXv9KpYwP0eMH1JuFE2FnuJPtzmOYBo5UjhyAMckBZIMu6DxzzY6wLv-03nmvBQaITHgdazuN0"
+
+=====================================================================
+FASE 2: CREAR ARCHIVO /src/app/page.tsx
+=====================================================================
+
+import Image from 'next/image'
+import Link from 'next/link'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Viva Resource Foundation | Empowering Rural Resilience',
+  description: '501(c)(3) Nonprofit Organization bridging the gap between rural communities and essential life-changing services through direct advocacy, education, and shared local resources.',
+  keywords: 'nonprofit, rural communities, Colorado, 501c3, community resources, food assistance, healthcare'
+}
+
+export default function HomePage() {
+  return (
+    <div className="min-h-screen">
+      {/* HEADER/NAV - Componente reutilizable */}
+      <header className="sticky top-0 z-50 bg-white shadow-md">
+        <nav className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="text-2xl font-bold text-[#2E6FA3]">Viva Resource</div>
+            </div>
+            
+            <div className="hidden md:flex items-center space-x-6">
+              <Link href="/about" className="text-gray-700 hover:text-[#2E6FA3] transition">About Us</Link>
+              <Link href="/resources" className="text-gray-700 hover:text-[#2E6FA3] transition">Resources</Link>
+              <Link href="/blog" className="text-gray-700 hover:text-[#2E6FA3] transition">Blog</Link>
+              <Link href="/contact" className="text-gray-700 hover:text-[#2E6FA3] transition">Contact Us</Link>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <button className="text-sm font-medium text-gray-700">EN/ES</button>
+              <Link href="/contact" className="bg-[#1E4D7B] text-white px-6 py-2 rounded-lg hover:bg-[#2E6FA3] transition">
+                Contact Us
+              </Link>
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      {/* HERO SECTION */}
+      <section className="bg-gradient-to-br from-[#2E6FA3] to-[#1E4D7B] text-white py-20">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <div className="inline-flex items-center space-x-2 bg-white/10 px-4 py-2 rounded-full mb-6">
+                <span className="text-2xl">diversity_3</span>
+                <span className="font-medium">501(c)(3) Nonprofit Organization</span>
+              </div>
+              
+              <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+                Empowering Rural Resilience
+              </h1>
+              
+              <p className="text-xl mb-8 text-blue-100 max-w-2xl">
+                Viva Resource Foundation bridges the gap between rural communities and essential life-changing services through direct advocacy, education, and shared local resources.
+              </p>
+              
+              <div className="flex flex-wrap gap-4">
+                <Link href="/get-help" className="bg-[#8BC53F] text-white px-8 py-4 rounded-lg font-semibold hover:bg-[#6B9E2F] transition shadow-lg">
+                  More Info
+                </Link>
+                <Link href="/about" className="bg-white text-[#2E6FA3] px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition shadow-lg">
+                  Our Impact
+                </Link>
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="grid grid-cols-2 gap-4">
+                <Image
+                  src="/assets/home/hero-1.webp"
+                  alt="Community support"
+                  width={300}
+                  height={400}
+                  className="rounded-2xl shadow-2xl object-cover"
+                />
+                <Image
+                  src="/assets/home/hero-2.webp"
+                  alt="Rural families"
+                  width={300}
+                  height={400}
+                  className="rounded-2xl shadow-2xl object-cover mt-8"
+                />
+                <Image
+                  src="/assets/home/hero-3.webp"
+                  alt="Education programs"
+                  width={300}
+                  height={400}
+                  className="rounded-2xl shadow-2xl object-cover"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* GET HELP CTA SECTION */}
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="bg-white p-8 md:p-12 rounded-2xl shadow-xl">
+              <div className="text-5xl mb-4">handshake</div>
+              <h2 className="text-3xl font-bold text-[#1E4D7B] mb-4">
+                Get Help Accessing Community Resources
+              </h2>
+              <p className="text-gray-700 mb-8 text-lg">
+                Are you or someone you know struggling to find local support? Our referral system connects you directly with food banks, health services, and emergency aid programs tailored to your specific needs.
+              </p>
+              <Link 
+                href="/get-help" 
+                className="inline-flex items-center space-x-2 bg-[#2E6FA3] text-white px-8 py-4 rounded-lg font-semibold hover:bg-[#1E4D7B] transition"
+              >
+                <span>Start My Referral</span>
+                <span>arrow_forward</span>
+              </Link>
+            </div>
+
+            <div className="relative">
+              <Image
+                src="/assets/home/get-help.webp"
+                alt="Community resources assistance"
+                width={600}
+                height={400}
+                className="rounded-2xl shadow-2xl object-cover"
+              />
+              <div className="absolute -bottom-6 -left-6 bg-[#8BC53F] text-white p-6 rounded-xl shadow-lg">
+                <div className="text-3xl font-bold">100+</div>
+                <div className="text-sm">Referrals Successfully processed this month alone.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* OUR PILLARS SECTION */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-bold text-center mb-16 text-[#1E4D7B]">Our Pillars</h2>
+          
+          <div className="space-y-4 max-w-4xl mx-auto">
+            {/* Pilar 1 */}
+            <div className="bg-white border-l-4 border-[#8BC53F] p-6 rounded-lg shadow-md hover:shadow-xl transition">
+              <div className="flex items-start space-x-6">
+                <div className="text-4xl font-bold text-[#8BC53F]">01</div>
+                <div>
+                  <h3 className="text-2xl font-bold text-[#1E4D7B] mb-2">Emergency Response</h3>
+                  <p className="text-gray-700">
+                    Immediate crisis intervention and logistical support for families facing sudden hardship, disasters, or unforeseen transitions.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Pilar 2 */}
+            <div className="bg-white border-l-4 border-[#2E6FA3] p-6 rounded-lg shadow-md hover:shadow-xl transition">
+              <div className="flex items-start space-x-6">
+                <div className="text-4xl font-bold text-[#2E6FA3]">02</div>
+                <div>
+                  <h3 className="text-2xl font-bold text-[#1E4D7B] mb-2">Food Security</h3>
+                  <p className="text-gray-700">
+                    Sustainable nutritional programs and partnerships with local producers to ensure no rural family goes without healthy meals.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Pilar 3 */}
+            <div className="bg-white border-l-4 border-[#8BC53F] p-6 rounded-lg shadow-md hover:shadow-xl transition">
+              <div className="flex items-start space-x-6">
+                <div className="text-4xl font-bold text-[#8BC53F]">03</div>
+                <div>
+                  <h3 className="text-2xl font-bold text-[#1E4D7B] mb-2">Health and Safety</h3>
+                  <p className="text-gray-700">
+                    Connecting isolated populations to preventive care, mental health resources, and safety education workshops.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Pilar 4 */}
+            <div className="bg-white border-l-4 border-[#2E6FA3] p-6 rounded-lg shadow-md hover:shadow-xl transition">
+              <div className="flex items-start space-x-6">
+                <div className="text-4xl font-bold text-[#2E6FA3]">04</div>
+                <div>
+                  <h3 className="text-2xl font-bold text-[#1E4D7B] mb-2">Community Engagement</h3>
+                  <p className="text-gray-700">
+                    Building social capital through volunteerism, community events, and leadership development within rural hubs.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Pilar 5 */}
+            <div className="bg-white border-l-4 border-[#8BC53F] p-6 rounded-lg shadow-md hover:shadow-xl transition">
+              <div className="flex items-start space-x-6">
+                <div className="text-4xl font-bold text-[#8BC53F]">05</div>
+                <div>
+                  <h3 className="text-2xl font-bold text-[#1E4D7B] mb-2">Continuous Improvement</h3>
+                  <p className="text-gray-700">
+                    Data-driven approaches to refine our impact and scale successful programs to reach more underserved areas effectively.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4 REASONS TO GET INVOLVED */}
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-bold text-center mb-12 text-[#1E4D7B]">4 Reasons to Get Involved</h2>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Razón 1 */}
+            <div className="bg-white p-8 rounded-xl shadow-lg text-center">
+              <div className="text-5xl mb-4 text-[#8BC53F]">star</div>
+              <h3 className="text-xl font-bold text-[#1E4D7B] mb-3">Tax-Deductible</h3>
+              <p className="text-gray-700">Your contributions are fully deductible under 501(c)(3) guidelines.</p>
+            </div>
+
+            {/* Razón 2 */}
+            <div className="bg-white p-8 rounded-xl shadow-lg text-center">
+              <div className="text-5xl mb-4 text-[#8BC53F]">potted_plant</div>
+              <h3 className="text-xl font-bold text-[#1E4D7B] mb-3">Direct Impact</h3>
+              <p className="text-gray-700">90% of funds go directly into community outreach and resource delivery.</p>
+            </div>
+
+            {/* Razón 3 */}
+            <div className="bg-white p-8 rounded-xl shadow-lg text-center">
+              <div className="text-5xl mb-4 text-[#8BC53F]">favorite</div>
+              <h3 className="text-xl font-bold text-[#1E4D7B] mb-3">Community Trust</h3>
+              <p className="text-gray-700">We are embedded in the communities we serve, ensuring lasting trust.</p>
+            </div>
+
+            {/* Razón 4 */}
+            <div className="bg-white p-8 rounded-xl shadow-lg text-center">
+              <div className="text-5xl mb-4 text-[#8BC53F]">handshake</div>
+              <h3 className="text-xl font-bold text-[#1E4D7B] mb-3">Scalable Hope</h3>
+              <p className="text-gray-700">Support models that can be replicated in rural areas nationwide.</p>
+            </div>
+
+            {/* CTA Grande */}
+            <div className="md:col-span-2 lg:col-span-2 bg-[#2E6FA3] text-white p-8 rounded-xl shadow-lg flex flex-col justify-center items-center text-center">
+              <div className="text-5xl mb-4">volunteer_activism</div>
+              <h3 className="text-2xl font-bold mb-3">Small Act, Big Change</h3>
+              <p className="mb-6 text-blue-100">Your donation provides the fuel for our advocacy and the resources for our neighbors.</p>
+              <Link href="/donate" className="bg-[#8BC53F] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#6B9E2F] transition">
+                Donate now!
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* AT VIVA RESOURCE SECTION */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-4xl font-bold text-[#1E4D7B] mb-6">At Viva Resource...</h2>
+              <p className="text-gray-700 text-lg mb-6">
+                ...we are committed to strengthening the foundations of rural life. By bridging the gap between local resources and community members, we foster resilience, growth, and collective prosperity.
+              </p>
+              <p className="text-gray-700 text-lg mb-8">
+                Our approach is deeply rooted in empathy and local understanding. We don't just provide services; we build relationships that empower individuals to become advocates for their own community's success.
+              </p>
+              
+              <div className="grid grid-cols-2 gap-6">
+                <div className="text-center p-6 bg-gray-50 rounded-xl">
+                  <div className="text-4xl font-bold text-[#2E6FA3] mb-2">500+</div>
+                  <div className="text-gray-700">Families Helped</div>
+                </div>
+                <div className="text-center p-6 bg-gray-50 rounded-xl">
+                  <div className="text-4xl font-bold text-[#2E6FA3] mb-2">24/7</div>
+                  <div className="text-gray-700">Advocacy Support</div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <Image
+                src="/assets/home/about-us.webp"
+                alt="Viva Resource team meeting"
+                width={600}
+                height={400}
+                className="rounded-2xl shadow-2xl object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* MEET OUR FOUNDERS */}
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-bold text-center mb-4 text-[#1E4D7B]">Meet Our Founders</h2>
+          <p className="text-center text-gray-600 mb-16 text-lg">The visionaries behind our mission.</p>
+          
+          <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
+            {/* Eva Leon */}
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+              <div className="grid md:grid-cols-2">
+                <div className="relative h-64 md:h-full">
+                  <Image
+                    src="/assets/home/founders-eva.webp"
+                    alt="Eva Leon"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="p-8">
+                  <h3 className="text-2xl font-bold text-[#1E4D7B] mb-2">Eva Leon</h3>
+                  <div className="text-[#8BC53F] font-medium mb-4">Co-Founder & Director</div>
+                  <p className="text-gray-700 mb-4">
+                    With over 15 years of experience in social work and community development, Eva has dedicated her life to ensuring that geographic isolation never equals isolation from opportunity. Her strategic vision has shaped Viva into the resilient organization it is today.
+                  </p>
+                  <div className="flex space-x-3">
+                    <button className="text-[#2E6FA3] hover:text-[#1E4D7B]">share</button>
+                    <button className="text-[#2E6FA3] hover:text-[#1E4D7B]">alternate_email</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Monserrat Mendoza */}
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+              <div className="grid md:grid-cols-2">
+                <div className="p-8 order-2 md:order-1">
+                  <h3 className="text-2xl font-bold text-[#1E4D7B] mb-2">Monserrat Mendoza</h3>
+                  <div className="text-[#8BC53F] font-medium mb-4">Co-Founder & Strategic Lead</div>
+                  <p className="text-gray-700 mb-4">
+                    Monserrat brings a unique background in public health policy and local advocacy. Her focus on bilingual accessibility and data-driven impact ensures that every dollar donated to Viva translates into measurable improvement for rural community members.
+                  </p>
+                  <div className="flex space-x-3">
+                    <button className="text-[#2E6FA3] hover:text-[#1E4D7B]">share</button>
+                    <button className="text-[#2E6FA3] hover:text-[#1E4D7B]">alternate_email</button>
+                  </div>
+                </div>
+                <div className="relative h-64 md:h-full order-1 md:order-2">
+                  <Image
+                    src="/assets/home/founders-monserrat.webp"
+                    alt="Monserrat Mendoza"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* DRIVING CHANGE SECTION */}
+      <section className="py-20 bg-[#1E4D7B] text-white">
+        <div className="container mx-auto px-4 text-center">
+          <div className="text-5xl mb-4 text-[#8BC53F]">auto_awesome</div>
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">Driving Change, Building Futures</h2>
+          <p className="text-xl text-blue-100 max-w-3xl mx-auto mb-8">
+            Our mission is to create a safety net that is both strong and flexible. We work at the intersection of local government, private partnerships, and grassroots energy to ensure no rural resident is left behind.
+          </p>
+          <Link href="/get-involved" className="inline-block bg-[#8BC53F] text-white px-8 py-4 rounded-lg font-semibold hover:bg-[#6B9E2F] transition shadow-lg">
+            Get Involved
+          </Link>
+        </div>
+      </section>
+
+      {/* ENGAGEMENT PATHWAYS */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-bold text-center mb-16 text-[#1E4D7B]">Engagement Pathways</h2>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Ambassador Program */}
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition">
+              <div className="relative h-48">
+                <Image
+                  src="/assets/home/ambassador.webp"
+                  alt="Ambassador Program"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="text-3xl font-bold text-[#8BC53F]">01</div>
+                  <h3 className="text-xl font-bold text-[#1E4D7B]">Ambassador Program</h3>
+                </div>
+                <p className="text-gray-700 mb-4">
+                  Lead from the front. Our ambassadors act as the primary liaison between Viva and their specific rural township.
+                </p>
+                <Link href="/get-involved#ambassador" className="inline-flex items-center text-[#2E6FA3] font-medium hover:text-[#1E4D7B]">
+                  Learn More <span className="ml-2">chevron_right</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Volunteer Program */}
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition">
+              <div className="relative h-48">
+                <Image
+                  src="/assets/home/volunteer.webp"
+                  alt="Volunteer Program"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="text-3xl font-bold text-[#2E6FA3]">02</div>
+                  <h3 className="text-xl font-bold text-[#1E4D7B]">Volunteer Program</h3>
+                </div>
+                <p className="text-gray-700 mb-4">
+                  Hands-on support. From distributing resources to assisting with health fairs, your time makes a massive difference.
+                </p>
+                <Link href="/get-involved#volunteer" className="inline-flex items-center text-[#2E6FA3] font-medium hover:text-[#1E4D7B]">
+                  Learn More <span className="ml-2">chevron_right</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* How to Get Involved */}
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition">
+              <div className="relative h-48">
+                <Image
+                  src="/assets/home/get-involved.webp"
+                  alt="How to Get Involved"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="text-3xl font-bold text-[#8BC53F]">03</div>
+                  <h3 className="text-xl font-bold text-[#1E4D7B]">How to Get Involved</h3>
+                </div>
+                <p className="text-gray-700 mb-4">
+                  Not sure where to start? Check our guide on corporate partnerships, legacy giving, and localized advocacy.
+                </p>
+                <Link href="/get-involved" className="inline-flex items-center text-[#2E6FA3] font-medium hover:text-[#1E4D7B]">
+                  Learn More <span className="ml-2">chevron_right</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ SECTION */}
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4 max-w-3xl">
+          <h2 className="text-4xl font-bold text-center mb-4 text-[#1E4D7B]">Common Questions</h2>
+          <p className="text-center text-gray-600 mb-12">Everything you need to know about our services.</p>
+          
+          <div className="space-y-4">
+            <details className="bg-white rounded-lg shadow-md p-6 group">
+              <summary className="font-semibold text-[#1E4D7B] cursor-pointer flex justify-between items-center">
+                What is Viva Resource?
+                <span className="text-2xl group-open:rotate-180 transition">expand_more</span>
+              </summary>
+              <p className="mt-4 text-gray-700">
+                Viva Resource Foundation is a 501(c)(3) nonprofit dedicated to rural resilience. We connect isolated communities with vital resources including health, food, and safety support through a direct referral system.
+              </p>
+            </details>
+
+            <details className="bg-white rounded-lg shadow-md p-6 group">
+              <summary className="font-semibold text-[#1E4D7B] cursor-pointer flex justify-between items-center">
+                How can I become a volunteer?
+                <span className="text-2xl group-open:rotate-180 transition">expand_more</span>
+              </summary>
+              <p className="mt-4 text-gray-700">
+                Visit our Get Involved page to fill out our volunteer application. We'll match you with opportunities that fit your skills and availability.
+              </p>
+            </details>
+
+            <details className="bg-white rounded-lg shadow-md p-6 group">
+              <summary className="font-semibold text-[#1E4D7B] cursor-pointer flex justify-between items-center">
+                Are my donations tax-deductible?
+                <span className="text-2xl group-open:rotate-180 transition">expand_more</span>
+              </summary>
+              <p className="mt-4 text-gray-700">
+                Yes! As a registered 501(c)(3) organization, all donations are fully tax-deductible to the extent allowed by law.
+              </p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      {/* CONTACT SECTION */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Info de contacto */}
+            <div className="bg-[#1E4D7B] text-white p-8 rounded-2xl">
+              <h3 className="text-2xl font-bold mb-8">Get in Touch</h3>
+              
+              <div className="space-y-6">
+                <div>
+                  <div className="text-3xl mb-3">mail</div>
+                  <div className="font-semibold mb-1">Email Us</div>
+                  <a href="mailto:vivaresourcefoundation@gmail.com" className="text-blue-200 hover:text-white">
+                    vivaresourcefoundation@gmail.com
+                  </a>
+                </div>
+
+                <div>
+                  <div className="text-3xl mb-3">location_on</div>
+                  <div className="font-semibold mb-1">Our Office</div>
+                  <p className="text-blue-200">
+                    13055 Bradshaw Drive #301<br />
+                    Peyton, CO
+                  </p>
+                </div>
+
+                <div>
+                  <div className="font-semibold mb-3">Follow Our Journey</div>
+                  <div className="flex space-x-4">
+                    <button className="text-2xl hover:text-[#8BC53F] transition">social_leaderboard</button>
+                    <button className="text-2xl hover:text-[#8BC53F] transition">camera</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Formulario */}
+            <div className="lg:col-span-2 bg-white p-8 rounded-2xl shadow-xl">
+              <form className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">First Name / Nombre</label>
+                    <input 
+                      type="text" 
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2E6FA3] focus:border-transparent"
+                      placeholder="Your first name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Last Name / Apellido</label>
+                    <input 
+                      type="text" 
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2E6FA3] focus:border-transparent"
+                      placeholder="Your last name"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                    <input 
+                      type="email" 
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2E6FA3] focus:border-transparent"
+                      placeholder="your@email.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                    <input 
+                      type="tel" 
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2E6FA3] focus:border-transparent"
+                      placeholder="(123) 456-7890"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Organization</label>
+                  <input 
+                    type="text" 
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2E6FA3] focus:border-transparent"
+                    placeholder="Your organization (optional)"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                  <textarea 
+                    rows={4}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2E6FA3] focus:border-transparent"
+                    placeholder="How can we help you?"
+                  ></textarea>
+                </div>
+
+                <div className="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    id="newsletter"
+                    className="w-4 h-4 text-[#2E6FA3] border-gray-300 rounded focus:ring-[#2E6FA3]"
+                  />
+                  <label htmlFor="newsletter" className="ml-2 text-sm text-gray-700">
+                    Subscribe to our monthly newsletter for impact updates.
+                  </label>
+                </div>
+
+                <button 
+                  type="submit"
+                  className="w-full bg-[#2E6FA3] text-white py-4 rounded-lg font-semibold hover:bg-[#1E4D7B] transition shadow-lg"
+                >
+                  Send Message
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="bg-[#1E4D7B] text-white py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <h4 className="text-2xl font-bold mb-4">Viva Resource Foundation</h4>
+              <p className="text-blue-200">
+                Building bridges of hope and resilience in rural communities across Colorado and beyond. Your 501(c)(3) partner in sustainable social impact.
+              </p>
+              <div className="mt-4 text-3xl">social_leaderboard</div>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
+              <ul className="space-y-2">
+                <li><Link href="/about" className="text-blue-200 hover:text-white transition">About Us</Link></li>
+                <li><Link href="/resources" className="text-blue-200 hover:text-white transition">Impact Areas</Link></li>
+                <li><Link href="/resources" className="text-blue-200 hover:text-white transition">Resources Hub</Link></li>
+                <li><Link href="/get-involved" className="text-blue-200 hover:text-white transition">Volunteer Portal</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Contact Details</h4>
+              <ul className="space-y-3">
+                <li className="flex items-start space-x-3">
+                  <span className="text-2xl">mail</span>
+                  <a href="mailto:vivaresourcefoundation@gmail.com" className="text-blue-200 hover:text-white">
+                    vivaresourcefoundation@gmail.com
+                  </a>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <span className="text-2xl">location_on</span>
+                  <span className="text-blue-200">13055 Bradshaw Drive #301, Peyton, CO</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-blue-800 pt-8 text-center text-blue-200">
+            <p>© 2024 Viva Resource Foundation. All rights reserved. Registered 501(c)(3).</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  )
+}
+
+=====================================================================
+FASE 3: VALIDACIÓN
+=====================================================================
+
+Después de ejecutar los comandos curl y crear el archivo page.tsx:
+
+1. Ejecuta: npm run dev
+2. Visita: http://localhost:3000
+3. Verifica:
+   - [ ] Todas las imágenes cargan correctamente
+   - [ ] Los colores coinciden (#2E6FA3, #8BC53F, #1E4D7B)
+   - [ ] La navegación funciona
+   - [ ] El diseño es responsive (prueba en móvil)
+   - [ ] Los links internos funcionan
+   - [ ] El formulario se ve correctamente
+
+=====================================================================
+NOTAS IMPORTANTES
+=====================================================================
+
+- Los iconos (handshake, star, etc.) son placeholders de Material Icons. Debes reemplazarlos con componentes reales de Lucide React o Heroicons.
+- Las imágenes descargadas están en formato WebP para mejor performance.
+- El diseño es mobile-first con breakpoints en md: y lg:
+- Todos los colores usan los tokens del design system de Viva Resource.
+
+¡LISTO PARA EMPEZAR! Copia este prompt completo y ejecuta los comandos en orden.

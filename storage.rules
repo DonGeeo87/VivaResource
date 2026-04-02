@@ -1,0 +1,29 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isAdmin() {
+      return isSignedIn() &&
+        get(/databases/(default)/documents/admin_users/$(request.auth.uid)).data.role == 'admin';
+    }
+    function isEditor() {
+      return isSignedIn() &&
+        get(/databases/(default)/documents/admin_users/$(request.auth.uid)).data.role in ['admin', 'editor'];
+    }
+
+    // Images folder - editors can upload, anyone can read
+    match /images/{allPaths=**} {
+      allow read: if true;
+      allow write: if isEditor();
+    }
+
+    // Uploads temp folder - only admins can write
+    match /uploads/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}

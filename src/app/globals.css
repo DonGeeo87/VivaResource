@@ -1,0 +1,261 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #f9f9f9;
+    --foreground: #1a1c1c;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: #1a1c1c;
+      --foreground: #f9f9f9;
+    }
+  }
+}
+
+@layer base {
+  * {
+    border-color: theme('colors.outline.low');
+  }
+
+  body {
+    background: theme('colors.surface.DEFAULT');
+    color: theme('colors.on-surface.DEFAULT');
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Focus states for accessibility - WCAG compliant */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 3px solid theme('colors.primary');
+    outline-offset: 2px;
+    border-radius: 0.25rem;
+  }
+
+  /* Remove default focus for mouse users */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* Ensure focus is visible for keyboard users */
+  :focus-visible {
+    outline: 3px solid theme('colors.primary');
+    outline-offset: 2px;
+  }
+
+  /* Skip link focus */
+  .skip-link:focus {
+    outline: 3px solid theme('colors.primary');
+    outline-offset: 2px;
+    background: theme('colors.primary');
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    font-weight: 700;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 50;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .editorial-shadow {
+    box-shadow: 0 8px 32px rgba(26, 28, 28, 0.06);
+  }
+
+  .glass-nav {
+    background: rgba(249, 249, 249, 0.8);
+    backdrop-filter: blur(20px);
+  }
+
+  /* Toast animations */
+  @keyframes slide-up {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out forwards;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+
+  /* ============================================
+     CINEMATIC SCROLL ANIMATIONS
+     ============================================ */
+
+  /* Base animation classes - elements start hidden */
+  .animate-on-scroll {
+    opacity: 0;
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  }
+
+  /* Fade in animation */
+  .animate-on-scroll.animate-fade-in.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .animate-on-scroll.animate-fade-in {
+    transform: translateY(30px);
+  }
+
+  /* Slide up animation */
+  .animate-on-scroll.animate-slide-up.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .animate-on-scroll.animate-slide-up {
+    transform: translateY(60px);
+  }
+
+  /* Slide in from left */
+  .animate-on-scroll.animate-slide-left.in-view {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .animate-on-scroll.animate-slide-left {
+    transform: translateX(-80px);
+  }
+
+  /* Slide in from right */
+  .animate-on-scroll.animate-slide-right.in-view {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .animate-on-scroll.animate-slide-right {
+    transform: translateX(80px);
+  }
+
+  /* Scale up animation */
+  .animate-on-scroll.animate-scale-up.in-view {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .animate-on-scroll.animate-scale-up {
+    transform: scale(0.9);
+  }
+
+  /* Staggered animations for child elements */
+  .stagger-container .stagger-item {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+
+  .stagger-container.in-view .stagger-item {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .stagger-container.in-view .stagger-item:nth-child(1) { transition-delay: 0ms; }
+  .stagger-container.in-view .stagger-item:nth-child(2) { transition-delay: 100ms; }
+  .stagger-container.in-view .stagger-item:nth-child(3) { transition-delay: 200ms; }
+  .stagger-container.in-view .stagger-item:nth-child(4) { transition-delay: 300ms; }
+  .stagger-container.in-view .stagger-item:nth-child(5) { transition-delay: 400ms; }
+  .stagger-container.in-view .stagger-item:nth-child(6) { transition-delay: 500ms; }
+  .stagger-container.in-view .stagger-item:nth-child(7) { transition-delay: 600ms; }
+  .stagger-container.in-view .stagger-item:nth-child(8) { transition-delay: 700ms; }
+
+  /* Hero entrance animation */
+  @keyframes hero-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .hero-animate {
+    opacity: 0;
+    animation: hero-fade-in 1s ease-out forwards;
+  }
+
+  .hero-animate-delay-1 {
+    animation: hero-fade-in 1s ease-out 0.2s forwards;
+    opacity: 0;
+  }
+
+  .hero-animate-delay-2 {
+    animation: hero-fade-in 1s ease-out 0.4s forwards;
+    opacity: 0;
+  }
+
+  .hero-animate-delay-3 {
+    animation: hero-fade-in 1s ease-out 0.6s forwards;
+    opacity: 0;
+  }
+
+  /* Parallax container */
+  .parallax-container {
+    overflow: hidden;
+    position: relative;
+    will-change: transform;
+  }
+
+  .parallax-container .parallax-image {
+    transition: transform 0.1s linear;
+    will-change: transform;
+    position: relative;
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-on-scroll,
+    .stagger-container .stagger-item,
+    .hero-animate,
+    .hero-animate-delay-1,
+    .hero-animate-delay-2,
+    .hero-animate-delay-3 {
+      opacity: 1;
+      transform: none;
+      animation: none;
+      transition: none;
+    }
+
+    .parallax-container,
+    .parallax-container .parallax-image {
+      transition: none;
+      transform: none !important;
+    }
+  }
+}

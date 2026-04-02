@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Events | Viva Resource Foundation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Public+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-lowest": "#ffffff",
+              "tertiary-fixed-dim": "#a0caff",
+              "secondary-fixed-dim": "#9cd850",
+              "surface-container-high": "#e8e8e8",
+              "inverse-primary": "#98cbff",
+              "error-container": "#ffdad6",
+              "on-primary-fixed": "#001d33",
+              "on-secondary-fixed-variant": "#304f00",
+              "on-primary-fixed-variant": "#004a77",
+              "surface-dim": "#dadada",
+              "secondary-container": "#b7f569",
+              "outline-variant": "#c1c7d0",
+              "on-surface": "#1a1c1c",
+              "on-tertiary-fixed-variant": "#184976",
+              "inverse-on-surface": "#f1f1f1",
+              "on-error": "#ffffff",
+              "error": "#ba1a1a",
+              "surface-variant": "#e2e2e2",
+              "background": "#f9f9f9",
+              "primary-fixed-dim": "#98cbff",
+              "on-tertiary-container": "#e2edff",
+              "secondary": "#416900",
+              "on-tertiary-fixed": "#001c37",
+              "on-secondary": "#ffffff",
+              "on-surface-variant": "#41474f",
+              "surface-tint": "#1c6296",
+              "surface-container": "#eeeeee",
+              "tertiary-fixed": "#d2e4ff",
+              "secondary-fixed": "#b7f569",
+              "outline": "#717880",
+              "on-error-container": "#93000a",
+              "surface-container-low": "#f3f3f3",
+              "surface-container-highest": "#e2e2e2",
+              "on-tertiary": "#ffffff",
+              "on-background": "#1a1c1c",
+              "tertiary-container": "#426d9d",
+              "on-primary-container": "#e0eeff",
+              "inverse-surface": "#2f3131",
+              "tertiary": "#275583",
+              "primary": "#025689",
+              "on-secondary-container": "#457000",
+              "primary-fixed": "#cee5ff",
+              "primary-container": "#2e6fa3",
+              "surface-bright": "#f9f9f9",
+              "on-primary": "#ffffff",
+              "surface": "#f9f9f9",
+              "on-secondary-fixed": "#102000"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Public Sans"],
+              "label": ["Public Sans"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .editorial-shadow {
+        box-shadow: 0 8px 32px -4px rgba(26, 28, 28, 0.06);
+      }
+      .glass-nav {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(20px);
+      }
+    </style>
+</head>
+<body class="bg-background font-body text-on-surface">
+<!-- Top Navigation Shell -->
+<nav class="fixed top-0 w-full z-50 glass-nav shadow-sm">
+<div class="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto w-full">
+<div class="text-2xl font-bold text-sky-900 font-headline tracking-tight">Viva Resource Foundation</div>
+<!-- Desktop Links -->
+<div class="hidden md:flex items-center space-x-8 font-headline text-base tracking-tight">
+<a class="text-slate-600 hover:text-sky-700 transition-colors" href="#">Home</a>
+<a class="text-slate-600 hover:text-sky-700 transition-colors" href="#">Our Impact</a>
+<a class="text-slate-600 hover:text-sky-700 transition-colors" href="#">Resources</a>
+<a class="text-sky-800 font-bold border-b-2 border-sky-800 pb-1" href="#">Events</a>
+<a class="text-slate-600 hover:text-sky-700 transition-colors" href="#">Blog</a>
+<a class="text-slate-600 hover:text-sky-700 transition-colors" href="#">Contact Us</a>
+</div>
+<div class="flex items-center space-x-6">
+<button class="text-slate-600 font-medium hover:text-sky-700 transition-colors">EN/ES</button>
+<button class="bg-primary text-on-primary px-6 py-2 rounded-full font-bold transition-all duration-300 ease-in-out active:scale-95 shadow-sm">Donate</button>
+</div>
+</div>
+</nav>
+<main class="pt-20">
+<!-- Hero Section -->
+<section class="relative h-[614px] min-h-[500px] flex items-center overflow-hidden bg-primary-container">
+<div class="absolute inset-0 z-0 opacity-40">
+<img alt="Community gathering" class="w-full h-full object-cover" data-alt="A diverse group of smiling people sitting in a sunlit circle at a community center, engaged in warm conversation with soft natural lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDviyMaJX02LZ9Ba55WlNjs85RirUbGfuvJTNuJra4dxuGVv8ax834dQy9wy2draDRL3BRjBJAYpIcWoybX_Ff2ghIhZuFfmmZaVSJd88SrhwUPlrAHAwwzXRds1IwO3kE5vo6D1Z6SPPmjwwJChjxbeQDqIucv2mbK7aTulSZBkzjYHHT1YKQ-A_7COiBglupwTPy8J63IN-yAYnTNJ0ZLLmOOiT-ZN4liJpTr8hOzja-I73xe-pBoByAtgzlu0nPPenyYkKiE9bA"/>
+</div>
+<div class="absolute inset-0 bg-gradient-to-tr from-primary via-primary/80 to-transparent z-10"></div>
+<div class="relative z-20 max-w-7xl mx-auto px-8 w-full">
+<div class="max-w-2xl">
+<span class="inline-block bg-secondary-container text-on-secondary-container px-4 py-1 rounded-full text-sm font-bold tracking-wider uppercase mb-6">Upcoming / Próximos</span>
+<h1 class="font-headline text-5xl md:text-6xl font-extrabold text-white leading-tight tracking-tighter mb-6">
+                        Community Events / <br/>
+<span class="text-secondary-fixed">Eventos Comunitarios</span>
+</h1>
+<p class="text-white/90 text-lg md:text-xl leading-relaxed max-w-xl">
+                        Join us in building a stronger, more connected community. Discover workshops, resources, and gatherings designed for you. / Únase a nosotros para construir una comunidad más fuerte y conectada.
+                    </p>
+</div>
+</div>
+</section>
+<!-- Category Filter Chips -->
+<section class="py-12 bg-surface">
+<div class="max-w-7xl mx-auto px-8">
+<div class="flex flex-wrap gap-4 items-center">
+<span class="font-headline font-bold text-on-surface-variant mr-4">Filter by / Filtrar por:</span>
+<button class="px-6 py-2 rounded-full bg-primary text-on-primary font-medium transition-all duration-300">All / Todos</button>
+<button class="px-6 py-2 rounded-full bg-surface-container-high text-on-surface-variant font-medium hover:bg-surface-container-highest transition-all duration-300">Workshops / Talleres</button>
+<button class="px-6 py-2 rounded-full bg-surface-container-high text-on-surface-variant font-medium hover:bg-surface-container-highest transition-all duration-300">Food Distribution / Distribución de Alimentos</button>
+<button class="px-6 py-2 rounded-full bg-surface-container-high text-on-surface-variant font-medium hover:bg-surface-container-highest transition-all duration-300">Community Meetings / Reuniones</button>
+</div>
+</div>
+</section>
+<!-- Events Bento Grid -->
+<section class="pb-24 px-8 max-w-7xl mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+<!-- Main Featured Event Card -->
+<div class="md:col-span-8 group relative overflow-hidden rounded-xl bg-surface-container-lowest editorial-shadow transition-transform duration-500 hover:-translate-y-1">
+<div class="md:flex h-full">
+<div class="md:w-1/2 h-64 md:h-auto overflow-hidden">
+<img alt="Community workshop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="Focus on hands sorting fresh vegetables in a bright community kitchen, warm sunlight streaming through windows." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCelZY24bWEqbBnxiqKj3MQ0KDYDvpJwKk1bIIwdoD3h5UbSQqbIkvLSjj_ZRAXQu23gN3XTZ4oRGbI83Ijf_0VY09pb-CTLcdQl_2qlwJmU2uVwLTjoSJobx2BZjmTToAGsBY2O-inEavEBFytXg9A77TE1wUqMvwUaiQaGLSuWyipT7hdYcWyCOP3LsVw834s5LL5bYUn8u7a1sesKd6EB60SB5_dmet9FnabND7vJ8SFqIZFwlO3hRO0QuVm-kPDI6-UjeuqGYA"/>
+</div>
+<div class="md:w-1/2 p-8 flex flex-col justify-between">
+<div>
+<div class="flex items-center text-secondary font-bold text-sm mb-4">
+<span class="material-symbols-outlined mr-2" style="font-size: 18px;">calendar_today</span>
+                                    MAR 15, 2024 • 10:00 AM
+                                </div>
+<h3 class="font-headline text-2xl font-bold text-primary mb-3">Fresh Harvest Distribution / Distribución de Cosecha Fresca</h3>
+<p class="text-on-surface-variant leading-relaxed mb-6">Supporting our neighbors with nutritional security. All families are welcome. / Apoyando a nuestros vecinos con seguridad nutricional.</p>
+<div class="flex items-center text-on-surface-variant text-sm mb-6">
+<span class="material-symbols-outlined mr-2" style="font-size: 18px;">location_on</span>
+                                    Central Community Hub, Main Hall
+                                </div>
+</div>
+<button class="w-full py-4 bg-secondary text-on-secondary rounded-full font-bold transition-all hover:bg-on-secondary-container active:scale-95">Register / Registrarse</button>
+</div>
+</div>
+</div>
+<!-- Small Card 1 -->
+<div class="md:col-span-4 group rounded-xl bg-surface-container-lowest editorial-shadow p-6 transition-transform duration-500 hover:-translate-y-1">
+<div class="h-48 rounded-lg overflow-hidden mb-6">
+<img alt="Yoga class" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="People practicing yoga in a peaceful park setting during sunset, silhouettes against a soft orange glow." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_yWwTueiv_leDsQLprIYVCwb6Rxra_3xdFdO-zhg0r3ZagWZoU1tTAhkzj_be0w6OcY9QqOs4ddiX7ZDgjw8XuLNYj_Q6gGgSl4p8bTt0FcDDZUp08h-LLhZ6S_Ci8cRDrt9FGrqgepBX0GN-RgsyO9b8FEBg-e6w9rQMaUPYsmjYaVYZ4T0VI7k8rnwA4YB48AyTbuFJjaMgVXH-NP70Qqqvv_-mgEuxz2FFbATQ_wH10qyTg7Yj2u1RWVge6RC5Fh11WRc8d5U"/>
+</div>
+<div class="text-secondary font-bold text-xs mb-2">APR 02, 2024 • 5:30 PM</div>
+<h3 class="font-headline text-xl font-bold text-primary mb-3">Community Yoga / Yoga Comunitario</h3>
+<p class="text-on-surface-variant text-sm mb-6">Free bilingual session for all levels. / Sesión bilingüe gratuita para todos los niveles.</p>
+<button class="w-full py-3 bg-surface-container-high text-primary rounded-full font-bold transition-all hover:bg-surface-container-highest">Details / Detalles</button>
+</div>
+<!-- Small Card 2 -->
+<div class="md:col-span-4 group rounded-xl bg-surface-container-lowest editorial-shadow p-6 transition-transform duration-500 hover:-translate-y-1">
+<div class="h-48 rounded-lg overflow-hidden mb-6">
+<img alt="Workshop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="People in a business workshop setting, collaborative atmosphere with sticky notes and laptops on a table." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZCU6J8yRnb7_zfXQESOjQgxzlb4rhI53AgzPM-s-qFDq4chrdNg6PecFigbvXC5TYYciixvdfZERNMjW9aDf5jjBDocHdhHOgrCpcRgxmLP-wJ-JZ9XkEBCvcsn0bqQ4qSLSsxXfjYLr6DG7YJkxGcQ9M3YjAyc0Fa2fq_OP1VxdWZ6rrfmM5VqKx3AZl1Xh8QN2qIDoDcks7_hljPRxdJZ4Rnu4HXpO9Pq2Rv5g-4FGcspHmsiVGuHw1X-19lKgvCW-34y8X7ak"/>
+</div>
+<div class="text-secondary font-bold text-xs mb-2">APR 12, 2024 • 6:00 PM</div>
+<h3 class="font-headline text-xl font-bold text-primary mb-3">Financial Wellness / Bienestar Financiero</h3>
+<p class="text-on-surface-variant text-sm mb-6">Expert advice on budgeting and saving. / Consejos expertos sobre presupuesto y ahorro.</p>
+<button class="w-full py-3 bg-surface-container-high text-primary rounded-full font-bold transition-all hover:bg-surface-container-highest">Details / Detalles</button>
+</div>
+<!-- Secondary Featured Event -->
+<div class="md:col-span-8 group relative overflow-hidden rounded-xl bg-surface-container-low editorial-shadow border-l-4 border-secondary transition-transform duration-500 hover:-translate-y-1">
+<div class="p-8 md:flex items-center justify-between gap-8 h-full">
+<div class="md:w-3/5">
+<div class="inline-block px-3 py-1 bg-secondary/10 text-secondary text-xs font-bold rounded-full mb-4">MANDATORY RSVP / RSVP OBLIGATORIO</div>
+<h3 class="font-headline text-2xl font-extrabold text-primary mb-3">Town Hall: Resource Planning / Ayuntamiento: Planificación de Recursos</h3>
+<p class="text-on-surface-variant mb-6">Shape the future of our foundation together. Spanish interpretation available. / Juntos demos forma al futuro de nuestra fundación.</p>
+<div class="flex items-center space-x-6 text-sm text-on-surface-variant">
+<span class="flex items-center"><span class="material-symbols-outlined mr-2" style="font-size:18px;">calendar_month</span> May 01</span>
+<span class="flex items-center"><span class="material-symbols-outlined mr-2" style="font-size:18px;">schedule</span> 7:00 PM</span>
+</div>
+</div>
+<div class="md:w-1/3 mt-6 md:mt-0">
+<button class="w-full py-4 bg-primary text-on-primary rounded-full font-bold shadow-lg transition-all hover:bg-primary-container">Secure Your Spot / Asegurar su lugar</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Newsletter Section -->
+<section class="bg-surface-container-low py-24 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-64 h-64 bg-secondary-container/20 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+<div class="max-w-7xl mx-auto px-8 relative z-10">
+<div class="grid md:grid-cols-2 gap-16 items-center">
+<div>
+<h2 class="font-headline text-4xl font-bold text-primary mb-6">Stay Updated / <br/><span class="text-secondary">Manténgase Informado</span></h2>
+<p class="text-on-surface-variant text-lg leading-relaxed mb-0">Never miss a community event or resource update. Join our bilingual monthly newsletter. / Nunca se pierda un evento comunitario o actualización de recursos. Únase a nuestro boletín mensual bilingüe.</p>
+</div>
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm">
+<form class="space-y-4">
+<div>
+<label class="block font-label text-xs font-medium text-on-surface-variant mb-2 uppercase tracking-wider">Email Address / Correo Electrónico</label>
+<input class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary text-on-surface transition-all" placeholder="example@email.com" type="email"/>
+</div>
+<div class="flex items-start mb-6">
+<input class="mt-1 rounded border-outline-variant text-primary focus:ring-primary" type="checkbox"/>
+<label class="ml-3 text-sm text-on-surface-variant">I agree to receive communications in English and Spanish. / Acepto recibir comunicaciones en inglés y español.</label>
+</div>
+<button class="w-full py-4 bg-secondary text-on-secondary rounded-full font-bold transition-all hover:bg-on-secondary-container shadow-md">Subscribe Now / Suscríbase Ahora</button>
+</form>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-slate-50 dark:bg-slate-950 border-t border-slate-200">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 px-8 py-16 max-w-7xl mx-auto">
+<div class="col-span-1 md:col-span-1">
+<div class="font-['Plus_Jakarta_Sans'] font-bold text-lg text-sky-900 mb-6 tracking-tight">Viva Resource Foundation</div>
+<p class="text-slate-500 font-['Public_Sans'] text-sm leading-relaxed mb-6">Empowering our community through shared resources and collective action. / Empoderando a nuestra comunidad a través de recursos compartidos.</p>
+<div class="flex space-x-4">
+<span class="material-symbols-outlined text-sky-700 cursor-pointer hover:opacity-100 transition-opacity opacity-80" data-icon="facebook">social_leaderboard</span>
+<span class="material-symbols-outlined text-sky-700 cursor-pointer hover:opacity-100 transition-opacity opacity-80" data-icon="instagram">retweet</span>
+<span class="material-symbols-outlined text-sky-700 cursor-pointer hover:opacity-100 transition-opacity opacity-80" data-icon="twitter">retweet</span>
+</div>
+</div>
+<div class="col-span-1">
+<h4 class="font-headline font-bold text-sky-900 mb-6">Quick Links</h4>
+<ul class="space-y-4 font-['Public_Sans'] text-sm">
+<li><a class="text-slate-500 hover:text-sky-600 transition-colors" href="#">About Us</a></li>
+<li><a class="text-slate-500 hover:text-sky-600 transition-colors" href="#">Our Programs</a></li>
+<li><a class="text-sky-700 font-bold underline" href="#">Events</a></li>
+<li><a class="text-slate-500 hover:text-sky-600 transition-colors" href="#">Volunteer</a></li>
+</ul>
+</div>
+<div class="col-span-1">
+<h4 class="font-headline font-bold text-sky-900 mb-6">Legal</h4>
+<ul class="space-y-4 font-['Public_Sans'] text-sm">
+<li><a class="text-slate-500 hover:text-sky-600 transition-colors" href="#">Privacy Policy</a></li>
+<li><a class="text-slate-500 hover:text-sky-600 transition-colors" href="#">Terms of Service</a></li>
+<li><a class="text-slate-500 hover:text-sky-600 transition-colors" href="#">Accessibility</a></li>
+<li><a class="text-slate-500 hover:text-sky-600 transition-colors" href="#">Sitemap</a></li>
+</ul>
+</div>
+<div class="col-span-1">
+<h4 class="font-headline font-bold text-sky-900 mb-6">Contact</h4>
+<p class="text-slate-500 font-['Public_Sans'] text-sm leading-relaxed mb-4">123 Community Way<br/>City Center, ST 54321</p>
+<p class="text-slate-500 font-['Public_Sans'] text-sm leading-relaxed mb-4">hello@vivaresource.org<br/>(555) 123-4567</p>
+</div>
+</div>
+<div class="border-t border-slate-200 py-8 text-center px-8">
+<p class="text-slate-500 font-['Public_Sans'] text-sm">© 2024 Viva Resource Foundation. All rights reserved.</p>
+</div>
+</footer>
+<!-- FAB for Donation - Highly Contextual -->
+<button class="fixed bottom-8 right-8 w-16 h-16 bg-primary text-on-primary rounded-full editorial-shadow flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 z-40">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</body></html>

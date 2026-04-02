@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Blog | Viva Resource Foundation</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Public+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface": "#f9f9f9",
+                        "secondary": "#416900",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#e2edff",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#e8e8e8",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed-dim": "#9cd850",
+                        "surface-container": "#eeeeee",
+                        "primary-fixed-dim": "#98cbff",
+                        "surface-tint": "#1c6296",
+                        "on-surface-variant": "#41474f",
+                        "surface-bright": "#f9f9f9",
+                        "on-primary-fixed": "#001d33",
+                        "on-error-container": "#93000a",
+                        "error-container": "#ffdad6",
+                        "primary-container": "#2e6fa3",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-container": "#457000",
+                        "inverse-on-surface": "#f1f1f1",
+                        "on-surface": "#1a1c1c",
+                        "secondary-fixed": "#b7f569",
+                        "on-secondary-fixed-variant": "#304f00",
+                        "tertiary-fixed": "#d2e4ff",
+                        "inverse-surface": "#2f3131",
+                        "surface-dim": "#dadada",
+                        "outline-variant": "#c1c7d0",
+                        "on-primary-container": "#e0eeff",
+                        "on-error": "#ffffff",
+                        "outline": "#717880",
+                        "on-background": "#1a1c1c",
+                        "surface-variant": "#e2e2e2",
+                        "on-tertiary-fixed-variant": "#184976",
+                        "primary": "#025689",
+                        "error": "#ba1a1a",
+                        "tertiary": "#275583",
+                        "tertiary-fixed-dim": "#a0caff",
+                        "on-tertiary-fixed": "#001c37",
+                        "surface-container-highest": "#e2e2e2",
+                        "background": "#f9f9f9",
+                        "tertiary-container": "#426d9d",
+                        "secondary-container": "#b7f569",
+                        "on-secondary-fixed": "#102000",
+                        "surface-container-low": "#f3f3f3",
+                        "primary-fixed": "#cee5ff",
+                        "on-primary-fixed-variant": "#004a77",
+                        "inverse-primary": "#98cbff"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Public Sans"],
+                        "label": ["Public Sans"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .editorial-gradient {
+            background: linear-gradient(135deg, #025689 0%, #2e6fa3 100%);
+        }
+        .glass-nav {
+            background: rgba(249, 249, 249, 0.8);
+            backdrop-filter: blur(20px);
+        }
+        .ambient-shadow {
+            box-shadow: 0 8px 32px rgba(26, 28, 28, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-secondary-fixed selection:text-on-secondary-fixed">
+<!-- TopAppBar -->
+<header class="sticky top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 shadow-sm">
+<nav class="flex justify-between items-center max-w-7xl mx-auto px-6 h-20">
+<div class="text-xl font-bold text-blue-900 tracking-tighter font-headline">
+                Viva Resource Foundation
+            </div>
+<div class="hidden md:flex items-center gap-8 font-headline text-sm font-medium tracking-tight">
+<a class="text-slate-600 hover:text-blue-700 transition-colors duration-200" href="#">About Us / Sobre Nosotros</a>
+<a class="text-slate-600 hover:text-blue-700 transition-colors duration-200" href="#">Resources / Recursos</a>
+<a class="text-blue-800 font-bold border-b-2 border-blue-800 pb-1" href="#">Blog</a>
+<a class="text-slate-600 hover:text-blue-700 transition-colors duration-200" href="#">Contact Us / Contacto</a>
+</div>
+<button class="px-4 py-2 rounded-full bg-surface-container-high text-primary font-bold text-xs tracking-widest hover:bg-primary hover:text-white transition-all duration-200">
+                EN/ES
+            </button>
+</nav>
+</header>
+<main>
+<!-- Hero Header -->
+<section class="editorial-gradient py-24 px-6 overflow-hidden relative">
+<div class="max-w-7xl mx-auto flex flex-col items-center text-center">
+<span class="inline-block px-4 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label text-xs font-bold mb-6">
+                    OUR STORIES / NUESTRAS HISTORIAS
+                </span>
+<h1 class="font-headline font-extrabold text-5xl md:text-7xl text-on-primary tracking-tighter mb-8 max-w-4xl">
+                    Voices of Resilience &amp; Community Impact
+                </h1>
+<p class="font-body text-lg md:text-xl text-on-primary-container max-w-2xl opacity-90 leading-relaxed">
+                    Explore our latest updates, community success stories, and critical insights into how we're building a stronger future together. / Explore nuestras últimas actualizaciones y testimonios de éxito.
+                </p>
+</div>
+<!-- Decorative Element -->
+<div class="absolute -bottom-12 -right-12 w-64 h-64 bg-secondary/20 rounded-full blur-3xl"></div>
+</section>
+<!-- Featured Article -->
+<section class="max-w-7xl mx-auto px-6 -mt-16 relative z-10 mb-24">
+<div class="bg-surface-container-lowest rounded-xl ambient-shadow overflow-hidden flex flex-col lg:flex-row">
+<div class="lg:w-3/5 h-[400px] lg:h-auto overflow-hidden">
+<img alt="Featured Story" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700" data-alt="Group of diverse community volunteers smiling and holding food boxes in a bright community center hall with natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9q6TBd51zeffnW7uX9PuWiAF_Vkcs1QiV1zlYEJo8bJaay5tSyhojwWBfQ6ugTKVzJOBNV_VS9V1ghcBow2dEpGuVo-WzgDo-uWsRu-z4h1lLWx7IngNax2ww_lVfBIF0kWHl14SRuC-Y2yeKGNX4kGa-mY07qLhzZ6K2PB4WbciG37anBWU-ArFyvwKydgkC7yxLjuKY5XYc0PQwyiXnTbB3OQMar2pXFQtUoUq-Jg6d2Av3RnEZo02vESDiZIKSxnugILrif-s"/>
+</div>
+<div class="lg:w-2/5 p-8 lg:p-12 flex flex-col justify-center">
+<div class="flex items-center gap-3 mb-6">
+<span class="w-1 h-8 bg-secondary rounded-full"></span>
+<span class="text-secondary font-bold uppercase tracking-widest text-xs">Food Security / Seguridad Alimentaria</span>
+</div>
+<h2 class="font-headline text-3xl font-bold text-on-surface leading-tight mb-6">
+                        Bridging the Gap: How Local Markets are Feeding Families / Cerrando la brecha: Cómo los mercados locales alimentan a las familias
+                    </h2>
+<p class="text-on-surface-variant font-body mb-8 leading-relaxed">
+                        Last month, we partnered with 15 local farmers to distribute over 10,000 lbs of fresh produce to neighborhoods in need. Discover how this circular economy is sustaining our community.
+                    </p>
+<div>
+<button class="bg-primary text-on-primary px-8 py-4 rounded-full font-headline font-bold text-sm tracking-wide hover:opacity-90 transition-all flex items-center gap-2">
+                            Read More / Leer Más
+                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Search and Filter Bar -->
+<section class="max-w-7xl mx-auto px-6 mb-16">
+<div class="flex flex-col lg:flex-row gap-8 items-center justify-between border-b-4 border-primary/10 pb-8">
+<div class="relative w-full lg:w-96">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-12 pr-4 py-4 bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary font-body text-on-surface" placeholder="Search articles / Buscar artículos..." type="text"/>
+</div>
+<div class="flex flex-wrap gap-3 justify-center">
+<button class="px-6 py-2 rounded-full bg-primary text-on-primary font-label font-bold text-xs uppercase">All / Todos</button>
+<button class="px-6 py-2 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors font-label font-bold text-xs uppercase">Emergency / Emergencias</button>
+<button class="px-6 py-2 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors font-label font-bold text-xs uppercase">Food Security / Seguridad</button>
+<button class="px-6 py-2 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors font-label font-bold text-xs uppercase">News / Noticias</button>
+</div>
+</div>
+</section>
+<!-- Article Grid -->
+<section class="max-w-7xl mx-auto px-6 mb-24">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+<!-- Card 1 -->
+<article class="group">
+<div class="aspect-[4/3] mb-6 overflow-hidden rounded-xl relative">
+<img alt="News Story" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Children in a colorful classroom environment smiling and engaging in educational activities with soft focus background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLr0k7sS4AIKnl5fq6zMVqfAaeQaDH81Ui530vHk5GYMOD1RPBDScX92Gjh9LM05UB9BAW1t2D_c9Lebknx3lStCzB1azfJK-jKZdYp5jYW-hmk9TbLPyJ-U7UNSuQaMRpfyf8mGqUwEjRfNM_xoA0Z7DTs8MPak6I-ke4_XxVjtH5M102fgvSVQqhzHWYnSoT2hoNznVqwzSZX_WyEqm10OoTW1Wm28pwI5PiKEygamuSrB8g2PIfcnN0QPhFrv4QvcWEhAHbCas"/>
+<div class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-[10px] font-bold text-primary">
+                            NEWS / NOTICIAS
+                        </div>
+</div>
+<div class="px-2">
+<div class="text-outline text-xs font-bold mb-3 uppercase tracking-tighter">October 14, 2023</div>
+<h3 class="font-headline text-xl font-bold text-on-surface mb-4 group-hover:text-primary transition-colors">
+                            Launching Our New Youth Education Hub / Inauguración del nuevo centro educativo para jóvenes
+                        </h3>
+<p class="text-on-surface-variant font-body text-sm mb-6 line-clamp-3 leading-relaxed">
+                            A safe space for learning and creativity has opened its doors in the South District. We're offering tutoring, art, and coding classes for all ages.
+                        </p>
+<button class="text-primary font-bold text-sm flex items-center gap-2 group/btn">
+                            Learn More / Saber Más
+                            <span class="material-symbols-outlined text-base group-hover/btn:translate-x-1 transition-transform">chevron_right</span>
+</button>
+</div>
+</article>
+<!-- Card 2 -->
+<article class="group">
+<div class="aspect-[4/3] mb-6 overflow-hidden rounded-xl relative">
+<img alt="Community Story" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Portrait of an elderly man smiling warmly in a sun-drenched garden with lush green plants behind him" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxtrHY7f98LDoVTSDnKjR3dBbAT9-fM3NsFCPsq4oIyu1u9g8dDI4HFaZBdKbnoAfTLC0GifRr8oB4_cR3YGa92vDCED6DFIIBZyVnIkfBvvj5-VGDEJTPFdEYdUljdxZx3uyy8si4zkmgS-_PFL4ylBJu5LbRdiLlv-Q83lUAgzjgqmKbfVwi5nv-4AcPtju5HIGRUSN_-l2QdG2xQqvu46_CJm0yz_G30ms-ltz3G7T1cN-wX1foaUh-CcpsTZ-SRt49UkrM4q0"/>
+<div class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-[10px] font-bold text-primary">
+                            COMMUNITY / COMUNIDAD
+                        </div>
+</div>
+<div class="px-2">
+<div class="text-outline text-xs font-bold mb-3 uppercase tracking-tighter">October 10, 2023</div>
+<h3 class="font-headline text-xl font-bold text-on-surface mb-4 group-hover:text-primary transition-colors">
+                            Senior Support: Miguel's Journey / Apoyo para mayores: El viaje de Miguel
+                        </h3>
+<p class="text-on-surface-variant font-body text-sm mb-6 line-clamp-3 leading-relaxed">
+                            Through our home visit program, Miguel regained his independence and found a renewed sense of belonging within the community network.
+                        </p>
+<button class="text-primary font-bold text-sm flex items-center gap-2 group/btn">
+                            Learn More / Saber Más
+                            <span class="material-symbols-outlined text-base group-hover/btn:translate-x-1 transition-transform">chevron_right</span>
+</button>
+</div>
+</article>
+<!-- Card 3 -->
+<article class="group">
+<div class="aspect-[4/3] mb-6 overflow-hidden rounded-xl relative">
+<img alt="Project Story" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Hands holding various gardening tools and young green plants over rich dark soil in a community garden setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1xF06Hvx-OR5FqOPw_GNiyuYqv3nsNhrMfLzgzhxleBhdeZOzoXeyenx7_BNkR0StUzutUSl0cz3tnrep6tAKu0TrpWT0m_js5Fj4n6u5waU1ndaTBhjV-P6iBZILrqHqtPfzG2geio6ys0MLb3agMvWmWZgSTVRE2KiCZ8oP8N3i9TuuWz_4CYzSw01iTKxVVqnZzYTOwBQe2hkIz2NnNtCWhTMpInncM6sadv1hWq_IxocCdFC72wQMxokgw3-TCAAGLeKhFSQ"/>
+<div class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-[10px] font-bold text-primary">
+                            EMERGENCY / EMERGENCIAS
+                        </div>
+</div>
+<div class="px-2">
+<div class="text-outline text-xs font-bold mb-3 uppercase tracking-tighter">October 02, 2023</div>
+<h3 class="font-headline text-xl font-bold text-on-surface mb-4 group-hover:text-primary transition-colors">
+                            Winter Preparedness: What You Need to Know / Preparación para el invierno
+                        </h3>
+<p class="text-on-surface-variant font-body text-sm mb-6 line-clamp-3 leading-relaxed">
+                            As temperatures drop, our resource centers are gearing up to provide heating assistance and winter apparel to families in the valley.
+                        </p>
+<button class="text-primary font-bold text-sm flex items-center gap-2 group/btn">
+                            Learn More / Saber Más
+                            <span class="material-symbols-outlined text-base group-hover/btn:translate-x-1 transition-transform">chevron_right</span>
+</button>
+</div>
+</article>
+</div>
+</section>
+<!-- Newsletter Signup -->
+<section class="bg-surface-container-low py-24 px-6">
+<div class="max-w-4xl mx-auto text-center">
+<h2 class="font-headline text-4xl font-extrabold text-on-surface mb-6">Stay Connected / Manténgase Conectado</h2>
+<p class="font-body text-on-surface-variant mb-10 text-lg">
+                    Join our newsletter to receive weekly stories of hope and impact directly in your inbox. No spam, just progress.
+                </p>
+<div class="flex flex-col sm:flex-row gap-4 items-stretch justify-center max-w-xl mx-auto">
+<input class="flex-1 px-6 py-4 rounded-full border-none bg-surface-container-lowest ambient-shadow text-on-surface focus:ring-2 focus:ring-secondary" placeholder="Enter your email / Correo electrónico" type="email"/>
+<button class="bg-secondary text-on-secondary px-10 py-4 rounded-full font-headline font-bold text-sm whitespace-nowrap hover:bg-on-secondary-container transition-colors">
+                        Subscribe / Suscribirse
+                    </button>
+</div>
+</div>
+</section>
+<!-- Support CTA -->
+<section class="py-24 px-6 text-center">
+<div class="max-w-7xl mx-auto bg-primary text-on-primary rounded-3xl p-12 md:p-20 relative overflow-hidden">
+<div class="relative z-10 flex flex-col items-center">
+<h2 class="font-headline text-4xl md:text-5xl font-bold mb-8">Ready to Make a Difference? / ¿Listo para hacer la diferencia?</h2>
+<p class="text-xl opacity-90 mb-12 max-w-2xl font-body">
+                        Your support fuels these stories. Join our volunteer network or donate today to help us continue our mission of community empowerment.
+                    </p>
+<div class="flex flex-col sm:flex-row gap-6">
+<button class="bg-secondary-container text-on-secondary-container px-10 py-4 rounded-full font-headline font-bold text-sm hover:scale-105 transition-transform">
+                            Volunteer / Voluntariado
+                        </button>
+<button class="border-2 border-white/30 text-white px-10 py-4 rounded-full font-headline font-bold text-sm hover:bg-white hover:text-primary transition-all">
+                            Donate Now / Donar Ahora
+                        </button>
+</div>
+</div>
+<!-- Abstract Design Elements -->
+<div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32"></div>
+<div class="absolute bottom-0 left-0 w-96 h-96 bg-secondary/10 rounded-full -ml-48 -mb-48"></div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full pt-16 pb-8 bg-slate-50 dark:bg-slate-950">
+<div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 font-body text-base leading-relaxed">
+<div class="col-span-1 md:col-span-1">
+<div class="text-lg font-bold text-blue-900 mb-6">Viva Resource Foundation</div>
+<p class="text-slate-500 text-sm">Empowering communities through sustainable food programs and emergency resource distribution.</p>
+</div>
+<div>
+<h4 class="font-bold text-blue-900 mb-6">Quick Links</h4>
+<div class="flex flex-col gap-3">
+<a class="text-slate-500 hover:text-green-700 transition-colors" href="#">Privacy Policy</a>
+<a class="text-slate-500 hover:text-green-700 transition-colors" href="#">Terms of Service</a>
+</div>
+</div>
+<div>
+<h4 class="font-bold text-blue-900 mb-6">Ways to Help</h4>
+<div class="flex flex-col gap-3">
+<a class="text-slate-500 hover:text-green-700 transition-colors" href="#">Volunteer</a>
+<a class="text-slate-500 hover:text-green-700 transition-colors" href="#">Donate</a>
+</div>
+</div>
+<div>
+<h4 class="font-bold text-blue-900 mb-6">Connect</h4>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-slate-500 cursor-pointer hover:text-primary">public</span>
+<span class="material-symbols-outlined text-slate-500 cursor-pointer hover:text-primary">mail</span>
+<span class="material-symbols-outlined text-slate-500 cursor-pointer hover:text-primary">share</span>
+</div>
+</div>
+</div>
+<div class="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-slate-100">
+<p class="text-slate-500 text-sm text-center md:text-left">© 2024 Viva Resource Foundation. All rights reserved.</p>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,112 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isAdmin() {
+      return isSignedIn() && 
+        get(/databases/$(database)/documents/admin_users/$(request.auth.uid)).data.role == 'admin';
+    }
+    function isEditor() {
+      return isSignedIn() && 
+        get(/databases/$(database)/documents/admin_users/$(request.auth.uid)).data.role in ['admin', 'editor'];
+    }
+    
+    // Blog posts - anyone can read published, editors can manage
+    match /blog_posts/{postId} {
+      allow read: if true;  // Público puede leer todos los posts
+      allow create, update, delete: if isEditor();
+      allow list: if true;
+    }
+
+    // Events - anyone can read published, editors can manage
+    match /events/{eventId} {
+      allow read: if true;  // Público puede leer todos los eventos
+      allow create, update, delete: if isEditor();
+      allow list: if true;
+    }
+    
+    // Event registrations - public can create, editors can manage
+    match /event_registrations/{regId} {
+      allow read: if isEditor();
+      allow create: if true;
+      allow update, delete: if isEditor();
+      allow list: if isEditor();
+    }
+    
+    // Volunteer registrations - public can create, editors can manage
+    match /volunteer_registrations/{volId} {
+      allow read: if isEditor();
+      allow create: if true;
+      allow update, delete: if isEditor();
+      allow list: if isEditor();
+    }
+    
+    // Site settings - anyone can read, only admin can write
+    match /site_settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Admin users - only admins can manage
+    match /admin_users/{userId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+    
+    // Donations - editors can read, server writes via admin SDK
+    match /donations/{donationId} {
+      allow read: if isEditor();
+      allow write: if false; // Only server-side writes allowed
+    }
+    
+    // Forms - public can read, editors can manage
+    match /forms/{formId} {
+      allow read: if true;
+      allow write: if isEditor();
+    }
+    
+    // Form submissions - public can create, editors can manage
+    match /form_submissions/{subId} {
+      allow read: if isEditor();
+      allow create: if true;
+      allow update, delete: if isEditor();
+    }
+    
+    // Newsletter subscribers - public can subscribe, editors can manage
+    match /newsletter_subscribers/{subId} {
+      allow read: if isEditor();
+      allow create: if true;
+      allow update, delete: if isEditor();
+    }
+    
+    // Newsletter history - editors can manage
+    match /newsletter_history/{histId} {
+      allow read: if isEditor();
+      allow write: if isEditor();
+    }
+    
+    // AI generated content - editors can manage
+    match /ai_generated_content/{contentId} {
+      allow read: if isEditor();
+      allow write: if isEditor();
+    }
+    
+    // Help requests - public can create, editors can manage
+    match /help_requests/{requestId} {
+      allow read: if isEditor();
+      allow create: if true;
+      allow update, delete: if isEditor();
+    }
+
+    // Volunteer messages - editors can send, editors can read
+    match /volunteer_messages/{msgId} {
+      allow read: if isEditor();
+      allow create, update, delete: if isEditor();
+      allow list: if isEditor();
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx:*)",
+      "Skill(remember)",
+      "Bash(gcloud auth:*)",
+      "Read(//c/Users/ginte/.claude/session-data/**)",
+      "Read(//c/Users/ginte/.claude/sessions/**)",
+      "Read(//c/GeeoDev/vivaresource/**)",
+      "Bash(npm install:*)",
+      "Bash(mkdir -p src/components)",
+      "Bash(touch /C/GeeoDev/vivaresource/src/app/get-involved/page.tsx)",
+      "Bash(touch /C/GeeoDev/vivaresource/src/app/donate/page.tsx)",
+      "Bash(npm run:*)",
+      "Bash(grep -l 'use client' C:GeeoDevvivaresourcesrcapp\"page.tsx C:GeeoDevvivaresourcesrcapp\"*page.tsx)"
+    ]
+  }
+}

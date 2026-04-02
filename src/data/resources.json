@@ -1,0 +1,262 @@
+{
+  "emergency": [
+    {
+      "name": "Call 2-1-1",
+      "phone": "Dial 2-1-1",
+      "email": null,
+      "web": "https://www.211.org",
+      "description": "Free 24/7 service. Refers to local resources for food, housing, health, and more.",
+      "descriptionEs": "Servicio gratuito 24/7. Refiere a recursos locales para comida, vivienda, salud y más.",
+      "schedule": "24/7",
+      "languages": ["English", "Spanish", "Multilingual"],
+      "county": "All Colorado"
+    },
+    {
+      "name": "United Way Help Line",
+      "phone": "303-433-8381",
+      "email": null,
+      "web": "https://www.unitedwaydenver.org",
+      "description": "Financial assistance, employment, housing resources.",
+      "descriptionEs": "Asistencia financiera, empleo, recursos de vivienda.",
+      "schedule": "Mon-Fri 8am-5pm",
+      "languages": ["English", "Spanish"],
+      "county": "Denver Metro"
+    },
+    {
+      "name": "Colorado Crisis Services",
+      "phone": "1-844-493-8255",
+      "email": null,
+      "web": "https://coloradocrisisservices.org",
+      "description": "24/7 crisis support, mental health, and substance use help.",
+      "descriptionEs": "Apoyo de crisis 24/7, salud mental y ayuda para uso de sustancias.",
+      "schedule": "24/7",
+      "languages": ["English", "Spanish"],
+      "county": "All Colorado"
+    }
+  ],
+  "housing": [
+    {
+      "name": "Colorado Coalition for the Homeless",
+      "phone": "303-293-2217",
+      "email": null,
+      "web": "https://www.coloradocoalition.org",
+      "description": "Housing and support services across Colorado, including healthcare and mental health.",
+      "descriptionEs": "Servicios de vivienda y apoyo en todo Colorado, incluyendo salud y salud mental.",
+      "schedule": "Mon-Fri 8am-5pm",
+      "languages": ["English", "Spanish"],
+      "county": "Denver Metro"
+    },
+    {
+      "name": "Denver Housing Authority",
+      "phone": "303-830-3300",
+      "email": null,
+      "web": "https://www.denverhousing.org",
+      "description": "Affordable housing programs and rental assistance.",
+      "descriptionEs": "Programas de vivienda asequible y asistencia para alquiler.",
+      "schedule": "Mon-Fri 8am-5pm",
+      "languages": ["English", "Spanish"],
+      "county": "Denver"
+    },
+    {
+      "name": "Volunteers of America",
+      "phone": "303-297-0408",
+      "email": null,
+      "web": "https://www.voa.org",
+      "description": "Emergency shelter, transitional housing, and supportive services.",
+      "descriptionEs": "Refugio de emergencia, vivienda transicional y servicios de apoyo.",
+      "schedule": "24/7",
+      "languages": ["English", "Spanish"],
+      "county": "All Colorado"
+    }
+  ],
+  "food": [
+    {
+      "name": "Food Bank of the Rockies",
+      "phone": "303-377-1852",
+      "email": null,
+      "web": "https://www.foodbankrockies.org",
+      "description": "Fighting hunger in Colorado and Wyoming. Find food pantries near you.",
+      "descriptionEs": "Combatiendo el hambre en Colorado y Wyoming. Encuentra bancos de alimentos cerca de ti.",
+      "schedule": "Mon-Fri 8am-4pm",
+      "languages": ["English", "Spanish"],
+      "county": "Colorado & Wyoming"
+    },
+    {
+      "name": "Care and Share Food Bank",
+      "phone": "719-526-5900",
+      "email": null,
+      "web": "https://careandshare.org",
+      "description": "Serving Southern Colorado with food resources and nutrition programs.",
+      "descriptionEs": "Sirviendo al sur de Colorado con recursos alimenticios y programas de nutrición.",
+      "schedule": "Mon-Fri 8am-5pm",
+      "languages": ["English", "Spanish"],
+      "county": "Southern Colorado"
+    },
+    {
+      "name": "SNAP (Food Stamps)",
+      "phone": "1-800-525-4567",
+      "email": null,
+      "web": "https://www.colorado.gov/cdhs/snap",
+      "description": "Supplemental Nutrition Assistance Program for eligible families.",
+      "descriptionEs": "Programa de Asistencia Nutricional Suplementaria para familias elegibles.",
+      "schedule": "Mon-Fri 8am-5pm",
+      "languages": ["English", "Spanish"],
+      "county": "All Colorado"
+    }
+  ],
+  "health_mental": [
+    {
+      "name": "Connect for Health Colorado",
+      "phone": "1-855-752-6749",
+      "email": null,
+      "web": "https://www.connectforhealthco.com",
+      "description": "Health insurance marketplace for Colorado residents. Get covered today.",
+      "descriptionEs": "Mercado de seguros de salud para residentes de Colorado. Obtén cobertura hoy.",
+      "schedule": "Mon-Fri 8am-6pm, Sat 9am-4pm",
+      "languages": ["English", "Spanish"],
+      "county": "All Colorado"
+    },
+    {
+      "name": "Community Health Centers",
+      "phone": "303-837-1100",
+      "email": null,
+      "web": "https://www.nachc.org",
+      "description": "Affordable primary healthcare regardless of insurance status.",
+      "descriptionEs": "Atención médica primaria accesible independientemente del estado de seguro.",
+      "schedule": "Mon-Fri 8am-5pm",
+      "languages": ["English", "Spanish"],
+      "county": "All Colorado"
+    },
+    {
+      "name": "Mental Health Colorado",
+      "phone": "303-830-9330",
+      "email": null,
+      "web": "https://www.mhcolorado.org",
+      "description": "Mental health advocacy, resources, and crisis support.",
+      "descriptionEs": "Defensa de salud mental, recursos y apoyo en crisis.",
+      "schedule": "Mon-Fri 9am-5pm",
+      "languages": ["English", "Spanish"],
+      "county": "All Colorado"
+    }
+  ],
+  "clothing": [
+    {
+      "name": "Goodwill Colorado",
+      "phone": "303-799-4441",
+      "email": null,
+      "web": "https://www.goodwillco.org",
+      "description": "Affordable clothing and job training programs.",
+      "descriptionEs": "Ropa accesible y programas de capacitación laboral.",
+      "schedule": "Mon-Sat 9am-9pm, Sun 10am-7pm",
+      "languages": ["English", "Spanish"],
+      "county": "Denver Metro"
+    },
+    {
+      "name": "Salvation Army",
+      "phone": "303-297-1111",
+      "email": null,
+      "web": "https://www.salvationarmyusa.org",
+      "description": "Clothing assistance, emergency services, and support programs.",
+      "descriptionEs": "Asistencia de ropa, servicios de emergencia y programas de apoyo.",
+      "schedule": "Mon-Fri 9am-5pm",
+      "languages": ["English", "Spanish"],
+      "county": "All Colorado"
+    }
+  ],
+  "employment": [
+    {
+      "name": "Colorado Workforce Center",
+      "phone": "1-800-332-6868",
+      "email": null,
+      "web": "https://www.coloradoworks.gov",
+      "description": "Job search, training, and employment resources for Colorado workers.",
+      "descriptionEs": "Búsqueda de empleo, capacitación y recursos de empleo para trabajadores de Colorado.",
+      "schedule": "Mon-Fri 8am-5pm",
+      "languages": ["English", "Spanish"],
+      "county": "All Colorado"
+    },
+    {
+      "name": "Catholic Charities Employment Services",
+      "phone": "303-742-0828",
+      "email": null,
+      "web": "https://www.ccdenver.org",
+      "description": "Employment assistance, resume help, and job placement for immigrants.",
+      "descriptionEs": "Asistencia de empleo, ayuda con currículums y colocación laboral para inmigrantes.",
+      "schedule": "Mon-Fri 9am-5pm",
+      "languages": ["English", "Spanish"],
+      "county": "Denver Metro"
+    }
+  ],
+  "utilities": [
+    {
+      "name": "LEAP (Low-income Energy Assistance)",
+      "phone": "1-866-432-8435",
+      "email": null,
+      "web": "https://www.colorado.gov/cdhs/leap",
+      "description": "Energy bill assistance for low-income Colorado families.",
+      "descriptionEs": "Asistencia para facturas de energía para familias de bajos ingresos en Colorado.",
+      "schedule": "Mon-Fri 8am-5pm",
+      "languages": ["English", "Spanish"],
+      "county": "All Colorado"
+    },
+    {
+      "name": "Xcel Energy Assistance",
+      "phone": "1-800-895-4999",
+      "email": null,
+      "web": "https://www.xcelenergy.com",
+      "description": "Payment plans and assistance programs for energy bills.",
+      "descriptionEs": "Planes de pago y programas de asistencia para facturas de energía.",
+      "schedule": "Mon-Fri 7am-7pm",
+      "languages": ["English", "Spanish"],
+      "county": "All Colorado"
+    }
+  ],
+  "transportation": [
+    {
+      "name": "RTD Access-a-Ride",
+      "phone": "303-299-6000",
+      "email": null,
+      "web": "https://www.rtd-denver.com",
+      "description": "Public transportation and paratransit services in Denver metro area.",
+      "descriptionEs": "Transporte público y servicios de paratránsito en el área metropolitana de Denver.",
+      "schedule": "Mon-Fri 6am-8pm",
+      "languages": ["English", "Spanish"],
+      "county": "Denver Metro"
+    },
+    {
+      "name": "Bustang",
+      "phone": "1-877-388-7433",
+      "email": null,
+      "web": "https://www.bustangbus.com",
+      "description": "Affordable intercity bus service connecting Colorado communities.",
+      "descriptionEs": "Servicio de autobús interurbano accesible conectando comunidades de Colorado.",
+      "schedule": "Daily",
+      "languages": ["English", "Spanish"],
+      "county": "All Colorado"
+    }
+  ],
+  "free_activities": [
+    {
+      "name": "Denver Public Library",
+      "phone": "720-865-1111",
+      "email": null,
+      "web": "https://www.denverlibrary.org",
+      "description": "Free library services, programs, and community events.",
+      "descriptionEs": "Servicios gratuitos de biblioteca, programas y eventos comunitarios.",
+      "schedule": "Varies by location",
+      "languages": ["English", "Spanish"],
+      "county": "Denver"
+    },
+    {
+      "name": "Denver Parks & Recreation",
+      "phone": "720-913-1311",
+      "email": null,
+      "web": "https://www.denvergov.org/parks",
+      "description": "Free parks, trails, and community recreation programs.",
+      "descriptionEs": "Parques gratuitos, senderos y programas de recreación comunitaria.",
+      "schedule": "Daily 5am-11pm",
+      "languages": ["English", "Spanish"],
+      "county": "Denver"
+    }
+  ]
+}

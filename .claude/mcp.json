@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "stitch": {
+      "command": "C:\\Users\\ginte\\AppData\\Roaming\\npm\\npx.cmd",
+      "args": ["@_davideast/stitch-mcp", "proxy"],
+      "env": {
+        "STITCH_USE_SYSTEM_GCLOUD": "1",
+        "GOOGLE_CLOUD_PROJECT": "codigoguerrerodev"
+      }
+    },
+    "firebase": {
+      "command": "C:\\Users\\ginte\\AppData\\Roaming\\npm\\npx.cmd",
+      "args": ["@modelcontextprotocol/server-firebase-gen2"],
+      "env": {
+        "FIREBASE_PROJECT_ID": "vivaresource",
+        "GOOGLE_APPLICATION_CREDENTIALS": "C:\\GeeoDev\\vivaresource\\firebase-admin-key.json"
+      }
+    }
+  }
+}
