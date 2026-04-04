@@ -13,9 +13,14 @@ interface UseInViewReturn {
   isInView: boolean;
 }
 
+function isIntersectionObserverSupported(): boolean {
+  return typeof window !== 'undefined' && 'IntersectionObserver' in window;
+}
+
 /**
  * Custom hook that uses IntersectionObserver to detect when an element is in view.
  * Uses a callback ref to ensure the observer is set up when the element mounts.
+ * Falls back to always-visible for browsers without IntersectionObserver support.
  * 
  * @param options - Configuration options for the observer
  * @returns Object containing ref (callback) and isInView boolean
@@ -28,23 +33,35 @@ export function useInView({
   const [isInView, setIsInView] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const hasTriggeredRef = useRef(false);
+  const fallbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const cleanupObserver = useCallback(() => {
     if (observerRef.current) {
       observerRef.current.disconnect();
       observerRef.current = null;
     }
+    if (fallbackTimeoutRef.current) {
+      clearTimeout(fallbackTimeoutRef.current);
+      fallbackTimeoutRef.current = null;
+    }
   }, []);
 
   const ref = useCallback((node: HTMLElement | null) => {
-    // Cleanup previous observer if node changes
     cleanupObserver();
 
     if (!node) return;
 
-    // If triggerOnce and already triggered, don't observe
     if (triggerOnce && hasTriggeredRef.current) {
       setIsInView(true);
+      return;
+    }
+
+    // Fallback for browsers without IntersectionObserver
+    if (!isIntersectionObserverSupported()) {
+      fallbackTimeoutRef.current = setTimeout(() => {
+        setIsInView(true);
+        hasTriggeredRef.current = true;
+      }, 100);
       return;
     }
 
@@ -67,7 +84,6 @@ export function useInView({
     observerRef.current.observe(node);
   }, [threshold, rootMargin, triggerOnce, cleanupObserver]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       cleanupObserver();

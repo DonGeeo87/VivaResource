@@ -23,6 +23,21 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useInView } from "@/hooks/useInView";
 
+function useReducedMotion(): boolean {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+  
+  return prefersReducedMotion;
+}
+
 interface FAQItemProps {
   question: string;
   answer: string;
@@ -59,6 +74,8 @@ export default function Home(): JSX.Element {
   const { translations } = useLanguage();
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [heroAnimationsComplete, setHeroAnimationsComplete] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
   // Intersection Observer hooks for each section
   const heroRef = useRef<HTMLDivElement | null>(null);
@@ -86,10 +103,20 @@ export default function Home(): JSX.Element {
     setIsHydrated(true);
   }, []);
 
+  // Safety fallback: ensure hero content is visible after animation timeout
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      setHeroAnimationsComplete(true);
+      return;
+    }
+    const timeout = setTimeout(() => {
+      setHeroAnimationsComplete(true);
+    }, 2000);
+    return () => clearTimeout(timeout);
+  }, [prefersReducedMotion]);
+
   // Parallax scroll handler
   useEffect(() => {
-    // Respect prefers-reduced-motion
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) return;
 
     const handleScroll = () => {
@@ -121,9 +148,15 @@ export default function Home(): JSX.Element {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // Initial call to set positions
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [prefersReducedMotion]);
+
+  // Animation classes based on reduced motion preference
+  const heroAnimateClass = prefersReducedMotion || heroAnimationsComplete ? '' : 'hero-animate';
+  const heroAnimateDelay1 = prefersReducedMotion || heroAnimationsComplete ? '' : 'hero-animate-delay-1';
+  const heroAnimateDelay2 = prefersReducedMotion || heroAnimationsComplete ? '' : 'hero-animate-delay-2';
+  const heroAnimateDelay3 = prefersReducedMotion || heroAnimationsComplete ? '' : 'hero-animate-delay-3';
 
   if (!isHydrated) {
     return <main className="bg-surface text-on-surface font-body" />;
@@ -132,59 +165,73 @@ export default function Home(): JSX.Element {
   return (
     <main className="bg-surface text-on-surface font-body">
       {/* 1. HERO SECTION */}
-      <section ref={heroRef} className="relative min-h-[870px] flex items-center overflow-hidden bg-surface py-20 px-6">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-secondary-container text-on-secondary-container rounded-full text-sm font-bold tracking-wide uppercase hero-animate">
+      <section ref={heroRef} className="relative min-h-[700px] md:min-h-[870px] flex items-center overflow-hidden bg-surface py-12 md:py-20 px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div className="space-y-6 md:space-y-8 order-2 lg:order-1">
+            <div className={`inline-flex items-center gap-2 px-4 py-2 bg-secondary-container text-on-secondary-container rounded-full text-xs md:text-sm font-bold tracking-wide uppercase ${heroAnimateClass}`}>
               <Users className="w-4 h-4" />
               {translations.home.heroBadge}
             </div>
-            <h1 className="text-5xl lg:text-7xl font-headline font-extrabold text-on-surface tracking-tight leading-[1.1] hero-animate-delay-1">
+            <h1 className={`text-4xl md:text-5xl lg:text-7xl font-headline font-extrabold text-on-surface tracking-tight leading-[1.1] ${heroAnimateDelay1}`}>
               {translations.home.heroMain} <br />
               <span className="text-primary italic">{translations.home.heroHighlight}</span>
             </h1>
-            <p className="text-lg text-on-surface-variant max-w-lg leading-relaxed hero-animate-delay-2">
+            <p className={`text-base md:text-lg text-on-surface-variant max-w-lg leading-relaxed ${heroAnimateDelay2}`}>
               {translations.home.heroDescription}
             </p>
-            <div className="flex flex-wrap gap-4 hero-animate-delay-3">
-              <Link href="/get-help" className="bg-primary text-on-primary px-8 py-4 rounded-full font-bold text-lg hover:shadow-xl hover:-translate-y-1 transition-all">
+            <div className={`flex flex-wrap gap-3 md:gap-4 ${heroAnimateDelay3}`}>
+              <Link href="/get-help" className="bg-primary text-on-primary px-6 md:px-8 py-3 md:py-4 rounded-full font-bold text-base md:text-lg hover:shadow-xl hover:-translate-y-1 transition-all">
                 {translations.home.ctaButtonAlt}
               </Link>
-              <Link href="/about" className="border-2 border-primary text-primary px-8 py-4 rounded-full font-bold text-lg hover:bg-primary-fixed transition-all">
+              <Link href="/about" className="border-2 border-primary text-primary px-6 md:px-8 py-3 md:py-4 rounded-full font-bold text-base md:text-lg hover:bg-primary-fixed transition-all">
                 {translations.home.ctaButtonAlt2}
               </Link>
             </div>
           </div>
-          {/* Circular Collage */}
-          <div className="relative h-[500px] w-full lg:h-[600px] hero-animate-delay-2">
-            <div className="absolute top-0 right-0 w-64 h-64 rounded-full overflow-hidden border-8 border-surface-lowest shadow-2xl z-10">
+          {/* Circular Collage - Mobile: Single column stack, Desktop: Overlapping collage */}
+          <div className={`relative h-[300px] md:h-[500px] lg:h-[600px] w-full order-1 lg:order-2 ${heroAnimateDelay2}`}>
+            {/* Mobile: Single image with rounded corners */}
+            <div className="lg:hidden relative w-full h-full rounded-3xl overflow-hidden shadow-2xl">
               <Image
                 src="/photo-bank/hero_01.jpg"
                 alt="VIVA volunteers team together"
                 fill
-                sizes="(max-width: 1024px) 100vw, 256px"
+                sizes="(max-width: 1024px) 100vw, 600px"
                 style={{ objectFit: 'cover' }}
                 priority
               />
             </div>
-            <div className="absolute bottom-10 left-0 w-80 h-80 rounded-[100px] overflow-hidden border-8 border-surface-lowest shadow-2xl z-20">
-              <Image
-                src="/photo-bank/hero_02.jpg"
-                alt="community meeting outdoors"
-                fill
-                sizes="(max-width: 1024px) 100vw, 320px"
-                style={{ objectFit: 'cover' }}
-              />
-            </div>
-            <div className="absolute top-1/4 left-1/4 w-48 h-48 rounded-full overflow-hidden border-4 border-primary z-0 opacity-20 bg-primary-container"></div>
-            <div className="absolute top-10 left-10 w-56 h-72 rounded-full overflow-hidden border-8 border-surface-lowest shadow-2xl rotate-12 z-10">
-              <Image
-                src="/photo-bank/hero_03.jpg"
-                alt="volunteer helping community member"
-                fill
-                sizes="(max-width: 1024px) 100vw, 224px"
-                style={{ objectFit: 'cover' }}
-              />
+            {/* Desktop: Overlapping collage */}
+            <div className="hidden lg:block relative w-full h-full">
+              <div className="absolute top-0 right-0 w-64 h-64 rounded-full overflow-hidden border-8 border-surface-lowest shadow-2xl z-10">
+                <Image
+                  src="/photo-bank/hero_01.jpg"
+                  alt="VIVA volunteers team together"
+                  fill
+                  sizes="256px"
+                  style={{ objectFit: 'cover' }}
+                  priority
+                />
+              </div>
+              <div className="absolute bottom-10 left-0 w-80 h-80 rounded-[100px] overflow-hidden border-8 border-surface-lowest shadow-2xl z-20">
+                <Image
+                  src="/photo-bank/hero_02.jpg"
+                  alt="community meeting outdoors"
+                  fill
+                  sizes="320px"
+                  style={{ objectFit: 'cover' }}
+                />
+              </div>
+              <div className="absolute top-1/4 left-1/4 w-48 h-48 rounded-full overflow-hidden border-4 border-primary z-0 opacity-20 bg-primary-container"></div>
+              <div className="absolute top-10 left-10 w-56 h-72 rounded-full overflow-hidden border-8 border-surface-lowest shadow-2xl rotate-12 z-10">
+                <Image
+                  src="/photo-bank/hero_03.jpg"
+                  alt="volunteer helping community member"
+                  fill
+                  sizes="224px"
+                  style={{ objectFit: 'cover' }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -237,55 +284,55 @@ export default function Home(): JSX.Element {
             <h2 className="text-5xl font-headline font-bold text-on-surface">{translations.home.pillarsTitle}</h2>
             <div className="w-24 h-1.5 bg-primary mx-auto rounded-full"></div>
           </div>
-          <div className="space-y-6 stagger-container">
+          <div className="space-y-4 md:space-y-6 stagger-container">
             {/* Pillar 01 */}
-            <div className="grid grid-cols-1 md:grid-cols-12 items-stretch rounded-3xl overflow-hidden shadow-sm group stagger-item">
-              <div className="md:col-span-2 bg-[#D4E8B9] flex items-center justify-center p-8 group-hover:bg-secondary transition-colors duration-500">
-                <span className="text-6xl font-headline font-black text-secondary group-hover:text-on-secondary transition-colors">01</span>
+            <div className="grid grid-cols-1 md:grid-cols-12 items-stretch rounded-2xl md:rounded-3xl overflow-hidden shadow-sm group stagger-item">
+              <div className="md:col-span-2 bg-[#D4E8B9] flex items-center justify-center p-4 md:p-8 group-hover:bg-secondary transition-colors duration-500">
+                <span className="text-3xl md:text-6xl font-headline font-black text-secondary group-hover:text-on-secondary transition-colors">01</span>
               </div>
-              <div className="md:col-span-10 bg-surface-low p-12 flex flex-col justify-center">
-                <h3 className="text-3xl font-headline font-bold mb-4">{translations.home.pillar01Title}</h3>
-                <p className="text-on-surface-variant max-w-3xl">{translations.home.pillar01Desc}</p>
+              <div className="md:col-span-10 bg-surface-low p-6 md:p-12 flex flex-col justify-center">
+                <h3 className="text-xl md:text-3xl font-headline font-bold mb-2 md:mb-4">{translations.home.pillar01Title}</h3>
+                <p className="text-sm md:text-base text-on-surface-variant max-w-3xl">{translations.home.pillar01Desc}</p>
               </div>
             </div>
             {/* Pillar 02 */}
-            <div className="grid grid-cols-1 md:grid-cols-12 items-stretch rounded-3xl overflow-hidden shadow-sm group stagger-item">
-              <div className="md:col-span-2 bg-[#1E4D7B] flex items-center justify-center p-8">
-                <span className="text-6xl font-headline font-black text-white">02</span>
+            <div className="grid grid-cols-1 md:grid-cols-12 items-stretch rounded-2xl md:rounded-3xl overflow-hidden shadow-sm group stagger-item">
+              <div className="md:col-span-2 bg-[#1E4D7B] flex items-center justify-center p-4 md:p-8">
+                <span className="text-3xl md:text-6xl font-headline font-black text-white">02</span>
               </div>
-              <div className="md:col-span-10 bg-surface-high p-12 flex flex-col justify-center">
-                <h3 className="text-3xl font-headline font-bold mb-4">{translations.home.pillar02Title}</h3>
-                <p className="text-on-surface-variant max-w-3xl">{translations.home.pillar02Desc}</p>
+              <div className="md:col-span-10 bg-surface-high p-6 md:p-12 flex flex-col justify-center">
+                <h3 className="text-xl md:text-3xl font-headline font-bold mb-2 md:mb-4">{translations.home.pillar02Title}</h3>
+                <p className="text-sm md:text-base text-on-surface-variant max-w-3xl">{translations.home.pillar02Desc}</p>
               </div>
             </div>
             {/* Pillar 03 */}
-            <div className="grid grid-cols-1 md:grid-cols-12 items-stretch rounded-3xl overflow-hidden shadow-sm group stagger-item">
-              <div className="md:col-span-2 bg-[#D4E8B9] flex items-center justify-center p-8 group-hover:bg-secondary transition-colors duration-500">
-                <span className="text-6xl font-headline font-black text-secondary group-hover:text-on-secondary transition-colors">03</span>
+            <div className="grid grid-cols-1 md:grid-cols-12 items-stretch rounded-2xl md:rounded-3xl overflow-hidden shadow-sm group stagger-item">
+              <div className="md:col-span-2 bg-[#D4E8B9] flex items-center justify-center p-4 md:p-8 group-hover:bg-secondary transition-colors duration-500">
+                <span className="text-3xl md:text-6xl font-headline font-black text-secondary group-hover:text-on-secondary transition-colors">03</span>
               </div>
-              <div className="md:col-span-10 bg-surface-low p-12 flex flex-col justify-center">
-                <h3 className="text-3xl font-headline font-bold mb-4">{translations.home.pillar03Title}</h3>
-                <p className="text-on-surface-variant max-w-3xl">{translations.home.pillar03Desc}</p>
+              <div className="md:col-span-10 bg-surface-low p-6 md:p-12 flex flex-col justify-center">
+                <h3 className="text-xl md:text-3xl font-headline font-bold mb-2 md:mb-4">{translations.home.pillar03Title}</h3>
+                <p className="text-sm md:text-base text-on-surface-variant max-w-3xl">{translations.home.pillar03Desc}</p>
               </div>
             </div>
             {/* Pillar 04 */}
-            <div className="grid grid-cols-1 md:grid-cols-12 items-stretch rounded-3xl overflow-hidden shadow-sm group stagger-item">
-              <div className="md:col-span-2 bg-[#1E4D7B] flex items-center justify-center p-8">
-                <span className="text-6xl font-headline font-black text-white">04</span>
+            <div className="grid grid-cols-1 md:grid-cols-12 items-stretch rounded-2xl md:rounded-3xl overflow-hidden shadow-sm group stagger-item">
+              <div className="md:col-span-2 bg-[#1E4D7B] flex items-center justify-center p-4 md:p-8">
+                <span className="text-3xl md:text-6xl font-headline font-black text-white">04</span>
               </div>
-              <div className="md:col-span-10 bg-surface-high p-12 flex flex-col justify-center">
-                <h3 className="text-3xl font-headline font-bold mb-4">{translations.home.pillar04Title}</h3>
-                <p className="text-on-surface-variant max-w-3xl">{translations.home.pillar04Desc}</p>
+              <div className="md:col-span-10 bg-surface-high p-6 md:p-12 flex flex-col justify-center">
+                <h3 className="text-xl md:text-3xl font-headline font-bold mb-2 md:mb-4">{translations.home.pillar04Title}</h3>
+                <p className="text-sm md:text-base text-on-surface-variant max-w-3xl">{translations.home.pillar04Desc}</p>
               </div>
             </div>
             {/* Pillar 05 */}
-            <div className="grid grid-cols-1 md:grid-cols-12 items-stretch rounded-3xl overflow-hidden shadow-sm group stagger-item">
-              <div className="md:col-span-2 bg-[#D4E8B9] flex items-center justify-center p-8 group-hover:bg-secondary transition-colors duration-500">
-                <span className="text-6xl font-headline font-black text-secondary group-hover:text-on-secondary transition-colors">05</span>
+            <div className="grid grid-cols-1 md:grid-cols-12 items-stretch rounded-2xl md:rounded-3xl overflow-hidden shadow-sm group stagger-item">
+              <div className="md:col-span-2 bg-[#D4E8B9] flex items-center justify-center p-4 md:p-8 group-hover:bg-secondary transition-colors duration-500">
+                <span className="text-3xl md:text-6xl font-headline font-black text-secondary group-hover:text-on-secondary transition-colors">05</span>
               </div>
-              <div className="md:col-span-10 bg-surface-low p-12 flex flex-col justify-center">
-                <h3 className="text-3xl font-headline font-bold mb-4">{translations.home.pillar05Title}</h3>
-                <p className="text-on-surface-variant max-w-3xl">{translations.home.pillar05Desc}</p>
+              <div className="md:col-span-10 bg-surface-low p-6 md:p-12 flex flex-col justify-center">
+                <h3 className="text-xl md:text-3xl font-headline font-bold mb-2 md:mb-4">{translations.home.pillar05Title}</h3>
+                <p className="text-sm md:text-base text-on-surface-variant max-w-3xl">{translations.home.pillar05Desc}</p>
               </div>
             </div>
           </div>
@@ -600,89 +647,89 @@ export default function Home(): JSX.Element {
       </section>
 
       {/* 11. CONTACT SECTION */}
-      <section ref={contactSection.ref} className={`py-24 px-6 animate-on-scroll animate-slide-up ${contactSection.isInView ? 'in-view' : ''}`}>
-        <div className="max-w-7xl mx-auto bg-white rounded-[3rem] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+      <section ref={contactSection.ref} className={`py-12 md:py-24 px-6 animate-on-scroll animate-slide-up ${contactSection.isInView ? 'in-view' : ''}`}>
+        <div className="max-w-7xl mx-auto bg-white rounded-2xl md:rounded-[3rem] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12">
           {/* Contact Info Sidebar */}
-          <div className="lg:col-span-5 bg-primary p-12 lg:p-20 text-on-primary space-y-12">
-            <div className="space-y-4">
-              <h2 className="text-4xl font-headline font-bold">{translations.home.contactTitle}</h2>
-              <p className="opacity-80">{translations.home.contactDesc}</p>
+          <div className="lg:col-span-5 bg-primary p-8 md:p-12 lg:p-20 text-on-primary space-y-6 md:space-y-12">
+            <div className="space-y-2 md:space-y-4">
+              <h2 className="text-3xl md:text-4xl font-headline font-bold">{translations.home.contactTitle}</h2>
+              <p className="opacity-80 text-sm md:text-base">{translations.home.contactDesc}</p>
             </div>
-            <div className="space-y-8">
+            <div className="space-y-4 md:space-y-8">
               <div className="flex items-start gap-4">
                 <div className="p-2 bg-primary-container rounded-lg">
-                  <Mail className="w-6 h-6" />
+                  <Mail className="w-5 h-5 md:w-6 md:h-6" />
                 </div>
                 <div>
                   <p className="text-xs uppercase font-bold tracking-widest opacity-60 mb-1">{translations.home.emailUs}</p>
-                  <p className="text-lg">{translations.home.email}</p>
+                  <p className="text-base md:text-lg">{translations.home.email}</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
                 <div className="p-2 bg-primary-container rounded-lg">
-                  <MapPin className="w-6 h-6" />
+                  <MapPin className="w-5 h-5 md:w-6 md:h-6" />
                 </div>
                 <div>
                   <p className="text-xs uppercase font-bold tracking-widest opacity-60 mb-1">{translations.home.ourOffice}</p>
-                  <p className="text-lg">{translations.home.address}</p>
+                  <p className="text-base md:text-lg">{translations.home.address}</p>
                 </div>
               </div>
             </div>
-            <div className="pt-8">
+            <div className="pt-4 md:pt-8">
               <p className="text-xs uppercase font-bold tracking-widest opacity-60 mb-4">{translations.home.followJourney}</p>
               <div className="flex gap-4">
-                <div className="w-12 h-12 bg-primary-container rounded-full flex items-center justify-center cursor-pointer hover:bg-white hover:text-primary transition-colors">
-                  <Trophy className="w-6 h-6" />
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-primary-container rounded-full flex items-center justify-center cursor-pointer hover:bg-white hover:text-primary transition-colors">
+                  <Trophy className="w-5 h-5 md:w-6 md:h-6" />
                 </div>
-                <div className="w-12 h-12 bg-primary-container rounded-full flex items-center justify-center cursor-pointer hover:bg-white hover:text-primary transition-colors">
-                  <Camera className="w-6 h-6" />
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-primary-container rounded-full flex items-center justify-center cursor-pointer hover:bg-white hover:text-primary transition-colors">
+                  <Camera className="w-5 h-5 md:w-6 md:h-6" />
                 </div>
               </div>
             </div>
           </div>
           {/* Form */}
-          <div className="lg:col-span-7 p-12 lg:p-20 bg-surface">
-            <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="lg:col-span-7 p-8 md:p-12 lg:p-20 bg-surface">
+            <form className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase text-on-surface-variant">{translations.home.labelFirstName}</label>
                 <input
                   type="text"
-                  className="w-full bg-surface-highest border-none rounded-xl p-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
+                  className="w-full bg-surface-highest border-none rounded-xl p-3 md:p-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase text-on-surface-variant">{translations.home.labelLastName}</label>
                 <input
                   type="text"
-                  className="w-full bg-surface-highest border-none rounded-xl p-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
+                  className="w-full bg-surface-highest border-none rounded-xl p-3 md:p-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
                 />
               </div>
               <div className="md:col-span-2 space-y-2">
                 <label className="text-xs font-bold uppercase text-on-surface-variant">{translations.home.labelEmail}</label>
                 <input
                   type="email"
-                  className="w-full bg-surface-highest border-none rounded-xl p-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
+                  className="w-full bg-surface-highest border-none rounded-xl p-3 md:p-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase text-on-surface-variant">{translations.home.labelPhone}</label>
                 <input
                   type="tel"
-                  className="w-full bg-surface-highest border-none rounded-xl p-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
+                  className="w-full bg-surface-highest border-none rounded-xl p-3 md:p-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase text-on-surface-variant">{translations.home.labelOrganization}</label>
                 <input
                   type="text"
-                  className="w-full bg-surface-highest border-none rounded-xl p-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
+                  className="w-full bg-surface-highest border-none rounded-xl p-3 md:p-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
                 />
               </div>
               <div className="md:col-span-2 space-y-2">
                 <label className="text-xs font-bold uppercase text-on-surface-variant">{translations.home.labelMessage}</label>
                 <textarea
                   rows={4}
-                  className="w-full bg-surface-highest border-none rounded-xl p-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all resize-none"
+                  className="w-full bg-surface-highest border-none rounded-xl p-3 md:p-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all resize-none"
                 />
               </div>
               <div className="md:col-span-2 flex items-center gap-3">
@@ -695,10 +742,10 @@ export default function Home(): JSX.Element {
                   {translations.home.subscribeNewsletter}
                 </label>
               </div>
-              <div className="md:col-span-2 pt-4">
+              <div className="md:col-span-2 pt-2 md:pt-4">
                 <button
                   type="submit"
-                  className="w-full bg-primary text-on-primary py-5 rounded-xl font-bold text-lg hover:shadow-xl transition-all"
+                  className="w-full bg-primary text-on-primary py-4 md:py-5 rounded-xl font-bold text-base md:text-lg hover:shadow-xl transition-all"
                 >
                   {translations.home.sendMessage}
                 </button>
