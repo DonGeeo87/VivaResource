@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     const { initializeApp, getApps, cert } = await import("firebase-admin/app");
     const path = await import("path");
 
-    function initFirebaseAdmin() {
+    const initFirebaseAdmin = async () => {
       if (getApps().length === 0) {
         const serviceAccountPath = path.join(
           process.cwd(),
@@ -17,9 +17,9 @@ export async function GET(request: NextRequest) {
         initializeApp({ credential });
       }
       return getFirestore();
-    }
+    };
 
-    const db = initFirebaseAdmin();
+    const db = await initFirebaseAdmin();
     const searchParams = request.nextUrl.searchParams;
     const limit = parseInt(searchParams.get("limit") || "50");
 

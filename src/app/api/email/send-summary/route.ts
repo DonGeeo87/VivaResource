@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import { adminDb } from "@/lib/firebase/admin";
 
 // Force dynamic rendering - uses Firebase Admin SDK at runtime
 export const dynamic = "force-dynamic";
-
-// Lazy getter for adminDb - call this inside functions, not at module level
-async function getDb() {
-  const { adminDb } = await import("@/lib/firebase/admin");
-  return adminDb();
-}
 
 // Configurar transporte de Gmail SMTP
 const transporter = nodemailer.createTransport({
@@ -40,7 +35,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // Get notification settings using Admin SDK
-    const emailsDoc = await adminDb.collection("site_settings").doc("notification_emails").get();
+    const db = await adminDb();
+    if (!db) {
+      return NextResponse.json(
+        { success: false, error: "Database not configured" },
+        { status: 500 }
+      );
+    }
+    const emailsDoc = await db.collection("site_settings").doc("notification_emails").get();
     const notificationEmails = emailsDoc.exists
       ? (emailsDoc.data()?.value || "").split(",").map((e: string) => e.trim()).filter(Boolean)
       : [process.env.NEWSLETTER_ADMIN_EMAILS?.split(",")[0] || "vivaresourcefoundation@gmail.com"];
@@ -57,7 +59,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (type === "event") {
       // Get event data using Admin SDK
-      const eventDoc = await adminDb.collection("events").doc(id).get();
+      const eventDoc = await db.collection("events").doc(id).get();
       if (!eventDoc.exists) {
         return NextResponse.json({ error: "Event not found" }, { status: 404 });
       }
@@ -66,7 +68,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       const eventName = data?.language === "es" && event.title_es ? event.title_es : event.title_en;
 
       // Get registrations using Admin SDK
-      const regSnapshot = await adminDb.collection("event_registrations").where("event_id", "==", id).get();
+      const regSnapshot = await db.collection("event_registrations").where("event_id", "==", id).get();
       const registrations = regSnapshot.docs.map(d => ({ id: d.id, ...d.data() } as Record<string, unknown>));
 
       subject = `Resumen de Registros: ${eventName} - ${registrations.length} inscritos`;
@@ -150,7 +152,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       `;
     } else if (type === "form") {
       // Get form data using Admin SDK
-      const formDoc = await adminDb.collection("forms").doc(id).get();
+      const formDoc = await db.collection("forms").doc(id).get();
       if (!formDoc.exists) {
         return NextResponse.json({ error: "Form not found" }, { status: 404 });
       }
@@ -159,7 +161,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       const formName = data?.language === "es" && form.titleEs ? form.titleEs : form.title;
 
       // Get submissions using Admin SDK
-      const subSnapshot = await adminDb.collection("form_submissions").where("formId", "==", id).get();
+      const subSnapshot = await db.collection("form_submissions").where("formId", "==", id).get();
       const submissions = subSnapshot.docs.map(d => ({ id: d.id, ...(d.data() as Record<string, unknown>) }));
 
       subject = `Resumen de Respuestas: ${formName} - ${submissions.length} envíos`;

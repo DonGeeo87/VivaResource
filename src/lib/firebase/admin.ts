@@ -1,9 +1,13 @@
 // Firebase Admin SDK - Fully dynamic imports
 // No static imports to avoid Vercel build errors
 
-let adminApp: any = null;
-let adminAuthInstance: any = null;
-let adminDbInstance: any = null;
+import type { App } from "firebase-admin/app";
+import type { Auth } from "firebase-admin/auth";
+import type { Firestore } from "firebase-admin/firestore";
+
+let adminApp: App | null = null;
+let adminAuthInstance: Auth | null = null;
+let adminDbInstance: Firestore | null = null;
 
 async function initAdmin() {
   if (adminApp) return { adminApp, adminAuthInstance, adminDbInstance };

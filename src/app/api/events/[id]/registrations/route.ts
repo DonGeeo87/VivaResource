@@ -16,7 +16,12 @@ async function verifyAdmin(request: NextRequest) {
     const decodedToken = await verifyIdToken(token);
     const uid = decodedToken.uid;
 
-    const userDoc = await adminDb().collection("admin_users").doc(uid).get();
+    const db = await adminDb();
+    if (!db) {
+      return { error: "Database not configured", status: 500 };
+    }
+
+    const userDoc = await db.collection("admin_users").doc(uid).get();
     if (!userDoc.exists) {
       return { error: "No tienes acceso de administrador", status: 403 };
     }
@@ -49,9 +54,13 @@ export async function GET(
 
     // Get adminDb lazily
     const { adminDb } = await import("@/lib/firebase/admin");
+    const db = await adminDb();
+    if (!db) {
+      return NextResponse.json({ error: "Database not configured" }, { status: 500 });
+    }
 
     // Obtener registros del evento
-    const snapshot = await adminDb()
+    const snapshot = await db
       .collection("event_registrations")
       .where("event_id", "==", eventId)
       .orderBy("created_at", "desc")

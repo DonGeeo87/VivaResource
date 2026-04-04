@@ -17,7 +17,12 @@ async function verifyAdmin(request: NextRequest) {
     const decodedToken = await verifyIdToken(token);
     const uid = decodedToken.uid;
 
-    const userDoc = await adminDb().collection("admin_users").doc(uid).get();
+    const db = await adminDb();
+    if (!db) {
+      return { error: "Database not configured", status: 500 };
+    }
+
+    const userDoc = await db.collection("admin_users").doc(uid).get();
     if (!userDoc.exists) {
       return { error: "No tienes acceso de administrador", status: 403 };
     }
@@ -62,8 +67,15 @@ export async function PUT(
       return NextResponse.json({ error: "La fecha es requerida" }, { status: 400 });
     }
 
+    // Get database instance
+    const { adminDb } = await import("@/lib/firebase/admin");
+    const db = await adminDb();
+    if (!db) {
+      return NextResponse.json({ error: "Database not configured" }, { status: 500 });
+    }
+
     // Verificar que el evento existe usando Admin SDK
-    const eventDoc = await adminDb.collection("events").doc(eventId).get();
+    const eventDoc = await db.collection("events").doc(eventId).get();
 
     if (!eventDoc.exists) {
       return NextResponse.json({ error: "Evento no encontrado" }, { status: 404 });
@@ -105,7 +117,7 @@ export async function PUT(
     }
 
     // Actualizar en Firestore usando Admin SDK
-    await adminDb.collection("events").doc(eventId).update(updateData);
+    await db.collection("events").doc(eventId).update(updateData);
 
     return NextResponse.json({
       success: true,
@@ -136,15 +148,22 @@ export async function DELETE(
 
     const eventId = params.id;
 
+    // Get database instance
+    const { adminDb } = await import("@/lib/firebase/admin");
+    const db = await adminDb();
+    if (!db) {
+      return NextResponse.json({ error: "Database not configured" }, { status: 500 });
+    }
+
     // Verificar que el evento existe usando Admin SDK
-    const eventDoc = await adminDb.collection("events").doc(eventId).get();
+    const eventDoc = await db.collection("events").doc(eventId).get();
 
     if (!eventDoc.exists) {
       return NextResponse.json({ error: "Evento no encontrado" }, { status: 404 });
     }
 
     // Eliminar de Firestore usando Admin SDK
-    await adminDb.collection("events").doc(eventId).delete();
+    await db.collection("events").doc(eventId).delete();
 
     return NextResponse.json({
       success: true,
@@ -173,7 +192,15 @@ export async function GET(
     }
 
     const eventId = params.id;
-    const eventDoc = await adminDb.collection("events").doc(eventId).get();
+
+    // Get database instance
+    const { adminDb } = await import("@/lib/firebase/admin");
+    const db = await adminDb();
+    if (!db) {
+      return NextResponse.json({ error: "Database not configured" }, { status: 500 });
+    }
+
+    const eventDoc = await db.collection("events").doc(eventId).get();
 
     if (!eventDoc.exists) {
       return NextResponse.json({ error: "Evento no encontrado" }, { status: 404 });
