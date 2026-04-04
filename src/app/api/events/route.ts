@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 import { parseEventDateTime } from "@/lib/timezone";
-import { verifyIdToken, adminDb as getAdminDb } from "@/lib/firebase/admin";
 
 // Force dynamic rendering - uses Firebase Admin SDK
 export const dynamic = "force-dynamic";
@@ -15,11 +14,12 @@ async function verifyAdmin(request: NextRequest) {
 
   const token = authHeader.split(" ")[1];
   try {
+    const { verifyIdToken, adminDb } = await import("@/lib/firebase/admin");
     const decodedToken = await verifyIdToken(token);
     const uid = decodedToken.uid;
 
     // Verificar que el usuario esté en admin_users (usando Admin SDK para bypass reglas)
-    const userDoc = await getAdminDb().collection("admin_users").doc(uid).get();
+    const userDoc = await adminDb().collection("admin_users").doc(uid).get();
     if (!userDoc.exists) {
       return { error: "No tienes acceso de administrador", status: 403 };
     }
@@ -107,7 +107,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     };
 
     // Guardar en Firestore usando Admin SDK (bypass reglas de seguridad)
-    const docRef = await adminDb.collection("events").add(eventData);
+    const { adminDb } = await import("@/lib/firebase/admin");
+    const docRef = await adminDb().collection("events").add(eventData);
 
     return NextResponse.json(
       {
@@ -137,7 +138,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     // Listar eventos usando Admin SDK
-    const snapshot = await adminDb.collection("events").orderBy("date", "desc").get();
+    const { adminDb } = await import("@/lib/firebase/admin");
+    const snapshot = await adminDb().collection("events").orderBy("date", "desc").get();
 
     const events = snapshot.docs.map(doc => ({
       id: doc.id,

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyIdToken, adminDb as getAdminDb } from "@/lib/firebase/admin";
 
-// Force dynamic rendering - uses Firebase Admin SDK
+// Force dynamic rendering - uses Firebase Admin SDK at runtime
 export const dynamic = "force-dynamic";
 
 // Helper para verificar autenticación del admin
@@ -13,10 +12,11 @@ async function verifyAdmin(request: NextRequest) {
 
   const token = authHeader.split(" ")[1];
   try {
+    const { verifyIdToken, adminDb } = await import("@/lib/firebase/admin");
     const decodedToken = await verifyIdToken(token);
     const uid = decodedToken.uid;
 
-    const userDoc = await getAdminDb().collection("admin_users").doc(uid).get();
+    const userDoc = await adminDb().collection("admin_users").doc(uid).get();
     if (!userDoc.exists) {
       return { error: "No tienes acceso de administrador", status: 403 };
     }
@@ -47,8 +47,11 @@ export async function GET(
 
     const eventId = params.id;
 
+    // Get adminDb lazily
+    const { adminDb } = await import("@/lib/firebase/admin");
+
     // Obtener registros del evento
-    const snapshot = await getAdminDb()
+    const snapshot = await adminDb()
       .collection("event_registrations")
       .where("event_id", "==", eventId)
       .orderBy("created_at", "desc")

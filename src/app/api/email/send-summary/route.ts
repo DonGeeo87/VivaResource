@@ -4,6 +4,12 @@ import nodemailer from "nodemailer";
 // Force dynamic rendering - uses Firebase Admin SDK at runtime
 export const dynamic = "force-dynamic";
 
+// Lazy getter for adminDb - call this inside functions, not at module level
+async function getDb() {
+  const { adminDb } = await import("@/lib/firebase/admin");
+  return adminDb();
+}
+
 // Configurar transporte de Gmail SMTP
 const transporter = nodemailer.createTransport({
   service: "gmail",
