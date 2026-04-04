@@ -81,12 +81,15 @@ export default function Home(): JSX.Element {
   const heroRef = useRef<HTMLDivElement | null>(null);
   const getHelpSection = useInView({ threshold: 0.15 });
   const pillarsSection = useInView({ threshold: 0.1 });
+  const pillarsStagger = useInView({ threshold: 0.1 });
   const donateSection = useInView({ threshold: 0.15 });
+  const donateStagger = useInView({ threshold: 0.1 });
   const aboutSection = useInView({ threshold: 0.15 });
   const foundersSection = useInView({ threshold: 0.1 });
   const partnersSection = useInView({ threshold: 0.3 });
   const drivingChangeSection = useInView({ threshold: 0.2 });
   const pathwaysSection = useInView({ threshold: 0.1 });
+  const pathwaysStagger = useInView({ threshold: 0.1 });
   const faqSection = useInView({ threshold: 0.1 });
   const contactSection = useInView({ threshold: 0.15 });
 
@@ -278,13 +281,13 @@ export default function Home(): JSX.Element {
       </section>
 
       {/* 3. OUR PILLARS */}
-      <section ref={pillarsSection.ref} className={`py-24 px-6 animate-on-scroll animate-fade-in ${pillarsSection.isInView ? 'in-view' : ''}`}>
-        <div className="max-w-7xl mx-auto space-y-16">
+      <section ref={pillarsSection.ref} className={`py-12 md:py-24 px-6 animate-on-scroll animate-fade-in ${pillarsSection.isInView ? 'in-view' : ''}`}>
+        <div className="max-w-7xl mx-auto space-y-8 md:space-y-16">
           <div className="text-center space-y-4">
-            <h2 className="text-5xl font-headline font-bold text-on-surface">{translations.home.pillarsTitle}</h2>
+            <h2 className="text-3xl md:text-5xl font-headline font-bold text-on-surface">{translations.home.pillarsTitle}</h2>
             <div className="w-24 h-1.5 bg-primary mx-auto rounded-full"></div>
           </div>
-          <div className="space-y-4 md:space-y-6 stagger-container">
+          <div ref={pillarsStagger.ref} className={`space-y-4 md:space-y-6 stagger-container ${pillarsStagger.isInView ? 'in-view' : ''}`}>
             {/* Pillar 01 */}
             <div className="grid grid-cols-1 md:grid-cols-12 items-stretch rounded-2xl md:rounded-3xl overflow-hidden shadow-sm group stagger-item">
               <div className="md:col-span-2 bg-[#D4E8B9] flex items-center justify-center p-4 md:p-8 group-hover:bg-secondary transition-colors duration-500">
@@ -340,42 +343,42 @@ export default function Home(): JSX.Element {
       </section>
 
       {/* 4. DONATE CTA */}
-      <section ref={donateSection.ref} className={`py-24 px-6 bg-surface-low animate-on-scroll animate-slide-up ${donateSection.isInView ? 'in-view' : ''}`}>
+      <section ref={donateSection.ref} className={`py-12 md:py-24 px-6 bg-surface-low animate-on-scroll animate-slide-up ${donateSection.isInView ? 'in-view' : ''}`}>
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="space-y-12">
-              <h2 className="text-4xl lg:text-5xl font-headline font-bold text-on-surface leading-tight">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center">
+            <div className="space-y-8 md:space-y-12">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-headline font-bold text-on-surface leading-tight">
                 {translations.home.donateReasons} <br />
                 <span className="text-secondary">{translations.home.donateHighlight}</span>
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 stagger-container">
-                <div className="space-y-4 p-6 bg-surface-lowest rounded-2xl stagger-item">
-                  <Star className="w-10 h-10 text-secondary" />
-                  <h4 className="font-bold text-xl">{translations.home.reason1Title}</h4>
+              <div ref={donateStagger.ref} className={`grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8 stagger-container ${donateStagger.isInView ? 'in-view' : ''}`}>
+                <div className="space-y-4 p-4 md:p-6 bg-surface-lowest rounded-2xl stagger-item">
+                  <Star className="w-8 h-8 md:w-10 md:h-10 text-secondary" />
+                  <h4 className="font-bold text-lg md:text-xl">{translations.home.reason1Title}</h4>
                   <p className="text-sm opacity-70">{translations.home.reason1Desc}</p>
                 </div>
-                <div className="space-y-4 p-6 bg-surface-lowest rounded-2xl stagger-item">
-                  <Flower2 className="w-10 h-10 text-secondary" />
-                  <h4 className="font-bold text-xl">{translations.home.reason2Title}</h4>
+                <div className="space-y-4 p-4 md:p-6 bg-surface-lowest rounded-2xl stagger-item">
+                  <Flower2 className="w-8 h-8 md:w-10 md:h-10 text-secondary" />
+                  <h4 className="font-bold text-lg md:text-xl">{translations.home.reason2Title}</h4>
                   <p className="text-sm opacity-70">{translations.home.reason2Desc}</p>
                 </div>
-                <div className="space-y-4 p-6 bg-surface-lowest rounded-2xl stagger-item">
-                  <Heart className="w-10 h-10 text-secondary" />
-                  <h4 className="font-bold text-xl">{translations.home.reason3Title}</h4>
+                <div className="space-y-4 p-4 md:p-6 bg-surface-lowest rounded-2xl stagger-item">
+                  <Heart className="w-8 h-8 md:w-10 md:h-10 text-secondary" />
+                  <h4 className="font-bold text-lg md:text-xl">{translations.home.reason3Title}</h4>
                   <p className="text-sm opacity-70">{translations.home.reason3Desc}</p>
                 </div>
-                <div className="space-y-4 p-6 bg-surface-lowest rounded-2xl stagger-item">
-                  <Handshake className="w-10 h-10 text-secondary" />
-                  <h4 className="font-bold text-xl">{translations.home.reason4Title}</h4>
+                <div className="space-y-4 p-4 md:p-6 bg-surface-lowest rounded-2xl stagger-item">
+                  <Handshake className="w-8 h-8 md:w-10 md:h-10 text-secondary" />
+                  <h4 className="font-bold text-lg md:text-xl">{translations.home.reason4Title}</h4>
                   <p className="text-sm opacity-70">{translations.home.reason4Desc}</p>
                 </div>
               </div>
             </div>
-            <div className="flex flex-col items-center justify-center space-y-8 bg-primary rounded-[3rem] p-16 text-center text-on-primary stagger-item">
-              <Heart className="w-20 h-20 text-secondary-container" />
-              <h3 className="text-3xl font-headline font-bold">{translations.home.donateCardTitle}</h3>
-              <p className="text-lg opacity-90 max-w-sm">{translations.home.donateCardDesc}</p>
-              <Link href="/donate" className="bg-secondary text-on-secondary px-12 py-6 rounded-full font-bold text-2xl hover:scale-105 transition-all shadow-2xl text-center">
+            <div className="flex flex-col items-center justify-center space-y-4 md:space-y-8 bg-primary rounded-2xl md:rounded-[3rem] p-8 md:p-16 text-center text-on-primary stagger-item">
+              <Heart className="w-16 h-16 md:w-20 md:h-20 text-secondary-container" />
+              <h3 className="text-2xl md:text-3xl font-headline font-bold">{translations.home.donateCardTitle}</h3>
+              <p className="text-base md:text-lg opacity-90 max-w-sm">{translations.home.donateCardDesc}</p>
+              <Link href="/donate" className="bg-secondary text-on-secondary px-8 md:px-12 py-4 md:py-6 rounded-full font-bold text-xl md:text-2xl hover:scale-105 transition-all shadow-2xl text-center">
                 {translations.home.ctaButton2}
               </Link>
             </div>
@@ -513,13 +516,13 @@ export default function Home(): JSX.Element {
       </section>
 
       {/* 9. ENGAGEMENT PATHWAYS */}
-      <section ref={pathwaysSection.ref} className={`py-24 px-6 animate-on-scroll animate-fade-in ${pathwaysSection.isInView ? 'in-view' : ''}`}>
+      <section ref={pathwaysSection.ref} className={`py-12 md:py-24 px-6 animate-on-scroll animate-fade-in ${pathwaysSection.isInView ? 'in-view' : ''}`}>
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-headline font-bold mb-16 text-center">{translations.home.pathwaysTitle}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 stagger-container">
+          <h2 className="text-3xl md:text-4xl font-headline font-bold mb-8 md:mb-16 text-center">{translations.home.pathwaysTitle}</h2>
+          <div ref={pathwaysStagger.ref} className={`grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 stagger-container ${pathwaysStagger.isInView ? 'in-view' : ''}`}>
             {/* Program 01 */}
             <div className="group cursor-pointer stagger-item">
-              <div className="relative h-80 rounded-3xl overflow-hidden mb-6">
+              <div className="relative h-60 md:h-80 rounded-2xl md:rounded-3xl overflow-hidden mb-4 md:mb-6">
                 <Image
                   src="/photo-bank/vivaresource (5).jpg"
                   alt="community workshop training session"
@@ -528,17 +531,17 @@ export default function Home(): JSX.Element {
                   style={{ objectFit: 'cover' }}
                   className="transition-transform duration-500 group-hover:scale-110"
                 />
-                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md w-12 h-12 rounded-full flex items-center justify-center font-black text-primary text-xl shadow-lg">01</div>
+                <div className="absolute top-3 left-3 md:top-4 md:left-4 bg-white/90 backdrop-blur-md w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-black text-primary text-lg md:text-xl shadow-lg">01</div>
               </div>
-              <h4 className="text-2xl font-headline font-bold mb-3 group-hover:text-primary transition-colors">{translations.home.pathway01Title}</h4>
-              <p className="text-on-surface-variant line-clamp-3">{translations.home.pathway01Desc}</p>
-              <Link href="/get-involved" className="mt-4 flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all">
-                {translations.home.learnMore} <ChevronRight className="w-5 h-5" />
+              <h4 className="text-xl md:text-2xl font-headline font-bold mb-2 md:mb-3 group-hover:text-primary transition-colors">{translations.home.pathway01Title}</h4>
+              <p className="text-on-surface-variant line-clamp-3 text-sm md:text-base">{translations.home.pathway01Desc}</p>
+              <Link href="/get-involved" className="mt-3 md:mt-4 flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all">
+                {translations.home.learnMore} <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
               </Link>
             </div>
             {/* Program 02 */}
             <div className="group cursor-pointer stagger-item">
-              <div className="relative h-80 rounded-3xl overflow-hidden mb-6">
+              <div className="relative h-60 md:h-80 rounded-2xl md:rounded-3xl overflow-hidden mb-4 md:mb-6">
                 <Image
                   src="/photo-bank/vivaresource (6).jpg"
                   alt="volunteers organizing food donations"
@@ -547,17 +550,17 @@ export default function Home(): JSX.Element {
                   style={{ objectFit: 'cover' }}
                   className="transition-transform duration-500 group-hover:scale-110"
                 />
-                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md w-12 h-12 rounded-full flex items-center justify-center font-black text-primary text-xl shadow-lg">02</div>
+                <div className="absolute top-3 left-3 md:top-4 md:left-4 bg-white/90 backdrop-blur-md w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-black text-primary text-lg md:text-xl shadow-lg">02</div>
               </div>
-              <h4 className="text-2xl font-headline font-bold mb-3 group-hover:text-primary transition-colors">{translations.home.pathway02Title}</h4>
-              <p className="text-on-surface-variant line-clamp-3">{translations.home.pathway02Desc}</p>
-              <Link href="/get-help" className="mt-4 flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all">
-                {translations.home.learnMore} <ChevronRight className="w-5 h-5" />
+              <h4 className="text-xl md:text-2xl font-headline font-bold mb-2 md:mb-3 group-hover:text-primary transition-colors">{translations.home.pathway02Title}</h4>
+              <p className="text-on-surface-variant line-clamp-3 text-sm md:text-base">{translations.home.pathway02Desc}</p>
+              <Link href="/get-help" className="mt-3 md:mt-4 flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all">
+                {translations.home.learnMore} <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
               </Link>
             </div>
             {/* Program 03 */}
             <div className="group cursor-pointer stagger-item">
-              <div className="relative h-80 rounded-3xl overflow-hidden mb-6">
+              <div className="relative h-60 md:h-80 rounded-2xl md:rounded-3xl overflow-hidden mb-4 md:mb-6">
                 <Image
                   src="/photo-bank/vivaresource (8).jpg"
                   alt="community collaboration meeting"
@@ -566,12 +569,12 @@ export default function Home(): JSX.Element {
                   style={{ objectFit: 'cover' }}
                   className="transition-transform duration-500 group-hover:scale-110"
                 />
-                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md w-12 h-12 rounded-full flex items-center justify-center font-black text-primary text-xl shadow-lg">03</div>
+                <div className="absolute top-3 left-3 md:top-4 md:left-4 bg-white/90 backdrop-blur-md w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-black text-primary text-lg md:text-xl shadow-lg">03</div>
               </div>
-              <h4 className="text-2xl font-headline font-bold mb-3 group-hover:text-primary transition-colors">{translations.home.pathway03Title}</h4>
-              <p className="text-on-surface-variant line-clamp-3">{translations.home.pathway03Desc}</p>
-              <Link href="/resources" className="mt-4 flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all">
-                {translations.home.learnMore} <ChevronRight className="w-5 h-5" />
+              <h4 className="text-xl md:text-2xl font-headline font-bold mb-2 md:mb-3 group-hover:text-primary transition-colors">{translations.home.pathway03Title}</h4>
+              <p className="text-on-surface-variant line-clamp-3 text-sm md:text-base">{translations.home.pathway03Desc}</p>
+              <Link href="/resources" className="mt-3 md:mt-4 flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all">
+                {translations.home.learnMore} <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
               </Link>
             </div>
           </div>
