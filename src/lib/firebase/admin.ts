@@ -1,14 +1,16 @@
-import { initializeApp, cert, getApps, getApp } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
-import { getFirestore } from "firebase-admin/firestore";
+// Firebase Admin SDK - Fully dynamic imports
+// No static imports to avoid Vercel build errors
 
-let adminApp: ReturnType<typeof initializeApp> | null = null;
-let adminAuth: ReturnType<typeof getAuth> | null = null;
-let adminDb: ReturnType<typeof getFirestore> | null = null;
+let adminApp: any = null;
+let adminAuthInstance: any = null;
+let adminDbInstance: any = null;
 
-// Initialize Admin SDK lazily (only at runtime, not during build)
-function getAdminApp() {
-  if (adminApp) return adminApp;
+async function initAdmin() {
+  if (adminApp) return { adminApp, adminAuthInstance, adminDbInstance };
+
+  const { initializeApp, cert, getApps, getApp } = await import("firebase-admin/app");
+  const { getAuth } = await import("firebase-admin/auth");
+  const { getFirestore } = await import("firebase-admin/firestore");
 
   if (getApps().length > 0) {
     adminApp = getApp();
@@ -23,40 +25,23 @@ function getAdminApp() {
     });
   }
 
-  return adminApp;
-}
-
-function getAdminAuth() {
-  if (adminAuth) return adminAuth;
-  const app = getAdminApp();
-  if (app) {
-    adminAuth = getAuth(app);
+  if (adminApp) {
+    adminAuthInstance = getAuth(adminApp);
+    adminDbInstance = getFirestore(adminApp);
   }
-  return adminAuth;
+
+  return { adminApp, adminAuthInstance, adminDbInstance };
 }
 
-function getAdminDb() {
-  if (adminDb) return adminDb;
-  const app = getAdminApp();
-  if (app) {
-    adminDb = getFirestore(app);
-  }
-  return adminDb;
-}
-
-// Export lazy getters instead of direct values
-export { getAdminAuth as adminAuth, getAdminDb as adminDb };
-
-// For backward compatibility, export verifyIdToken
 export async function verifyIdToken(token: string) {
-  const auth = getAdminAuth();
-  if (!auth) {
-    throw new Error("Firebase Admin SDK not configured. Set FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY.");
+  const { adminAuthInstance } = await initAdmin();
+  if (!adminAuthInstance) {
+    throw new Error("Firebase Admin SDK not configured");
   }
-  try {
-    return await auth.verifyIdToken(token);
-  } catch (error) {
-    console.error("[Firebase Admin] Error verifying token:", error);
-    throw new Error(`Invalid token: ${error instanceof Error ? error.message : "Unknown error"}`);
-  }
+  return adminAuthInstance.verifyIdToken(token);
+}
+
+export async function adminDb() {
+  const { adminDbInstance } = await initAdmin();
+  return adminDbInstance;
 }
