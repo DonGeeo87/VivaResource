@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyIdToken, adminDb } from "@/lib/firebase/admin";
+import { verifyIdToken, adminDb as getAdminDb } from "@/lib/firebase/admin";
 
 // Helper para verificar autenticación del admin
 async function verifyAdmin(request: NextRequest) {
