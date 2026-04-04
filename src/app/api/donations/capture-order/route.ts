@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getFirestore } from "firebase-admin/firestore";
-import { initializeApp, getApps, cert } from "firebase-admin/app";
-import path from "path";
 
 const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
@@ -12,7 +9,11 @@ const PAYPAL_BASE_URL =
     ? "https://api-m.paypal.com"
     : "https://api-m.sandbox.paypal.com";
 
-function initFirebaseAdmin() {
+async function initFirebaseAdmin() {
+  const { getFirestore } = await import("firebase-admin/firestore");
+  const { initializeApp, getApps, cert } = await import("firebase-admin/app");
+  const path = await import("path");
+
   if (getApps().length === 0) {
     const serviceAccountPath = path.join(
       process.cwd(),
@@ -96,7 +97,7 @@ export async function POST(request: NextRequest) {
     const payerInfo = captureData.payer || {};
 
     // Save to Firestore
-    const db = initFirebaseAdmin();
+    const db = await initFirebaseAdmin();
     const donationRef = db.collection("donations").doc();
 
     const amountValue = parseFloat(
