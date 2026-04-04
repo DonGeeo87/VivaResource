@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 import { parseEventDateTime } from "@/lib/timezone";
-import { verifyIdToken, adminDb } from "@/lib/firebase/admin";
+import { verifyIdToken, adminDb as getAdminDb } from "@/lib/firebase/admin";
 
 // Helper para verificar autenticación del admin
 async function verifyAdmin(request: NextRequest) {
@@ -15,7 +15,7 @@ async function verifyAdmin(request: NextRequest) {
     const decodedToken = await verifyIdToken(token);
     const uid = decodedToken.uid;
 
-    const userDoc = await adminDb.collection("admin_users").doc(uid).get();
+    const userDoc = await getAdminDb().collection("admin_users").doc(uid).get();
     if (!userDoc.exists) {
       return { error: "No tienes acceso de administrador", status: 403 };
     }
