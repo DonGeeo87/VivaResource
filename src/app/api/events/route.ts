@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { FieldValue } from "firebase-admin/firestore";
 import { parseEventDateTime } from "@/lib/timezone";
 
 // Force dynamic rendering - uses Firebase Admin SDK
@@ -102,8 +101,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       registration_required: body.registration_required || false,
       status: body.status || "draft",
       image_url: body.image_url || "",
-      created_at: FieldValue.serverTimestamp(),
-      updated_at: FieldValue.serverTimestamp(),
+      created_at: new Date(),
+      updated_at: new Date(),
     };
 
     // Guardar en Firestore usando Admin SDK (bypass reglas de seguridad)

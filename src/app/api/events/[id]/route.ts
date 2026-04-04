@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { FieldValue } from "firebase-admin/firestore";
 import { parseEventDateTime } from "@/lib/timezone";
 
 // Force dynamic rendering - uses Firebase Admin SDK
@@ -97,7 +96,7 @@ export async function PUT(
       category: body.category || "community",
       registration_required: body.registration_required || false,
       status: body.status || "draft",
-      updated_at: FieldValue.serverTimestamp(),
+      updated_at: new Date(),
     };
 
     // Only update image_url if explicitly provided (even if empty)
