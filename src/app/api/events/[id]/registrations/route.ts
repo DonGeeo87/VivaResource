@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyIdToken, adminDb as getAdminDb } from "@/lib/firebase/admin";
+import { verifyIdToken } from "@/lib/firebase/admin";
 
 // Force dynamic rendering - uses Firebase Admin SDK
 export const dynamic = "force-dynamic";
