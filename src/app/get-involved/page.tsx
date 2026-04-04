@@ -234,13 +234,13 @@ export default function GetInvolvedPage(): JSX.Element {
       <VolunteerToast />
       <main className="pt-0">
         {/* Hero Section */}
-        <header className="relative overflow-hidden px-6 lg:px-12 py-20 lg:py-32 bg-gradient-to-br from-primary to-primary-container text-on-primary">
-          <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+        <header className="relative overflow-hidden px-6 lg:px-12 py-16 md:py-20 lg:py-32 bg-gradient-to-br from-primary to-primary-container text-on-primary">
+          <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
             <div className="z-10">
-              <span className="inline-block bg-secondary text-on-secondary px-4 py-1 rounded-full text-xs font-bold mb-6 tracking-widest uppercase">
+              <span className="inline-block bg-secondary text-on-secondary px-4 py-1 rounded-full text-xs font-bold mb-4 md:mb-6 tracking-widest uppercase">
                 {isES ? "Impulsado por la Comunidad" : "Community Driven"}
               </span>
-              <h1 className="font-headline text-5xl lg:text-7xl font-extrabold tracking-tight leading-tight mb-8">
+              <h1 className="font-headline text-3xl md:text-5xl lg:text-7xl font-extrabold tracking-tight leading-tight mb-6 md:mb-8">
                 {isES ? "Únase a Nuestra Causa" : "Join Our Cause"}
               </h1>
               <p className="text-lg text-on-primary/80 max-w-xl mb-10 leading-relaxed">

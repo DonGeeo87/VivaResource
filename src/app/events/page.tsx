@@ -124,7 +124,7 @@ export default function EventsPage(): JSX.Element {
   return (
     <main className="pt-20">
         {/* Hero Section */}
-        <section className="relative h-[500px] min-h-[500px] flex items-center overflow-hidden bg-primary-container">
+        <section className="relative h-[400px] md:h-[500px] min-h-[400px] md:min-h-[500px] flex items-center overflow-hidden bg-primary-container">
           <div className="absolute inset-0 z-0 opacity-40">
             <Image
               alt="Community gathering"
@@ -135,16 +135,16 @@ export default function EventsPage(): JSX.Element {
             />
           </div>
           <div className="absolute inset-0 bg-gradient-to-tr from-primary via-primary/80 to-transparent z-10"></div>
-          <div className="relative z-20 max-w-7xl mx-auto px-8 w-full">
+          <div className="relative z-20 max-w-7xl mx-auto px-6 md:px-8 w-full">
             <div className="max-w-2xl">
-              <span className="inline-block bg-secondary-container text-on-secondary-container px-4 py-1 rounded-full text-sm font-bold tracking-wider uppercase mb-6">
+              <span className="inline-block bg-secondary-container text-on-secondary-container px-4 py-1 rounded-full text-sm font-bold tracking-wider uppercase mb-4 md:mb-6">
                 {translations.events?.title || "Upcoming / Próximos"}
               </span>
-              <h1 className="font-headline text-5xl md:text-6xl font-extrabold text-white leading-tight tracking-tighter mb-6">
+              <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight tracking-tighter mb-4 md:mb-6">
                 Community Events / <br />
                 <span className="text-secondary-container">Eventos Comunitarios</span>
               </h1>
-              <p className="text-white/90 text-lg md:text-xl leading-relaxed max-w-xl">
+              <p className="text-white/90 text-base md:text-lg leading-relaxed max-w-xl">
                 Join us in building a stronger, more connected community. Discover
                 workshops, resources, and gatherings designed for you. / Únase a
                 nosotros para construir una comunidad más fuerte y conectada.

@@ -52,19 +52,19 @@ function StepCard({
 }: StepCardProps) {
   return (
     <div className="relative group">
-      <div className="text-9xl font-black text-primary/5 absolute -top-12 -left-4">
+      <div className="text-6xl md:text-9xl font-black text-primary/5 absolute -top-8 md:-top-12 -left-2 md:-left-4">
         {number}
       </div>
-      <div className="relative z-10 pt-8">
+      <div className="relative z-10 pt-8 md:pt-12">
         <div
-          className={`w-16 h-16 ${iconBgClass} rounded-full flex items-center justify-center mb-6 shadow-md`}
+          className={`w-12 h-12 md:w-16 md:h-16 ${iconBgClass} rounded-full flex items-center justify-center mb-4 md:mb-6 shadow-md`}
         >
           {icon}
         </div>
-        <h3 className="font-headline text-xl font-bold mb-3 text-primary">
+        <h3 className="font-headline text-lg md:text-xl font-bold mb-2 md:mb-3 text-primary">
           {title}
         </h3>
-        <p className="text-on-surface-variant">{description}</p>
+        <p className="text-sm md:text-base text-on-surface-variant">{description}</p>
       </div>
     </div>
   );
@@ -273,7 +273,7 @@ export default function GetHelpPage() {
   return (
     <main className="pt-20 pb-24">
       {/* Hero Section */}
-      <section className="relative min-h-[500px] flex items-center py-20 px-6 overflow-hidden">
+      <section className="relative min-h-[400px] md:min-h-[500px] flex items-center py-16 md:py-20 px-6 overflow-hidden">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0">
           <div
@@ -286,25 +286,25 @@ export default function GetHelpPage() {
         </div>
         <div className="relative z-10 max-w-7xl mx-auto w-full">
           <div className="max-w-2xl">
-            <span className="inline-block bg-secondary-container text-on-secondary-container px-4 py-1 rounded-full text-sm font-bold tracking-wider uppercase mb-6">
+            <span className="inline-block bg-secondary-container text-on-secondary-container px-4 py-1 rounded-full text-sm font-bold tracking-wider uppercase mb-4 md:mb-6">
               {t.title}
             </span>
-            <h1 className="font-headline text-5xl md:text-6xl font-extrabold text-on-primary leading-tight tracking-tighter mb-6">
+            <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl font-extrabold text-on-primary leading-tight tracking-tighter mb-4 md:mb-6">
               {t.subtitle}
             </h1>
-            <p className="text-on-primary/90 text-lg md:text-xl leading-relaxed max-w-xl">
+            <p className="text-on-primary/90 text-base md:text-lg leading-relaxed max-w-xl">
               {t.heroDescription}
             </p>
-            <div className="flex flex-wrap gap-4 mt-8">
+            <div className="flex flex-wrap gap-3 md:gap-4 mt-6 md:mt-8">
               <a
-                className="bg-secondary text-on-secondary px-6 md:px-8 py-4 rounded-full font-bold shadow-lg hover:opacity-90 transition-opacity"
+                className="bg-secondary text-on-secondary px-5 md:px-8 py-3 md:py-4 rounded-full font-bold shadow-lg hover:opacity-90 transition-opacity"
                 href="#referral-form"
               >
                 {t.startRequest}
               </a>
               <button
                 onClick={() => setCrisisModalOpen(true)}
-                className="bg-on-primary/20 text-on-primary px-6 md:px-8 py-4 rounded-full font-bold hover:opacity-90 transition-opacity backdrop-blur-sm border border-on-primary/30 cursor-pointer"
+                className="bg-on-primary/20 text-on-primary px-5 md:px-8 py-3 md:py-4 rounded-full font-bold hover:opacity-90 transition-opacity backdrop-blur-sm border border-on-primary/30 cursor-pointer"
               >
                 {t.immediateCrisisHelp}
               </button>

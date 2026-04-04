@@ -192,7 +192,7 @@ function DonateForm(): JSX.Element {
       </div>
 
       {/* Preset Amounts */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4 mb-8 md:mb-10">
         {donationAmounts.map((option) => (
           <button
             key={option.amount}
@@ -314,13 +314,13 @@ export default function DonatePage(): JSX.Element {
     <main className="bg-surface text-on-surface">
       <div className="pt-24">
         {/* Hero Section */}
-        <section className="relative overflow-hidden py-24 px-6">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <section className="relative overflow-hidden py-16 md:py-24 px-6">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
             <div className="z-10">
-              <h1 className="text-5xl md:text-6xl font-extrabold text-primary leading-tight tracking-tight mb-6 font-headline">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-primary leading-tight tracking-tight mb-4 md:mb-6 font-headline">
                 {t.title}
               </h1>
-              <p className="text-lg text-on-surface-variant max-w-xl mb-8 leading-relaxed">
+              <p className="text-base md:text-lg text-on-surface-variant max-w-xl mb-6 md:mb-8 leading-relaxed">
                 Your gift provides critical resources to rural families in Colorado. / Su donación proporciona recursos críticos a las familias rurales de
                 Colorado.
               </p>

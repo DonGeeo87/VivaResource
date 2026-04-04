@@ -137,15 +137,15 @@ export default function BlogPage() {
   return (
     <main className="bg-surface text-on-surface font-body">
       {/* Hero Header */}
-      <section className="relative py-24 px-6 overflow-hidden bg-gradient-to-br from-primary to-primary-container">
+      <section className="relative py-16 md:py-24 px-6 overflow-hidden bg-gradient-to-br from-primary to-primary-container">
         <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
-          <span className="inline-block px-4 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label text-xs font-bold mb-6">
+          <span className="inline-block px-4 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label text-xs font-bold mb-4 md:mb-6">
             OUR STORIES / NUESTRAS HISTORIAS
           </span>
-          <h1 className="font-headline font-extrabold text-5xl md:text-7xl text-on-primary tracking-tighter mb-8 max-w-4xl">
+          <h1 className="font-headline font-extrabold text-3xl md:text-5xl lg:text-7xl text-on-primary tracking-tighter mb-6 md:mb-8 max-w-4xl">
             {t.title}
           </h1>
-          <p className="font-body text-lg md:text-xl text-on-primary-container max-w-2xl opacity-90 leading-relaxed">
+          <p className="font-body text-base md:text-lg text-on-primary-container max-w-2xl opacity-90 leading-relaxed">
             {t.subtitle || "Explore our latest updates, community success stories, and critical insights into how we're building a stronger future together."}
           </p>
         </div>

@@ -25,15 +25,15 @@ function TimelineItem({
   isLast = false,
 }: TimelineItemProps) {
   return (
-    <div className="relative pl-12">
-      <div className="absolute left-0 top-1 w-6 h-6 rounded-full bg-secondary"></div>
+    <div className="relative pl-10 md:pl-12">
+      <div className="absolute left-0 top-1 w-5 h-5 md:w-6 md:h-6 rounded-full bg-secondary"></div>
       {!isLast && (
-        <div className="absolute left-[11px] top-7 bottom-[-48px] w-[2px] bg-outline-low"></div>
+        <div className="absolute left-[10px] md:left-[11px] top-6 md:top-7 bottom-[-40px] md:bottom-[-48px] w-[2px] bg-outline-low"></div>
       )}
-      <h3 className="font-headline font-bold text-xl text-primary mb-2">
+      <h3 className="font-headline font-bold text-lg md:text-xl text-primary mb-2">
         {year}: {title}
       </h3>
-      <p className="text-on-surface-variant">{description}</p>
+      <p className="text-sm md:text-base text-on-surface-variant">{description}</p>
     </div>
   );
 }
@@ -111,13 +111,13 @@ export default function AboutPage(): JSX.Element {
   return (
     <main className="bg-surface text-on-surface font-body pt-20">
       {/* Hero Section */}
-      <section className="relative pt-24 pb-32 px-6 bg-gradient-to-br from-primary to-primary-container overflow-hidden">
-        <div className="max-w-7xl mx-auto relative z-10 grid md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-8">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl text-on-primary font-extrabold leading-tight tracking-tight font-headline">
+      <section className="relative pt-20 md:pt-24 pb-16 md:pb-32 px-6 bg-gradient-to-br from-primary to-primary-container overflow-hidden">
+        <div className="max-w-7xl mx-auto relative z-10 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+          <div className="space-y-6 md:space-y-8">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl text-on-primary font-extrabold leading-tight tracking-tight font-headline">
               {translations.about.heroTitle}
             </h1>
-            <p className="text-lg md:text-xl text-on-primary/80 max-w-lg leading-relaxed">
+            <p className="text-base md:text-lg text-on-primary/80 max-w-lg leading-relaxed">
               {translations.about.heroSubtitle}
             </p>
           </div>

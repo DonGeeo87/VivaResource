@@ -256,19 +256,19 @@ export default function ResourcesPage() {
   return (
     <main className="bg-surface text-on-surface font-body pt-20">
       {/* Hero Section */}
-      <section className="relative min-h-[400px] flex items-center py-20 px-6 overflow-hidden bg-gradient-to-br from-primary to-primary-container">
-        <div className="max-w-7xl mx-auto w-full grid md:grid-cols-2 gap-12 items-center relative z-10">
-          <div className="space-y-8">
+      <section className="relative min-h-[300px] md:min-h-[400px] flex items-center py-16 md:py-20 px-6 overflow-hidden bg-gradient-to-br from-primary to-primary-container">
+        <div className="max-w-7xl mx-auto w-full grid md:grid-cols-2 gap-8 md:gap-12 items-center relative z-10">
+          <div className="space-y-6 md:space-y-8">
             <div className="inline-flex items-center gap-2 bg-secondary-container/20 border border-secondary-container/30 px-4 py-1.5 rounded-full">
               <span className="w-2 h-2 rounded-full bg-secondary-container animate-pulse" />
               <span className="text-secondary-container text-sm font-bold tracking-wider uppercase font-label">
                 {isES ? "Recursos Verificados" : "Verified Resources"}
               </span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-headline font-extrabold text-white leading-tight tracking-tighter">
+            <h1 className="text-3xl md:text-4xl lg:text-6xl font-headline font-extrabold text-white leading-tight tracking-tighter">
               {isES ? "Directorio de Recursos de Colorado" : "Colorado Resource Directory"}
             </h1>
-            <p className="text-xl text-on-primary-container font-body leading-relaxed max-w-xl">
+            <p className="text-base md:text-xl text-on-primary-container font-body leading-relaxed max-w-xl">
               {isES
                 ? "Encuentra recursos verificados de salud, comida, vivienda y más en Colorado"
                 : "Find verified resources for health, food, housing, and more across Colorado"}
