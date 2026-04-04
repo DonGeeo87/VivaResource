@@ -52,6 +52,7 @@ function TeamMember({ name, role, imageSrc }: TeamMemberProps) {
           src={imageSrc}
           alt={name}
           fill
+          sizes="(max-width: 768px) 100vw, 50vw"
           className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -121,14 +122,13 @@ export default function AboutPage(): JSX.Element {
             </p>
           </div>
           <div className="relative">
-            <div className="rounded-xl overflow-hidden shadow-2xl transform rotate-3">
+            <div className="rounded-xl overflow-hidden shadow-2xl transform rotate-3 h-[400px] w-full">
               <Image
-                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80"
+                src="/photo-bank/hero_01.jpg"
                 alt="Collaborative group of diverse professionals"
-                fill
-                sizes="(max-width: 1024px) 100vw, 600px"
-                className="object-cover"
-                style={{ width: '100%', height: '100%' }}
+                width={600}
+                height={400}
+                className="object-cover w-full h-full"
               />
             </div>
             <div className="absolute -bottom-8 -left-8 bg-secondary-container p-8 rounded-xl shadow-xl hidden md:block max-w-[240px]">
@@ -229,44 +229,40 @@ export default function AboutPage(): JSX.Element {
             {translations.about.statsTitle}
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px]">
-            <div className="col-span-2 row-span-2 rounded-xl overflow-hidden shadow-sm">
+            <div className="col-span-2 row-span-2 rounded-xl overflow-hidden shadow-sm relative">
               <Image
                 src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80"
                 alt="Children laughing in classroom"
                 fill
                 sizes="(max-width: 1024px) 50vw, 800px"
                 className="object-cover"
-                style={{ width: '100%', height: '100%' }}
               />
             </div>
-            <div className="col-span-1 rounded-xl overflow-hidden shadow-sm">
+            <div className="col-span-1 rounded-xl overflow-hidden shadow-sm relative">
               <Image
                 src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=400&q=80"
                 alt="Volunteers planting trees"
                 fill
                 sizes="(max-width: 1024px) 25vw, 400px"
                 className="object-cover"
-                style={{ width: '100%', height: '100%' }}
               />
             </div>
-            <div className="col-span-1 row-span-2 rounded-xl overflow-hidden shadow-sm">
+            <div className="col-span-1 row-span-2 rounded-xl overflow-hidden shadow-sm relative">
               <Image
                 src="https://images.unsplash.com/photo-1581056771107-24ca5f033842?w=400&q=80"
                 alt="Mobile clinic consultation"
                 fill
                 sizes="(max-width: 1024px) 25vw, 400px"
                 className="object-cover"
-                style={{ width: '100%', height: '100%' }}
               />
             </div>
-            <div className="col-span-1 rounded-xl overflow-hidden shadow-sm">
+            <div className="col-span-1 rounded-xl overflow-hidden shadow-sm relative">
               <Image
                 src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=400&q=80"
                 alt="Workplace training session"
                 fill
                 sizes="(max-width: 1024px) 25vw, 400px"
                 className="object-cover"
-                style={{ width: '100%', height: '100%' }}
               />
             </div>
           </div>

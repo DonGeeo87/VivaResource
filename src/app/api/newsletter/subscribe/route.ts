@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { collection, addDoc, getDocs, query, where, Timestamp } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -8,48 +8,63 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const { email, name } = body;
 
     // Validate email
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!email || typeof email !== "string") {
+      return NextResponse.json(
+        { error: "Email es requerido" },
+        { status: 400 }
+      );
+    }
+
+    const trimmedEmail = email.toLowerCase().trim();
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
       return NextResponse.json(
         { error: "Email inválido" },
         { status: 400 }
       );
     }
 
-    // Check if email already exists
-    const q = query(
-      collection(db, "newsletter_subscribers"),
-      where("email", "==", email.toLowerCase().trim())
-    );
-    const snapshot = await getDocs(q);
-
-    if (!snapshot.empty) {
-      return NextResponse.json(
-        { error: "Este email ya está suscrito" },
-        { status: 409 }
+    // Check if email already exists (without orderBy to avoid index requirement)
+    try {
+      const q = query(
+        collection(db, "newsletter_subscribers"),
+        where("email", "==", trimmedEmail)
       );
+      const snapshot = await getDocs(q);
+
+      if (!snapshot.empty) {
+        return NextResponse.json(
+          { error: "Este email ya está suscrito" },
+          { status: 409 }
+        );
+      }
+    } catch (queryError) {
+      console.error("Error checking existing subscription:", queryError);
+      // If the index doesn't exist yet, proceed without checking duplicate
+      // This handles the case of a fresh Firestore with no indexes
     }
 
     // Add to Firestore
     await addDoc(collection(db, "newsletter_subscribers"), {
-      email: email.toLowerCase().trim(),
+      email: trimmedEmail,
       name: name || "",
-      subscribed_at: Timestamp.now(),
+      subscribed_at: serverTimestamp(),
       status: "active",
       source: "website"
     });
 
     // Send confirmation email asynchronously (don't block the response)
     try {
-      fetch(`${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/api/email/notify`, {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+      fetch(`${siteUrl}/api/email/notify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "newsletter-confirmation",
-          data: { email, name: name || undefined },
+          data: { email: trimmedEmail, name: name || undefined },
         }),
       }).catch((emailErr) => console.error("Failed to send newsletter confirmation:", emailErr));
     } catch (emailError) {
-      // Silently fail - don't block the main operation
       console.error("Error triggering newsletter confirmation email:", emailError);
     }
 
@@ -58,9 +73,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { status: 201 }
     );
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
     console.error("Error subscribing to newsletter:", error);
     return NextResponse.json(
-      { error: "Error al suscribirse. Intenta nuevamente." },
+      { error: "Error al suscribirse. Intenta nuevamente.", details: message },
       { status: 500 }
     );
   }

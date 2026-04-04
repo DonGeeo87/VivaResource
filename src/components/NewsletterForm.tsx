@@ -45,7 +45,7 @@ export default function NewsletterForm({ variant = "simple" }: NewsletterFormPro
 
   if (variant === "footer") {
     return (
-      <div className="flex flex-col sm:flex-row gap-4 items-stretch justify-center max-w-xl mx-auto">
+      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 items-stretch justify-center max-w-xl mx-auto">
         <input
           type="email"
           value={email}
@@ -55,13 +55,13 @@ export default function NewsletterForm({ variant = "simple" }: NewsletterFormPro
           required
         />
         <button
-          onClick={handleSubmit}
+          type="submit"
           disabled={loading}
           className="bg-secondary text-on-secondary px-10 py-4 rounded-full font-headline font-bold text-sm whitespace-nowrap hover:bg-on-secondary-container transition-colors disabled:opacity-50"
         >
           {loading ? "Suscribiendo..." : "Subscribe"}
         </button>
-      </div>
+      </form>
     );
   }
 
@@ -92,7 +92,7 @@ export default function NewsletterForm({ variant = "simple" }: NewsletterFormPro
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="tu@email.com"
-            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg !text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-primary focus:border-primary"
             required
           />
         </div>
@@ -107,7 +107,7 @@ export default function NewsletterForm({ variant = "simple" }: NewsletterFormPro
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Tu nombre"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg !text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-primary focus:border-primary"
         />
       </div>
 

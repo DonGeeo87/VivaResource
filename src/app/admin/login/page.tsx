@@ -19,12 +19,19 @@ export default function AdminLoginPage(): JSX.Element {
   const [isLoading, setIsLoading] = useState(false);
   const [portal, setPortal] = useState<PortalType>("admin");
   const [isHydrated, setIsHydrated] = useState(false);
+  const [bgShift, setBgShift] = useState(false);
   const router = useRouter();
   const { language } = useLanguage();
 
   useEffect(() => {
     setIsHydrated(true);
   }, []);
+
+  const handlePortalChange = (newPortal: PortalType) => {
+    setBgShift((prev) => !prev);
+    setPortal(newPortal);
+    setError("");
+  };
 
   const t = isHydrated 
     ? translations[language]?.admin?.login 
@@ -63,22 +70,38 @@ export default function AdminLoginPage(): JSX.Element {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0">
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1559027615-cd4628902d42?w=1920&q=80')"
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/90 to-secondary/80" />
-      </div>
+      {/* Animated Gradient Background */}
+      <div className={`absolute inset-0 bg-gradient-to-br transition-all duration-1000 ease-in-out ${
+        bgShift
+          ? "from-secondary/90 via-primary/85 to-primary/95"
+          : "from-primary/95 via-primary/90 to-secondary/80"
+      }`} />
+
+      {/* Secondary gradient layer for depth */}
+      <div className={`absolute inset-0 bg-gradient-to-tr transition-all duration-1000 ease-in-out delay-200 ${
+        bgShift
+          ? "from-primary/30 via-transparent to-secondary/20"
+          : "from-secondary/20 via-transparent to-primary/30"
+      }`} />
 
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/5 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "2s" }} />
+        <div className={`absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl transition-all duration-1000 ${
+          bgShift ? "bg-secondary/20 translate-x-10" : "bg-white/5 animate-pulse"
+        }`} />
+        <div className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl transition-all duration-1000 delay-300 ${
+          bgShift ? "bg-primary/20 translate-y-10" : "bg-white/5 animate-pulse"
+        }`} style={{ animationDelay: "1s" }} />
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl transition-all duration-1000 delay-500 ${
+          bgShift ? "bg-primary/15 scale-110" : "bg-secondary/10 animate-pulse"
+        }`} style={{ animationDelay: "2s" }} />
+        {/* Extra floating element */}
+        <div className={`absolute top-20 left-1/4 w-64 h-64 rounded-full blur-3xl transition-all duration-1000 delay-150 ${
+          bgShift ? "bg-white/10 -translate-y-8" : "bg-primary/5 translate-y-4"
+        }`} />
+        <div className={`absolute bottom-20 right-1/4 w-72 h-72 rounded-full blur-3xl transition-all duration-1000 delay-700 ${
+          bgShift ? "bg-secondary/15 translate-y-12" : "bg-white/5 -translate-y-4"
+        }`} />
       </div>
 
       {/* Main Content */}
@@ -107,13 +130,10 @@ export default function AdminLoginPage(): JSX.Element {
             {/* Portal Selector */}
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-2 mb-6 flex gap-2">
               <button
-                onClick={() => {
-                  setPortal("admin");
-                  setError("");
-                }}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold transition-all duration-300 ${
+                onClick={() => handlePortalChange("admin")}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold transition-all duration-500 ${
                   portal === "admin"
-                    ? "bg-white text-primary shadow-lg"
+                    ? "bg-white text-primary shadow-lg scale-[1.02]"
                     : "text-white/80 hover:bg-white/10 hover:text-white"
                 }`}
               >
@@ -121,13 +141,10 @@ export default function AdminLoginPage(): JSX.Element {
                 <span className="text-sm">{t?.adminPortal}</span>
               </button>
               <button
-                onClick={() => {
-                  setPortal("volunteer");
-                  setError("");
-                }}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold transition-all duration-300 ${
+                onClick={() => handlePortalChange("volunteer")}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold transition-all duration-500 ${
                   portal === "volunteer"
-                    ? "bg-white text-secondary shadow-lg"
+                    ? "bg-white text-secondary shadow-lg scale-[1.02]"
                     : "text-white/80 hover:bg-white/10 hover:text-white"
                 }`}
               >
@@ -137,9 +154,9 @@ export default function AdminLoginPage(): JSX.Element {
             </div>
 
             {/* Login Card */}
-            <div className="bg-white rounded-2xl shadow-2xl p-8">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 transition-all duration-500">
+              <div className="mb-6 transition-all duration-500">
+                <h2 className="text-2xl font-bold text-gray-900 transition-colors duration-300">
                   {portal === "admin" ? t?.title : t?.volunteerTitle}
                 </h2>
                 <p className="text-gray-500 mt-1">

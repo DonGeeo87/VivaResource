@@ -611,7 +611,7 @@ export default function GetHelpPage() {
                 sizes="(max-width: 768px) 100vw, 30vw"
                 style={{ objectFit: "cover" }}
                 className="w-full h-full"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnSTmaysPfUG4NZVF7uya2sQaj-4j0URop_2alh1Wf2SOHGEGVjFTqKBtUECERx1uvpcGrQnwSCcP5cGx6B_Lpo1YBqnvQAFtD5ugY9WCmXXpLb64a09FhBXBfklCIHXJyaDkrZIuNM5rNZM1VbHEP7fr-L_7d7nOT3_XjCWhrOGSXXkSHkBQqX3piWAXxGCJCPZY9tw2POVb-T-HdSYSWERuIdE1P2NBfeSwzJR1uADeWUSHnT9HphT9e-eGouF1eATCugMu0ytQ"
+                src="/photo-bank/vivaresource (15).jpg"
               />
             </div>
           </div>

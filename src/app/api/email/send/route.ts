@@ -1,20 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const resendApiKey = process.env.RESEND_API_KEY;
+// Configurar transporte de Gmail SMTP
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_APP_PASSWORD,
+  },
+});
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    // Validate API key early
-    if (!resendApiKey) {
-      console.warn("RESEND_API_KEY is not configured");
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
+      console.warn("[Email Send] Gmail SMTP credentials not configured");
       return NextResponse.json(
         { error: "Email service is not configured. Please contact the administrator." },
         { status: 503 }
       );
     }
-
-    const resend = new Resend(resendApiKey);
 
     const body = await request.json();
     const {
@@ -50,7 +54,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
     }
 
-    const fromEmail = "Viva Resource <onboarding@resend.dev>";
+    const fromEmail = process.env.EMAIL_USER || "vivaresourcefoundation@gmail.com";
     const adminEmail = process.env.NEWSLETTER_ADMIN_EMAILS?.split(",")[0] || "vivaresourcefoundation@gmail.com";
 
     // Build email content based on type
@@ -111,24 +115,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // Send email
-    const { data, error } = await resend.emails.send({
-      from: fromEmail,
+    await transporter.sendMail({
+      from: `"Viva Resource Foundation" <${fromEmail}>`,
       to: emailTo,
       replyTo: emailReplyTo,
       subject: emailSubject,
       html: emailHtml,
     });
 
-    if (error) {
-      console.error("Resend error:", error);
-      return NextResponse.json(
-        { error: "Error al enviar email" },
-        { status: 500 }
-      );
-    }
-
     return NextResponse.json(
-      { success: true, data },
+      { success: true },
       { status: 200 }
     );
   } catch (error) {

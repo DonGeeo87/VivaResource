@@ -9,23 +9,21 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { collection, query, orderBy, getDocs } from "firebase/firestore";
+import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { BlogHeroSkeleton, BlogFeaturedSkeleton, BlogGridSkeleton } from "@/components/Skeleton";
 import NewsletterForm from "@/components/NewsletterForm";
 
 interface BlogPost {
   id: string;
-  title_en: string;
-  title_es: string;
+  title: string;
   slug: string;
-  excerpt_en: string;
-  excerpt_es: string;
-  content_en: string;
-  content_es: string;
+  excerpt: string;
+  content: string;
   category: string;
   featured_image: string;
   author: string;
+  language: "en" | "es";
   status: string;
   published_at: unknown;
   created_at: unknown;
@@ -49,16 +47,19 @@ export default function BlogPage() {
 
   useEffect(() => {
     fetchPosts();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language]);
 
   const fetchPosts = async () => {
     try {
       let snapshot;
 
-      // Try ordering by published_at first
+      // Try ordering by published_at first, filtered by language
       try {
         const q = query(
           collection(db, "blog_posts"),
+          where("status", "==", "published"),
+          where("language", "==", language),
           orderBy("published_at", "desc")
         );
         snapshot = await getDocs(q);
@@ -67,13 +68,19 @@ export default function BlogPage() {
         try {
           const q = query(
             collection(db, "blog_posts"),
+            where("status", "==", "published"),
+            where("language", "==", language),
             orderBy("created_at", "desc")
           );
           snapshot = await getDocs(q);
         } catch {
-          // Final fallback: fetch without ordering
-          console.log("Blog: Fetching without ordering (date fields may not exist)");
-          const q = query(collection(db, "blog_posts"));
+          // Final fallback: fetch with language filter only
+          console.log("Blog: Fetching with language filter only (date fields may not exist)");
+          const q = query(
+            collection(db, "blog_posts"),
+            where("status", "==", "published"),
+            where("language", "==", language)
+          );
           snapshot = await getDocs(q);
         }
       }
@@ -83,8 +90,8 @@ export default function BlogPage() {
         ...doc.data()
       })) as BlogPost[];
 
-      // Filter published posts on client side
-      const publishedPosts = postsData.filter(post => post.status === "published");
+      // Posts already filtered by language and status in Firestore query
+      const publishedPosts = postsData;
 
       if (publishedPosts.length > 0) {
         setPosts(publishedPosts);
@@ -98,16 +105,6 @@ export default function BlogPage() {
     }
   };
 
-  const getTitle = (post: BlogPost) => {
-    if (language === "es" && post.title_es) return post.title_es;
-    return post.title_en || post.title_es;
-  };
-
-  const getExcerpt = (post: BlogPost) => {
-    if (language === "es" && post.excerpt_es) return post.excerpt_es;
-    return post.excerpt_en || post.excerpt_es;
-  };
-
   const getCategory = (post: BlogPost) => {
     const cats: Record<string, string> = {
       news: "News / Noticias",
@@ -119,12 +116,8 @@ export default function BlogPage() {
   };
 
   const filteredPosts = posts.filter(post => {
-    const title = getTitle(post);
-    const postCategory = post.category;
-    
-    const matchesSearch = title.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || postCategory === selectedCategory;
-    
+    const matchesSearch = (post.title?.toLowerCase() ?? "").includes(search.toLowerCase());
+    const matchesCategory = selectedCategory === "all" || post.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -160,13 +153,13 @@ export default function BlogPage() {
       </section>
 
       {/* Featured Article - Only show if there are posts */}
-      {!loading && posts.length > 0 && (
+      {!loading && filteredPosts.length > 0 && (
         <section className="max-w-7xl mx-auto px-6 -mt-16 relative z-10 mb-24">
           <div className="bg-white rounded-xl shadow-ambient-lg overflow-hidden flex flex-col lg:flex-row">
             <div className="lg:w-3/5 h-[400px] lg:h-auto overflow-hidden">
               <Image
-                src={posts[0].featured_image || placeholderImage}
-                alt={getTitle(posts[0])}
+                src={filteredPosts[0].featured_image || placeholderImage}
+                alt={filteredPosts[0].title}
                 width={800}
                 height={600}
                 className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
@@ -177,17 +170,17 @@ export default function BlogPage() {
               <div className="flex items-center gap-3 mb-6">
                 <span className="w-1 h-8 bg-secondary rounded-full"></span>
                 <span className="text-secondary font-bold uppercase tracking-widest text-xs">
-                  {getCategory(posts[0])}
+                  {getCategory(filteredPosts[0])}
                 </span>
               </div>
               <h2 className="font-headline text-3xl font-bold text-on-surface leading-tight mb-6">
-                {getTitle(posts[0])}
+                {filteredPosts[0].title}
               </h2>
               <p className="text-on-surface-variant font-body mb-8 leading-relaxed line-clamp-4">
-                {getExcerpt(posts[0])}
+                {filteredPosts[0].excerpt}
               </p>
               <div>
-                <Link href={`/blog/${posts[0].slug}`} className="bg-primary text-on-primary px-8 py-4 rounded-full font-headline font-bold text-sm tracking-wide hover:opacity-90 transition-all flex items-center gap-2 inline-flex">
+                <Link href={`/blog/${filteredPosts[0].slug}`} className="bg-primary text-on-primary px-8 py-4 rounded-full font-headline font-bold text-sm tracking-wide hover:opacity-90 transition-all flex items-center gap-2 inline-flex">
                   {t.readMore}
                   <ArrowRight className="w-4 h-4" />
                 </Link>
@@ -249,7 +242,7 @@ export default function BlogPage() {
                 <div className="aspect-[4/3] mb-6 overflow-hidden rounded-xl relative">
                   <Image
                     src={post.featured_image || placeholderImage}
-                    alt={getTitle(post)}
+                    alt={post.title}
                     width={600}
                     height={450}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
@@ -265,10 +258,10 @@ export default function BlogPage() {
                       : ""}
                   </div>
                   <h3 className="font-headline text-xl font-bold text-on-surface mb-4 group-hover:text-primary transition-colors">
-                    {getTitle(post)}
+                    {post.title}
                   </h3>
                   <p className="text-on-surface-variant font-body text-sm mb-6 line-clamp-3 leading-relaxed">
-                    {getExcerpt(post)}
+                    {post.excerpt}
                   </p>
                   <Link href={`/blog/${post.slug}`} className="text-primary font-bold text-sm flex items-center gap-2 group/btn">
                     {t.readMore}
@@ -299,10 +292,10 @@ export default function BlogPage() {
         <div className="max-w-7xl mx-auto bg-primary text-on-primary rounded-3xl p-12 md:p-20 relative overflow-hidden">
           <div className="relative z-10 flex flex-col items-center">
             <h2 className="font-headline text-4xl md:text-5xl font-bold mb-8">
-              {t.subtitle || "Ready to Make a Difference?"}
+              {t.ctaTitle || "Ready to Make a Difference?"}
             </h2>
             <p className="text-xl opacity-90 mb-12 max-w-2xl font-body">
-              Your support fuels these stories. Join our volunteer network or donate today to help us continue our mission of community empowerment.
+              {t.ctaDesc || "Your support fuels these stories. Join our volunteer network or donate today to help us continue our mission of community empowerment."}
             </p>
             <div className="flex flex-col sm:flex-row gap-6">
               <Link href="/get-involved" className="bg-secondary-container text-on-secondary-container px-10 py-4 rounded-full font-headline font-bold text-sm hover:scale-105 transition-transform inline-flex">

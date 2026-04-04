@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import type { Timestamp } from "firebase/firestore";
+import { auth } from "@/lib/firebase/config";
 import ImageUpload from "@/components/ImageUpload";
 
 // Validación schema
@@ -59,8 +60,11 @@ export default function EventForm({ initialData, onSubmit }: EventFormProps) {
     defaultValues: initialData || {
       title_en: "",
       title_es: "",
+      slug: "",
       description_en: "",
       description_es: "",
+      date: "",
+      time: "",
       location: "",
       category: "community",
       status: "draft",
@@ -95,14 +99,26 @@ export default function EventForm({ initialData, onSubmit }: EventFormProps) {
         const method = initialData?.id ? "PUT" : "POST";
         const endpoint = initialData?.id ? `/api/events/${initialData.id}` : "/api/events";
 
+        // Get Firebase auth token
+        const user = auth.currentUser;
+        if (!user) {
+          throw new Error("Debes iniciar sesión para realizar esta acción");
+        }
+
+        const token = await user.getIdToken();
+
         const response = await fetch(endpoint, {
           method,
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
           body: JSON.stringify(data),
         });
 
         if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `Error: ${response.statusText}`);
         }
 
         setSuccess(true);

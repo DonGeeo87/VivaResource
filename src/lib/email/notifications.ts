@@ -1,8 +1,15 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Configurar transporte de Gmail SMTP
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_APP_PASSWORD,
+  },
+});
 
-const FROM_EMAIL = "Viva Resource <onboarding@resend.dev>";
+const FROM_EMAIL = process.env.EMAIL_USER || "vivaresourcefoundation@gmail.com";
 const SITE_URL = "https://vivaresource.org";
 
 // Helper to get admin emails from env
@@ -123,17 +130,12 @@ export async function sendEventRegistrationConfirmation(
       </p>
     `;
 
-    const { error } = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: [data.attendeeEmail],
+    await transporter.sendMail({
+      from: `"Viva Resource Foundation" <${FROM_EMAIL}>`,
+      to: data.attendeeEmail,
       subject: `Registration Confirmed: ${data.eventName}`,
       html: emailWrapper(content),
     });
-
-    if (error) {
-      console.error("Error sending event confirmation email:", error);
-      return { success: false, error: error.message };
-    }
 
     return { success: true };
   } catch (err) {
@@ -197,17 +199,12 @@ export async function sendNewVolunteerNotification(
       </p>
     `;
 
-    const { error } = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: adminEmails,
+    await transporter.sendMail({
+      from: `"Viva Resource Foundation" <${FROM_EMAIL}>`,
+      to: adminEmails.join(", "),
       subject: `New Volunteer: ${data.firstName} ${data.lastName}`,
       html: emailWrapper(content),
     });
-
-    if (error) {
-      console.error("Error sending volunteer notification email:", error);
-      return { success: false, error: error.message };
-    }
 
     return { success: true };
   } catch (err) {
@@ -250,17 +247,12 @@ export async function sendFormSubmissionNotification(
       </p>
     `;
 
-    const { error } = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: adminEmails,
+    await transporter.sendMail({
+      from: `"Viva Resource Foundation" <${FROM_EMAIL}>`,
+      to: adminEmails.join(", "),
       subject: `New Submission: ${data.formName}`,
       html: emailWrapper(content),
     });
-
-    if (error) {
-      console.error("Error sending form submission notification email:", error);
-      return { success: false, error: error.message };
-    }
 
     return { success: true };
   } catch (err) {
@@ -307,17 +299,12 @@ export async function sendNewsletterConfirmation(
       </p>
     `;
 
-    const { error } = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: [email],
+    await transporter.sendMail({
+      from: `"Viva Resource Foundation" <${FROM_EMAIL}>`,
+      to: email,
       subject: "Welcome to Viva Resource Newsletter!",
       html: emailWrapper(content),
     });
-
-    if (error) {
-      console.error("Error sending newsletter confirmation email:", error);
-      return { success: false, error: error.message };
-    }
 
     return { success: true };
   } catch (err) {

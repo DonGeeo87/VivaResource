@@ -1,18 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
 
-const resendApiKey = process.env.RESEND_API_KEY;
+// Configurar transporte de Gmail SMTP
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_APP_PASSWORD,
+  },
+});
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    if (!resendApiKey) {
-      return NextResponse.json(
-        { success: true },
-        { status: 200 }
-      );
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
+      console.warn("[Forms Notify] Gmail SMTP credentials not configured");
+      return NextResponse.json({ success: true }, { status: 200 });
     }
 
-    const resend = new Resend(resendApiKey);
     const body = await request.json();
     const { formId, formTitle, formTitleEs, responses, email } = body;
 
@@ -23,7 +29,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const adminEmail = process.env.NEWSLETTER_ADMIN_EMAILS?.split(",")[0] || "vivaresourcefoundation@gmail.com";
+    // Get notification settings from Firestore
+    const notifySetting = await getDoc(doc(db, "site_settings", "notify_on_form_submission"));
+    const emailsSetting = await getDoc(doc(db, "site_settings", "notification_emails"));
+
+    const shouldNotify = notifySetting.exists() ? notifySetting.data().value === "true" : true;
+    const notificationEmails = emailsSetting.exists()
+      ? emailsSetting.data().value.split(",").map((e: string) => e.trim()).filter(Boolean)
+      : [process.env.NEWSLETTER_ADMIN_EMAILS?.split(",")[0] || "vivaresourcefoundation@gmail.com"];
+
+    if (!shouldNotify || notificationEmails.length === 0) {
+      console.log("[Forms Notify] Notifications disabled or no emails configured");
+      return NextResponse.json({ success: true }, { status: 200 });
+    }
 
     const responsesRows = Object.entries(responses || {})
       .map(([label, value]) => {
@@ -52,14 +70,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       </div>
     `;
 
-    await resend.emails.send({
-      from: "Viva Resource <onboarding@resend.dev>",
-      to: [adminEmail],
+    await transporter.sendMail({
+      from: `"Viva Resource Foundation" <${process.env.EMAIL_USER}>`,
+      to: notificationEmails.join(", "),
       subject: `New submission: ${formTitle}`,
       html: emailHtml,
       replyTo: email || undefined,
     });
 
+    console.log("[Forms Notify] Notification sent to:", notificationEmails);
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
     console.error("Error sending form notification:", error);

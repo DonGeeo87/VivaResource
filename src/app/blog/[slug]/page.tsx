@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
+import { cache } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Calendar, User } from "lucide-react";
@@ -11,26 +12,47 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vivaresource.org";
 
 interface BlogPost {
   id: string;
-  title_en: string;
-  title_es: string;
+  title: string;
   slug: string;
-  excerpt_en: string;
-  excerpt_es: string;
-  content_en: string;
-  content_es: string;
+  excerpt: string;
+  content: string;
   category: string;
   featured_image: string;
   author: string;
+  language: "en" | "es";
   status: string;
   published_at: unknown;
   created_at: unknown;
 }
 
-async function getPostBySlug(slug: string): Promise<BlogPost | null> {
+/**
+ * Detect user's preferred language from the viva-lang cookie.
+ * Shared between generateMetadata and BlogPostPage to avoid duplication.
+ */
+function getUserLanguage(): "en" | "es" {
+  try {
+    const cookieStore = cookies();
+    const langCookie = cookieStore.get("viva-lang");
+    if (langCookie && (langCookie.value === "es" || langCookie.value === "en")) {
+      return langCookie.value as "en" | "es";
+    }
+  } catch {
+    // Default to English if cookie not available
+  }
+  return "en";
+}
+
+/**
+ * Fetch a published blog post by slug and user language.
+ * Wrapped in React cache() to deduplicate calls within the same request
+ * (called by both generateMetadata and BlogPostPage).
+ */
+const getPostBySlug = cache(async (slug: string, userLang: "en" | "es"): Promise<BlogPost | null> => {
   try {
     const q = query(
       collection(db, "blog_posts"),
       where("slug", "==", slug),
+      where("language", "==", userLang),
       where("status", "==", "published"),
       limit(1)
     );
@@ -47,18 +69,18 @@ async function getPostBySlug(slug: string): Promise<BlogPost | null> {
       ...doc.data(),
     } as BlogPost;
   } catch (error) {
-    console.error("Error fetching blog post:", error);
+    console.error(`Error fetching blog post "${slug}":`, error);
     return null;
   }
-}
+});
 
-// Generate metadata for dynamic blog posts
 export async function generateMetadata({
   params,
 }: {
   params: { slug: string };
 }) {
-  const post = await getPostBySlug(params.slug);
+  const userLang = getUserLanguage();
+  const post = await getPostBySlug(params.slug, userLang);
 
   if (!post) {
     return {
@@ -66,8 +88,8 @@ export async function generateMetadata({
     };
   }
 
-  const title = post.title_en || post.title_es;
-  const excerpt = post.excerpt_en || post.excerpt_es;
+  const title = post.title;
+  const excerpt = post.excerpt;
 
   return {
     title: `${title} | Viva Resource Foundation Blog - Colorado`,
@@ -118,7 +140,13 @@ function getCategoryLabel(category: string): string {
 }
 
 function sanitizeHtml(html: string): string {
-  // Basic sanitization: remove script tags and event handlers
+  // NOTE: This is basic regex-based sanitization. It strips <script> tags
+  // and on* event handlers but does NOT cover all XSS vectors (javascript: URLs,
+  // <iframe>, <object>, <svg onload>, CSS expressions, etc.).
+  // Since content originates from the authenticated admin BlogEditor (React Quill)
+  // and not from untrusted user input, the attack surface is limited.
+  // For production with external content authors, replace with DOMPurify
+  // (isomorphic-dompurify for SSR compatibility).
   const sanitized = html
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
     .replace(/on\w+\s*=\s*["'][^"']*["']/gi, "")
@@ -129,7 +157,7 @@ function sanitizeHtml(html: string): string {
 function renderContent(content: string): JSX.Element {
   // Content from Quill.js is already HTML, so we render it directly
   const sanitizedContent = sanitizeHtml(content);
-  
+
   return (
     <div
       className="prose-content"
@@ -143,28 +171,16 @@ export default async function BlogPostPage({
 }: {
   params: { slug: string };
 }): Promise<JSX.Element> {
-  const post = await getPostBySlug(params.slug);
+  const userLang = getUserLanguage();
+  const post = await getPostBySlug(params.slug, userLang);
 
   if (!post) {
     notFound();
   }
 
-  // Detect user language from cookie
-  let userLang: "en" | "es" = "en";
-  try {
-    const cookieStore = cookies();
-    const langCookie = cookieStore.get("viva-lang");
-    if (langCookie && (langCookie.value === "es" || langCookie.value === "en")) {
-      userLang = langCookie.value as "en" | "es";
-    }
-  } catch {
-    // Default to English if cookie not available
-  }
-
-  // Use user's preferred language, fallback to available content
-  const title = userLang === "es" && post.title_es ? post.title_es : post.title_en;
-  const content = userLang === "es" && post.content_es ? post.content_es : post.content_en;
-  const excerpt = userLang === "es" && post.excerpt_es ? post.excerpt_es : post.excerpt_en;
+  const title = post.title;
+  const content = post.content;
+  const excerpt = post.excerpt;
   const dateStr = formatDate(post.published_at || post.created_at);
 
   // Parse published_at for schema

@@ -8,6 +8,38 @@ import { collection, addDoc, serverTimestamp, doc, getDoc } from "firebase/fires
 import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/components/Toast";
+import { formatMountainDate } from "@/lib/timezone";
+import type { Timestamp } from "firebase/firestore";
+
+// Helper seguro para formatear fechas que pueden ser Timestamp, Date, o string
+const safeFormatDate = (date: string | Date | Timestamp | { toDate: () => Date } | undefined, lang: string): string => {
+  if (!date) return "-";
+  
+  // Si ya es un string, retornarlo directamente
+  if (typeof date === "string") return date;
+  
+  // Si tiene método toDate (Firestore Timestamp), convertirlo
+  if (typeof (date as { toDate?: () => Date }).toDate === "function") {
+    return formatMountainDate(date, lang);
+  }
+  
+  // Si es instancia de Date
+  if (date instanceof Date) {
+    return formatMountainDate(date, lang);
+  }
+  
+  // Intentar crear Date desde el valor
+  try {
+    const dateObj = new Date(date as unknown as string);
+    if (!isNaN(dateObj.getTime())) {
+      return formatMountainDate(dateObj, lang);
+    }
+  } catch {
+    // Ignorar errores
+  }
+  
+  return "-";
+};
 
 interface EventData {
   id: string;
@@ -15,7 +47,7 @@ interface EventData {
   title_es?: string;
   description_en?: string;
   description_es?: string;
-  date?: string;
+  date?: string | Date | Timestamp | { toDate: () => Date };
   time?: string;
   location?: string;
   image_url?: string;
@@ -266,13 +298,13 @@ export default function EventRegisterPage(): JSX.Element {
               {event?.date && (
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-primary" />
-                  <span>{event.date}</span>
+                  <span>{safeFormatDate(event.date, language)}</span>
                 </div>
               )}
               {event?.time && (
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-primary" />
-                  <span>{event.time}</span>
+                  <span>{safeFormatDate(event.time as string | Date | { toDate: () => Date } | undefined, language)}</span>
                 </div>
               )}
               {event?.location && (

@@ -57,9 +57,10 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     
-    // Donations - editors can read, server writes via admin SDK
+    // Donations - editors can read/list, server writes via admin SDK
     match /donations/{donationId} {
       allow read: if isEditor();
+      allow list: if isEditor();
       allow write: if false; // Only server-side writes allowed
     }
     

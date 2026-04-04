@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Search, Trash2, Calendar, MapPin } from "lucide-react";
-import { collection, query, orderBy, getDocs, deleteDoc, doc, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
+import { Plus, Search, Trash2, Calendar, MapPin, Users, X, Download } from "lucide-react";
+import { Timestamp } from "firebase/firestore";
+import { auth } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { formatMountainDate } from "@/lib/timezone";
 
 interface Event {
   id: string;
@@ -17,30 +18,25 @@ interface Event {
   category: string;
   status: string;
   registration_required: boolean;
+  image_url?: string;
   created_at: unknown;
+  registrationCount?: number;
 }
 
-// Helper function to format dates
+interface Registration {
+  id: string;
+  full_name: string;
+  email: string;
+  phone?: string;
+  attendees: number;
+  comments?: string;
+  status: string;
+  created_at: Timestamp | Date;
+}
+
+// Helper function to format dates in Mountain Time (Peyton, CO)
 const formatDate = (date: string | Timestamp | Date | undefined, lang: string): string => {
-  if (!date) return "-";
-  
-  let dateObj: Date;
-  
-  if (date instanceof Timestamp) {
-    dateObj = date.toDate();
-  } else if (date instanceof Date) {
-    dateObj = date;
-  } else if (typeof date === "string") {
-    dateObj = new Date(date);
-  } else {
-    return "-";
-  }
-  
-  return dateObj.toLocaleDateString(lang === "es" ? "es-ES" : "en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric"
-  });
+  return formatMountainDate(date, lang);
 };
 
 export default function AdminEventsPage(): JSX.Element {
@@ -49,6 +45,12 @@ export default function AdminEventsPage(): JSX.Element {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  
+  // Modal state for registrations
+  const [showRegistrationsModal, setShowRegistrationsModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [registrations, setRegistrations] = useState<Registration[]>([]);
+  const [loadingRegistrations, setLoadingRegistrations] = useState(false);
 
   useEffect(() => {
     fetchEvents();
@@ -56,13 +58,47 @@ export default function AdminEventsPage(): JSX.Element {
 
   const fetchEvents = async () => {
     try {
-      const q = query(collection(db, "events"), orderBy("date", "desc"));
-      const snapshot = await getDocs(q);
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Event[];
-      setEvents(data);
+      const user = auth.currentUser;
+      if (!user) {
+        console.error("User not authenticated");
+        setLoading(false);
+        return;
+      }
+
+      const token = await user.getIdToken();
+      const response = await fetch("/api/events", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch events");
+      }
+
+      const data = await response.json();
+      
+      // Fetch registration counts for each event
+      const eventsWithCounts = await Promise.all(
+        data.map(async (event: { id: string }) => {
+          try {
+            const regResponse = await fetch(`/api/events/${event.id}/registrations`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            if (regResponse.ok) {
+              const regData = await regResponse.json();
+              return { ...event, registrationCount: regData.count || 0 };
+            }
+          } catch (err) {
+            console.error(`Error fetching registrations for event ${event.id}:`, err);
+          }
+          return { ...event, registrationCount: 0 };
+        })
+      );
+      
+      setEvents(eventsWithCounts);
     } catch (error) {
       console.error("Error fetching events:", error);
     } finally {
@@ -70,15 +106,89 @@ export default function AdminEventsPage(): JSX.Element {
     }
   };
 
+  const fetchRegistrations = async (eventId: string) => {
+    try {
+      setLoadingRegistrations(true);
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const token = await user.getIdToken();
+      const response = await fetch(`/api/events/${eventId}/registrations`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setRegistrations(data.registrations || []);
+      }
+    } catch (error) {
+      console.error("Error fetching registrations:", error);
+    } finally {
+      setLoadingRegistrations(false);
+    }
+  };
+
+  const handleViewRegistrations = async (event: Event) => {
+    setSelectedEvent(event);
+    setShowRegistrationsModal(true);
+    await fetchRegistrations(event.id);
+  };
+
   const handleDelete = async (id: string) => {
     if (confirm(language === "es" ? "¿Estás seguro de eliminar este evento?" : "Are you sure you want to delete this event?")) {
       try {
-        await deleteDoc(doc(db, "events", id));
+        const user = auth.currentUser;
+        if (!user) {
+          throw new Error("User not authenticated");
+        }
+
+        const token = await user.getIdToken();
+        const response = await fetch(`/api/events/${id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to delete event");
+        }
+
         setEvents(events.filter(e => e.id !== id));
       } catch (error) {
         console.error("Error deleting event:", error);
       }
     }
+  };
+
+  const exportToCSV = () => {
+    if (!selectedEvent || registrations.length === 0) return;
+
+    const headers = ["Name", "Email", "Phone", "Attendees", "Comments", "Status", "Date"];
+    const rows = registrations.map(reg => [
+      reg.full_name,
+      reg.email,
+      reg.phone || "",
+      reg.attendees,
+      reg.comments || "",
+      reg.status,
+      formatDate(reg.created_at as Timestamp | Date | undefined, language)
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${selectedEvent.title_en}_registrations.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const filteredEvents = events.filter(event => {
@@ -97,7 +207,8 @@ export default function AdminEventsPage(): JSX.Element {
   const categoryColors: Record<string, string> = {
     workshop: "bg-purple-100 text-purple-700",
     community: "bg-blue-100 text-blue-700",
-    fundraiser: "bg-orange-100 text-orange-700"
+    fundraiser: "bg-orange-100 text-orange-700",
+    food: "bg-yellow-100 text-yellow-700"
   };
 
   return (
@@ -171,13 +282,30 @@ export default function AdminEventsPage(): JSX.Element {
         ) : (
           filteredEvents.map((event) => (
             <div key={event.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="h-32 bg-gradient-to-br from-primary to-primary-container relative">
-                <div className="absolute top-3 right-3">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[event.status]}`}>
-                    {event.status}
-                  </span>
+              {/* Event Image */}
+              {event.image_url ? (
+                <div className="h-32 relative overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={event.image_url}
+                    alt={event.title_en}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-3 right-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[event.status]}`}>
+                      {event.status}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="h-32 bg-gradient-to-br from-primary to-primary-container relative">
+                  <div className="absolute top-3 right-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[event.status]}`}>
+                      {event.status}
+                    </span>
+                  </div>
+                </div>
+              )}
               <div className="p-4">
                 <span className={`inline-block px-2 py-1 rounded text-xs font-medium mb-2 ${categoryColors[event.category]}`}>
                   {event.category}
@@ -194,14 +322,39 @@ export default function AdminEventsPage(): JSX.Element {
                       {event.location}
                     </div>
                   )}
+                  {/* Registration Count Badge */}
+                  {event.registration_required && (
+                    <div className="flex items-center gap-2 text-primary">
+                      <Users className="w-4 h-4" />
+                      <span className="font-medium">
+                        {event.registrationCount || 0} {language === "es" ? "inscritos" : "registered"}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   <Link
                     href={`/admin/events/${event.id}`}
                     className="flex-1 text-center py-2 text-sm text-primary hover:bg-gray-50 rounded-lg border border-primary"
                   >
+                    {language === "es" ? "Detalles" : "Details"}
+                  </Link>
+                  <Link
+                    href={`/admin/events/${event.id}/edit`}
+                    className="flex-1 text-center py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg border border-gray-300"
+                  >
                     {language === "es" ? "Editar" : "Edit"}
                   </Link>
+                  {event.registration_required && (
+                    <button
+                      onClick={() => handleViewRegistrations(event)}
+                      className="flex-1 text-center py-2 text-sm text-secondary hover:bg-secondary/5 rounded-lg border border-secondary"
+                      title={language === "es" ? "Ver inscritos" : "View registrations"}
+                    >
+                      <Users className="w-4 h-4 inline mr-1" />
+                      {event.registrationCount || 0}
+                    </button>
+                  )}
                   <button
                     onClick={() => handleDelete(event.id)}
                     className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"
@@ -214,6 +367,95 @@ export default function AdminEventsPage(): JSX.Element {
           ))
         )}
       </div>
+
+      {/* Registrations Modal */}
+      {showRegistrationsModal && selectedEvent && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  {language === "es" ? "Inscritos" : "Registrations"}
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">{selectedEvent.title_en}</p>
+              </div>
+              <div className="flex items-center gap-3">
+                {registrations.length > 0 && (
+                  <button
+                    onClick={exportToCSV}
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-primary hover:bg-primary/5 rounded-lg"
+                  >
+                    <Download className="w-4 h-4" />
+                    CSV
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowRegistrationsModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+              {loadingRegistrations ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : registrations.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <p>{language === "es" ? "No hay inscritos aún" : "No registrations yet"}</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">
+                          {language === "es" ? "Nombre" : "Name"}
+                        </th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Email</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">
+                          {language === "es" ? "Teléfono" : "Phone"}
+                        </th>
+                        <th className="text-center py-3 px-4 text-sm font-semibold text-gray-600">
+                          {language === "es" ? "Asistentes" : "Attendees"}
+                        </th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">
+                          {language === "es" ? "Comentarios" : "Comments"}
+                        </th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">
+                          {language === "es" ? "Fecha" : "Date"}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {registrations.map((reg) => (
+                        <tr key={reg.id} className="border-b border-gray-100 hover:bg-gray-50">
+                          <td className="py-3 px-4 text-sm font-medium text-gray-900">{reg.full_name}</td>
+                          <td className="py-3 px-4 text-sm text-gray-600">{reg.email}</td>
+                          <td className="py-3 px-4 text-sm text-gray-600">{reg.phone || "-"}</td>
+                          <td className="py-3 px-4 text-sm text-center text-gray-600">{reg.attendees}</td>
+                          <td className="py-3 px-4 text-sm text-gray-600 max-w-xs truncate">
+                            {reg.comments || "-"}
+                          </td>
+                          <td className="py-3 px-4 text-sm text-gray-600">
+                            {formatDate(reg.created_at as Timestamp | Date | undefined, language)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

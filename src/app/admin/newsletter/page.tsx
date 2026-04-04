@@ -71,6 +71,24 @@ export default function AdminNewsletterPage(): JSX.Element {
       setSubscribers(data);
     } catch (error) {
       console.error("Error fetching subscribers:", error);
+      // Fallback: try fetching without ordering (works even without indexes)
+      try {
+        const snapshot = await getDocs(collection(db, "newsletter_subscribers"));
+        const data = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Subscriber[];
+        // Sort client-side
+        data.sort((a, b) => {
+          const dateA = a.subscribed_at instanceof Timestamp ? a.subscribed_at.toDate() : new Date(a.subscribed_at);
+          const dateB = b.subscribed_at instanceof Timestamp ? b.subscribed_at.toDate() : new Date(b.subscribed_at);
+          return dateB.getTime() - dateA.getTime();
+        });
+        setSubscribers(data);
+      } catch (fallbackError) {
+        console.error("Fallback fetch also failed:", fallbackError);
+        setSubscribers([]);
+      }
     } finally {
       setLoading(false);
     }

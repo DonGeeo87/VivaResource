@@ -12,6 +12,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 interface EventInfo {
   id: string;
   title: string;
+  titleEs?: string;
+  description?: string;
+  descriptionEs?: string;
   date?: string;
   time?: string;
   location?: string;
@@ -210,7 +213,7 @@ export default function PublicFormPage() {
           <textarea
             value={value as string}
             onChange={(e) => handleResponseChange(field.id, e.target.value)}
-            placeholder={field.placeholder}
+            placeholder={language === "es" && field.placeholderEs ? field.placeholderEs : field.placeholder}
             rows={4}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
           />
@@ -225,7 +228,7 @@ export default function PublicFormPage() {
           >
             <option value="">{language === "es" ? "Selecciona una opción" : "Select an option"}</option>
             {field.options?.map((opt, i) => (
-              <option key={i} value={opt.value}>{opt.label}</option>
+              <option key={i} value={opt.value}>{language === "es" && opt.labelEs ? opt.labelEs : opt.label}</option>
             ))}
           </select>
         );
@@ -243,7 +246,7 @@ export default function PublicFormPage() {
                   onChange={(e) => handleResponseChange(field.id, e.target.value)}
                   className="w-4 h-4 text-primary focus:ring-primary"
                 />
-                <span className="text-gray-700">{opt.label}</span>
+                <span className="text-gray-700">{language === "es" && opt.labelEs ? opt.labelEs : opt.label}</span>
               </label>
             ))}
           </div>
@@ -267,7 +270,7 @@ export default function PublicFormPage() {
                   }}
                   className="w-4 h-4 text-primary focus:ring-primary rounded"
                 />
-                <span className="text-gray-700">{opt.label}</span>
+                <span className="text-gray-700">{language === "es" && opt.labelEs ? opt.labelEs : opt.label}</span>
               </label>
             ))}
           </div>
@@ -279,7 +282,7 @@ export default function PublicFormPage() {
             type={field.type}
             value={value as string}
             onChange={(e) => handleResponseChange(field.id, e.target.value)}
-            placeholder={field.placeholder}
+            placeholder={language === "es" && field.placeholderEs ? field.placeholderEs : field.placeholder}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
           />
         );
@@ -401,16 +404,12 @@ export default function PublicFormPage() {
         {/* Form Header */}
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {form.title}
+            {language === "es" && form.titleEs ? form.titleEs : form.title}
           </h1>
-          {form.titleEs && (
-            <p className="text-xl text-gray-600 mb-4">{form.titleEs}</p>
-          )}
           {form.description && (
-            <p className="text-gray-600 mb-2">{form.description}</p>
-          )}
-          {form.descriptionEs && (
-            <p className="text-gray-600">{form.descriptionEs}</p>
+            <p className="text-gray-600">
+              {language === "es" && form.descriptionEs ? form.descriptionEs : form.description}
+            </p>
           )}
         </div>
 
@@ -455,21 +454,26 @@ export default function PublicFormPage() {
           )}
 
           {/* Form Fields */}
-          {form.fields.map((field) => (
-            <div key={field.id}>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {field.label}
-                {field.required && <span className="text-red-500 ml-1">*</span>}
-              </label>
-              {field.description && (
-                <p className="text-sm text-gray-500 mb-2">{field.description}</p>
-              )}
-              {errors[field.id] && (
-                <p className="text-sm text-red-500 mb-2">{errors[field.id]}</p>
-              )}
-              {renderField(field)}
-            </div>
-          ))}
+          {form.fields.map((field) => {
+            const fieldLabel = language === "es" && field.labelEs ? field.labelEs : field.label;
+            const fieldDescription = language === "es" && field.descriptionEs ? field.descriptionEs : field.description;
+            
+            return (
+              <div key={field.id}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {fieldLabel}
+                  {field.required && <span className="text-red-500 ml-1">*</span>}
+                </label>
+                {fieldDescription && (
+                  <p className="text-sm text-gray-500 mb-2">{fieldDescription}</p>
+                )}
+                {errors[field.id] && (
+                  <p className="text-sm text-red-500 mb-2">{errors[field.id]}</p>
+                )}
+                {renderField(field)}
+              </div>
+            );
+          })}
 
           {/* Form-level errors */}
           {errors['__form'] && (

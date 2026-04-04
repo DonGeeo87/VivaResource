@@ -154,7 +154,7 @@ export default function NewsletterModal({ isOpen, onClose }: NewsletterModalProp
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your name"
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl !text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all"
               />
             </div>
 
@@ -170,7 +170,7 @@ export default function NewsletterModal({ isOpen, onClose }: NewsletterModalProp
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="tu@email.com"
-                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl !text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                   required
                 />
               </div>

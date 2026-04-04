@@ -159,8 +159,8 @@ export default function Home(): JSX.Element {
           <div className="relative h-[500px] w-full lg:h-[600px] hero-animate-delay-2">
             <div className="absolute top-0 right-0 w-64 h-64 rounded-full overflow-hidden border-8 border-surface-lowest shadow-2xl z-10">
               <Image
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuACzrVpMy56dwyiM6XyGE5tw2d6MOUE4haIQHDgUOfF81Ubr-rWzfTWHD1J2QJcxDd-FfxNzNtJ0A_wMhzApWQG03mj1UFd9a_u9VyUzr_1CVXJtp92tX7ybPR99o8cEKnCKVKtKmyVgnv1ZfKFn5JQEUNoOcvy6mjrQceNnEgjYSqJxBJhMrVYAmO1454MMJ65EpsJ-5HwEEjodKP4ik4eQG2UhhsTWtxx4TsVEhrottpTxBZFN2ny8H7VIxFS1Uv47vLkGWBTwW8"
-                alt="close up of diverse volunteers hands stacked together in a circle showing unity and teamwork"
+                src="/photo-bank/hero_01.jpg"
+                alt="VIVA volunteers team together"
                 fill
                 sizes="(max-width: 1024px) 100vw, 256px"
                 style={{ objectFit: 'cover' }}
@@ -169,8 +169,8 @@ export default function Home(): JSX.Element {
             </div>
             <div className="absolute bottom-10 left-0 w-80 h-80 rounded-[100px] overflow-hidden border-8 border-surface-lowest shadow-2xl z-20">
               <Image
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDD2_X_hc7VAtH8xoo68p2rM886-5FsRwpaRNohamZ2DisevB7wFwX1gN4H3e-z-S2wjqS2UGq3O_RD53owy9c7yhcAJC69_M2TdWQweeBlOgrdIzfXMGz2fp6okUfc-VmhGYl8cVQydRYlatJWZJOg5gkxPVsfyyvrU0EILY8VImtL6aKFBlaUYnyyy56l-LW1R2ePOTcxO36YhW9ucijAWMYHBhHH6Z4B6kegKBct4iTTfZhlhRi7xmrt_g_o4QsgMSc-UYbDDGw"
-                alt="a group of community members smiling and talking in a sunlit outdoor garden setting"
+                src="/photo-bank/hero_02.jpg"
+                alt="community meeting outdoors"
                 fill
                 sizes="(max-width: 1024px) 100vw, 320px"
                 style={{ objectFit: 'cover' }}
@@ -179,8 +179,8 @@ export default function Home(): JSX.Element {
             <div className="absolute top-1/4 left-1/4 w-48 h-48 rounded-full overflow-hidden border-4 border-primary z-0 opacity-20 bg-primary-container"></div>
             <div className="absolute top-10 left-10 w-56 h-72 rounded-full overflow-hidden border-8 border-surface-lowest shadow-2xl rotate-12 z-10">
               <Image
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC08k16sAUbHinOS5lQssSyDSBge1AlGguG0ZiJjYZ4fkRAqRRMI6n7TrV0lupGbH9vRNG3SWXJjjYtWtEKjLNpj1r_FZ_-e4UU0Aep86jrZLoy5p1rgy_GmxaslLFIvqRsrU_aBAXBesFNIf-gJBpGjOZjA4YJ9VK5r_H7VI4jd7N4yT2WIZZrAPXLUpaHTI5NBvOBYHU--Kza2oOPzDiZLKOQCgnNzGBNPue06v5ed_1LCeKZLF-KLxEnVRKg96ZtLiNahirSmBE"
-                alt="a volunteer helping a senior citizen with groceries in a rural community"
+                src="/photo-bank/hero_03.jpg"
+                alt="volunteer helping community member"
                 fill
                 sizes="(max-width: 1024px) 100vw, 224px"
                 style={{ objectFit: 'cover' }}
@@ -212,8 +212,8 @@ export default function Home(): JSX.Element {
             <div className="relative">
               <div className="rounded-3xl overflow-hidden shadow-2xl rotate-3">
                 <Image
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8zyptKqJNePZ4ujbc48M0KVVScvp6NyIx4d6-MmW-Xis3L28_KwyfOK8FwiOAwSyDPqOpBbUswn518F6OK9ePY_Wq-P0_JqTOlQLQ7DNl9IN8Lffglx_8z4baCBpyg1jOBgTCrrsz-wlJzfar_8cTeWMheCDOubt0XV-MCxwN0b0a42Hm_BMff8LNiqTY7xmwBZ7QwQE9oh-qUVATC1gjHwUwdT9B1MgidJxzC_jUshsn7sen27e6sIXp86UwzwWaJsCuDImaWuY"
-                  alt="two friendly social workers in a brightly lit office looking at a laptop with a helpful expression"
+                  src="/photo-bank/vivaresource (10).jpg"
+                  alt="social workers helping community members"
                   width={600}
                   height={400}
                   sizes="(max-width: 1024px) 100vw, 600px"
@@ -474,8 +474,8 @@ export default function Home(): JSX.Element {
             <div className="group cursor-pointer stagger-item">
               <div className="relative h-80 rounded-3xl overflow-hidden mb-6">
                 <Image
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbELa4pJq5K8plEddqxI3LuX-Lc5wQuqEKY0Z2eQ9iUnUj2g032eDUXprGZZpZ9-FnRvSd16uuXmoyWQPk8LXxBW1_OUmv6t-hAkf13w3fn7Ekeg-6FEKJmT2hd07GtUvouqjX9je9u4TT8CMlL-iv29UEHblEtJu8g2eI-0B4L-dJbBR1gFdSwXHtVff9f3rPMX-iDj-xffVCBkdTRPIqbhmpWA79kXQAYlWUc1HkXyTP775MUUSwNOlIugcsCI4JhVnq-3nbj8c"
-                  alt="a diverse group of people engaged in an active training session"
+                  src="/photo-bank/vivaresource (5).jpg"
+                  alt="community workshop training session"
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
                   style={{ objectFit: 'cover' }}
@@ -493,8 +493,8 @@ export default function Home(): JSX.Element {
             <div className="group cursor-pointer stagger-item">
               <div className="relative h-80 rounded-3xl overflow-hidden mb-6">
                 <Image
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoAD_qDoct_eHEQITGPzwgcVP7nMQadEx570MX67r5VIxXIt_7sLShVj3b6xwFiOeWeElElFD4euxEMl4kgFsA-OnYcLLna1XBNF6Md7NjOC6ceOjqLG9eyU1eDcVTHwrrcxrB7c-Ij8E0dqv_C0vlNlg-MZhQM6Y85Rb7kvX9rvdRney5bprh02lpC1CTG3gIw2VavzLdOMI1pBtObDhMbyzaYynGy0DEt8SyWT-oZlau35JwM-YI1Fqi1fHMB0fp_T9XqldT40Y"
-                  alt="volunteers organizing food at a local donation center"
+                  src="/photo-bank/vivaresource (6).jpg"
+                  alt="volunteers organizing food donations"
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
                   style={{ objectFit: 'cover' }}
@@ -512,8 +512,8 @@ export default function Home(): JSX.Element {
             <div className="group cursor-pointer stagger-item">
               <div className="relative h-80 rounded-3xl overflow-hidden mb-6">
                 <Image
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBMdbiTC7yx5xhGQrdQvB8c5aAmRebaE7M-K24OdJDdatjXkKLcgw4ypqhqLmTpEFIZZACAl0rDGun8lUUmhraPwK8JIcPGJIByw3njg8eWW02iASzdyiHeXXAnsA5Kt0jIaCBBI2Imf8AwUYm_7OKvBzyePOgFMsvV5an7gtc9vuX6lqw8icUhqvAsRs1rO7fGAG2zJcG75WbM6JnLWu-LUKTDTUJtaLEC8nLjfQY29pNeXjRz2hbwaU6cPvjo867XugDqAOCAC0"
-                  alt="a team of people collaborating around a wooden table in a light filled room"
+                  src="/photo-bank/vivaresource (8).jpg"
+                  alt="community collaboration meeting"
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
                   style={{ objectFit: 'cover' }}

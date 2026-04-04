@@ -13,6 +13,7 @@ import {
   Mail,
   User,
   BarChart3,
+  Send,
 } from "lucide-react";
 import {
   collection,
@@ -28,6 +29,7 @@ import {
 import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { FormField } from "@/types/forms";
+import ConfirmModal from "@/components/ConfirmModal";
 
 interface FormSubmission {
   id: string;
@@ -147,6 +149,39 @@ export default function FormResponsesPage(): JSX.Element {
     URL.revokeObjectURL(url);
   };
 
+  const [sendingSummary, setSendingSummary] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  const sendSummaryEmail = async () => {
+    if (!form) return;
+    
+    setShowConfirmModal(false);
+    setSendingSummary(true);
+    try {
+      const response = await fetch("/api/email/send-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "form",
+          id: formId,
+          data: { language },
+        }),
+      });
+
+      if (response.ok) {
+        alert(language === "es" ? "¡Resumen enviado exitosamente!" : "Summary sent successfully!");
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to send summary");
+      }
+    } catch (error) {
+      console.error("Error sending summary:", error);
+      alert(language === "es" ? "Error al enviar el resumen: " + (error instanceof Error ? error.message : "") : "Error sending summary");
+    } finally {
+      setSendingSummary(false);
+    }
+  };
+
   const formatTimestamp = (ts: Timestamp | Date): string => {
     const date = ts instanceof Timestamp ? ts.toDate() : new Date(ts);
     return date.toLocaleString(language === "es" ? "es-ES" : "en-US", {
@@ -228,6 +263,14 @@ export default function FormResponsesPage(): JSX.Element {
           </div>
         </div>
         <div className="mt-4 md:mt-0 flex items-center gap-3">
+          <button
+            onClick={() => setShowConfirmModal(true)}
+            disabled={submissions.length === 0}
+            className="inline-flex items-center gap-2 bg-secondary text-white px-4 py-2 rounded-lg font-medium hover:bg-secondary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Send className="w-4 h-4" />
+            {language === "es" ? "Enviar Resumen" : "Send Summary"}
+          </button>
           <button
             onClick={exportToCSV}
             disabled={submissions.length === 0}
@@ -495,6 +538,20 @@ export default function FormResponsesPage(): JSX.Element {
           </div>
         </div>
       )}
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        title={language === "es" ? "Enviar Resumen por Email" : "Send Summary Email"}
+        message={language === "es"
+          ? "Se enviará un resumen completo de todas las respuestas de este formulario a los administradores configurados."
+          : "A complete summary of all form responses will be sent to the configured administrators."}
+        confirmText={language === "es" ? "Enviar Resumen" : "Send Summary"}
+        cancelText={language === "es" ? "Cancelar" : "Cancel"}
+        onConfirm={sendSummaryEmail}
+        onCancel={() => setShowConfirmModal(false)}
+        isLoading={sendingSummary}
+      />
     </div>
   );
 }

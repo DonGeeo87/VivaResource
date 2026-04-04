@@ -25,6 +25,7 @@ interface Event {
   time: string;
   location: string;
   image: string;
+  image_url?: string;
   featured: boolean;
   category: string;
   status: string;
@@ -65,10 +66,15 @@ export default function EventsPage(): JSX.Element {
       // Fetch all events without where/orderBy to avoid index requirements
       const q = query(collection(db, "events"));
       const snapshot = await getDocs(q);
-      let eventsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Event[];
+      let eventsData = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          // Map image_url to image for compatibility with existing code
+          image: data.image_url || data.image || "",
+        };
+      }) as Event[];
 
       // Filter published events client-side
       eventsData = eventsData.filter(e => e.status === "published");
@@ -92,72 +98,6 @@ export default function EventsPage(): JSX.Element {
   const getTitle = (event: Event) => language === "es" && event.title_es ? event.title_es : event.title_en;
   const getDescription = (event: Event) => language === "es" && event.description_es ? event.description_es : event.description_en;
 
-  const hasDynamicEvents = events.length > 0;
-
-  const fallbackEvents: Event[] = [
-    {
-      id: "1",
-      title_en: "Fresh Harvest Distribution",
-      title_es: "Distribución de Cosecha Fresca",
-      description_en: "Supporting our neighbors with nutritional security. All families are welcome.",
-      description_es: "Apoyando a nuestros vecinos con seguridad nutricional. Todas las familias son bienvenidas.",
-      date: "MAR 15, 2024",
-      time: "10:00 AM",
-      location: "Central Community Hub, Main Hall",
-      image: "/events/harvest.jpg",
-      featured: true,
-      category: "food",
-      status: "published",
-      cta: "Register / Registrarse",
-    },
-    {
-      id: "2",
-      title_en: "Community Yoga",
-      title_es: "Yoga Comunitario",
-      description_en: "Free bilingual session for all levels.",
-      description_es: "Sesión bilingüe gratuita para todos los niveles.",
-      date: "APR 02, 2024",
-      time: "5:30 PM",
-      location: "Community Center",
-      image: "/events/yoga.jpg",
-      featured: false,
-      category: "workshops",
-      status: "published",
-      cta: "Details / Detalles",
-    },
-    {
-      id: "3",
-      title_en: "Financial Wellness",
-      title_es: "Bienestar Financiero",
-      description_en: "Expert advice on budgeting and saving.",
-      description_es: "Consejos expertos sobre presupuesto y ahorro.",
-      date: "APR 12, 2024",
-      time: "6:00 PM",
-      location: "Virtual",
-      image: "/events/finance.jpg",
-      featured: false,
-      category: "workshops",
-      status: "published",
-      cta: "Details / Detalles",
-    },
-    {
-      id: "4",
-      title_en: "Town Hall: Resource Planning",
-      title_es: "Ayuntamiento: Planificación de Recursos",
-      description_en: "Shape the future of our foundation together. Spanish interpretation available.",
-      description_es: "Juntos demos forma al futuro de nuestra fundación. Interpretación en español disponible.",
-      date: "MAY 01",
-      time: "7:00 PM",
-      location: "Main Auditorium",
-      image: "",
-      featured: false,
-      category: "meetings",
-      status: "published",
-      cta: "Secure Your Spot / Asecgurar su lugar",
-      badge: "MANDATORY RSVP / RSVP OBLIGATORIO",
-    },
-  ];
-
   // Map selectedCategory number to category string values
   const categoryMap: Record<number, string> = {
     0: "", // All - no filter
@@ -166,12 +106,10 @@ export default function EventsPage(): JSX.Element {
     3: "meetings",
   };
 
-  const allEvents = hasDynamicEvents ? events : fallbackEvents;
-  
   // Filter events by selected category
   const displayEvents = selectedCategory === 0
-    ? allEvents
-    : allEvents.filter((e: Event) => e.category === categoryMap[selectedCategory]);
+    ? events
+    : events.filter((e: Event) => e.category === categoryMap[selectedCategory]);
 
   if (loading) {
     return (
@@ -355,20 +293,12 @@ export default function EventsPage(): JSX.Element {
             </div>
           
           {/* No events message when filter returns no results */}
-          {displayEvents.length === 0 && selectedCategory !== 0 && (
+          {!loading && displayEvents.length === 0 && (
             <div className="mt-12 text-center py-12">
               <p className="text-on-surface-variant text-lg">
                 {language === "es"
-                  ? "No hay eventos en esta categoría. ¡Prueba con otra!"
-                  : "No events in this category. Try another one!"}
-              </p>
-            </div>
-          )}
-          
-          {!loading && !hasDynamicEvents && (
-            <div className="mt-12 text-center">
-              <p className="text-on-surface-variant text-sm">
-                Mostrando eventos de ejemplo. ¡Conecta Firestore para ver eventos dinámicos!
+                  ? "No hay eventos disponibles. ¡Vuelve pronto!"
+                  : "No events available. Check back soon!"}
               </p>
             </div>
           )}

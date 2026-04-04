@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { collection, addDoc, getDocs, query, where, orderBy, Timestamp } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM_EMAIL = "Viva Resource <onboarding@resend.dev>";
-const BATCH_SIZE = 50; // Resend limit per batch
+// Configurar transporte de Gmail SMTP
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_APP_PASSWORD,
+  },
+});
+
+const FROM_EMAIL = process.env.EMAIL_USER || "vivaresourcefoundation@gmail.com";
 
 interface Subscriber {
   id: string;
@@ -16,28 +23,57 @@ interface Subscriber {
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
+      console.warn("[Newsletter Send] Gmail SMTP credentials not configured");
+      return NextResponse.json(
+        { error: "Gmail SMTP credentials not configured" },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     const { subject, content, html } = body;
 
     // Validate required fields
-    if (!subject || !content) {
+    if (!subject || typeof subject !== "string" || !subject.trim()) {
       return NextResponse.json(
-        { error: "Subject and content are required" },
+        { error: "Subject is required" },
         { status: 400 }
       );
     }
 
-    // Fetch all active subscribers
-    const q = query(
-      collection(db, "newsletter_subscribers"),
-      where("status", "==", "active"),
-      orderBy("subscribed_at", "asc")
-    );
-    const snapshot = await getDocs(q);
-    const subscribers = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Subscriber[];
+    if (!content || typeof content !== "string" || !content.trim()) {
+      return NextResponse.json(
+        { error: "Content is required" },
+        { status: 400 }
+      );
+    }
+
+    // Fetch all active subscribers (without orderBy to avoid index requirement)
+    let subscribers: Subscriber[] = [];
+    try {
+      const q = query(
+        collection(db, "newsletter_subscribers"),
+        where("status", "==", "active")
+      );
+      const snapshot = await getDocs(q);
+      subscribers = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        email: doc.data().email,
+        name: doc.data().name || "",
+        status: doc.data().status || "active",
+      })) as Subscriber[];
+    } catch (queryError) {
+      console.error("Error fetching subscribers for newsletter:", queryError);
+      // Fallback: fetch all and filter client-side
+      const snapshot = await getDocs(collection(db, "newsletter_subscribers"));
+      subscribers = snapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Subscriber[];
+      subscribers = subscribers.filter((s) => s.status === "active");
+    }
 
     if (subscribers.length === 0) {
       return NextResponse.json(
@@ -46,54 +82,51 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Build HTML email using the same wrapper pattern
+    // Build HTML email
     const emailHtml = html || buildEmailHtml(subject, content);
 
-    // Send in batches to avoid rate limits
+    // Send emails one by one with delay to avoid rate limiting (Gmail limit: 500/day)
     const results: { success: number; failed: number; errors: string[] } = {
       success: 0,
       failed: 0,
       errors: [],
     };
 
-    for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
-      const batch = subscribers.slice(i, i + BATCH_SIZE);
+    for (const subscriber of subscribers) {
+      try {
+        await transporter.sendMail({
+          from: `"Viva Resource Foundation" <${FROM_EMAIL}>`,
+          to: subscriber.email,
+          subject: subject.trim(),
+          html: emailHtml,
+        });
 
-      const sendPromises = batch.map(async (subscriber) => {
-        try {
-          const { error } = await resend.emails.send({
-            from: FROM_EMAIL,
-            to: [subscriber.email],
-            subject,
-            html: emailHtml,
-          });
+        results.success++;
 
-          if (error) {
-            results.failed++;
-            results.errors.push(`Failed to send to ${subscriber.email}: ${error.message}`);
-          } else {
-            results.success++;
-          }
-        } catch (err) {
-          results.failed++;
-          const message = err instanceof Error ? err.message : "Unknown error";
-          results.errors.push(`Error sending to ${subscriber.email}: ${message}`);
-        }
-      });
-
-      await Promise.all(sendPromises);
+        // Small delay between sends to avoid rate limiting
+        await new Promise((resolve) => setTimeout(resolve, 200));
+      } catch (err) {
+        results.failed++;
+        const message = err instanceof Error ? err.message : "Unknown error";
+        results.errors.push(`Error sending to ${subscriber.email}: ${message}`);
+        console.error(`Error sending newsletter to ${subscriber.email}:`, err);
+      }
     }
 
     // Save to newsletter history
-    await addDoc(collection(db, "newsletter_history"), {
-      subject,
-      content,
-      sent_at: Timestamp.now(),
-      total_sent: results.success,
-      total_failed: results.failed,
-      total_subscribers: subscribers.length,
-      status: results.failed === 0 ? "completed" : "completed_with_errors",
-    });
+    try {
+      await addDoc(collection(db, "newsletter_history"), {
+        subject: subject.trim(),
+        content,
+        sent_at: Timestamp.now(),
+        total_sent: results.success,
+        total_failed: results.failed,
+        total_subscribers: subscribers.length,
+        status: results.failed === 0 ? "completed" : "completed_with_errors",
+      });
+    } catch (historyError) {
+      console.error("Error saving to newsletter history:", historyError);
+    }
 
     return NextResponse.json({
       success: true,

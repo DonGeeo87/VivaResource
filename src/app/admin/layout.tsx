@@ -15,7 +15,9 @@ import {
   Mail,
   ClipboardList,
   Sparkles,
-  Shield
+  Shield,
+  Image,
+  HandHelping,
 } from "lucide-react";
 import { AuthProvider, useAuth } from "@/contexts/AdminAuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -32,13 +34,14 @@ function AdminLayoutContent({ children }: { children: ReactNode }): JSX.Element 
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/blog", label: "Blog", icon: FileText },
     { href: "/admin/events", label: language === "es" ? "Eventos" : "Events", icon: Calendar },
-    { href: "/admin/event-registrations", label: language === "es" ? "Registros" : "Registrations", icon: Calendar },
     { href: "/admin/forms", label: language === "es" ? "Formularios" : "Forms", icon: ClipboardList },
     { href: "/admin/volunteers", label: language === "es" ? "Voluntarios" : "Volunteers", icon: Users },
     { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
     { href: "/admin/donations", label: language === "es" ? "Donaciones" : "Donations", icon: Heart },
     { href: "/admin/ai-generator", label: "AI Generator", icon: Sparkles },
     { href: "/admin/users", label: language === "es" ? "Usuarios" : "Users", icon: Shield },
+    { href: "/admin/help-requests", label: language === "es" ? "Solicitudes de Ayuda" : "Help Requests", icon: HandHelping },
+    { href: "/admin/images", label: language === "es" ? "Imágenes" : "Images", icon: Image },
     { href: "/admin/settings", label: language === "es" ? "Configuración" : "Settings", icon: Settings },
   ];
 

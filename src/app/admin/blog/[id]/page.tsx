@@ -32,16 +32,14 @@ export default function EditBlogPostPage(): JSX.Element {
       if (docSnap.exists()) {
         const data = docSnap.data();
         setPostData({
-          title_en: (data.title_en as string) || "",
-          title_es: (data.title_es as string) || "",
+          title: (data.title as string) || "",
           slug: (data.slug as string) || "",
-          excerpt_en: (data.excerpt_en as string) || "",
-          excerpt_es: (data.excerpt_es as string) || "",
-          content_en: (data.content_en as string) || "",
-          content_es: (data.content_es as string) || "",
+          excerpt: (data.excerpt as string) || "",
+          content: (data.content as string) || "",
           category: (data.category as string) || "news",
           featured_image: (data.featured_image as string) || "",
           author: (data.author as string) || "",
+          language: (data.language as "en" | "es") || "en",
           published: (data.published as boolean) || false,
           status: (data.status as string) || "draft"
         });

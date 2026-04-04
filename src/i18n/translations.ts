@@ -408,6 +408,8 @@ export const translations = {
       newsletterDesc: "Get updates on our work and ways to get involved delivered to your inbox.",
       newsletterButton: "Subscribe",
       noResults: "No articles found",
+      ctaTitle: "Ready to Make a Difference?",
+      ctaDesc: "Your support fuels these stories. Join our volunteer network or donate today to help us continue our mission of community empowerment.",
     },
     volunteers: {
       title: "Volunteers",
@@ -974,6 +976,8 @@ export const translations = {
       newsletterDesc: "Recibe actualizaciones sobre nuestro trabajo y formas de involucrarte directamente en tu bandeja de entrada.",
       newsletterButton: "Suscribirse",
       noResults: "No se encontraron artículos",
+      ctaTitle: "¿Listo para Hacer la Diferencia?",
+      ctaDesc: "Tu apoyo impulsa estas historias. Únete a nuestra red de voluntarios o dona hoy para ayudarnos a continuar nuestra misión de empoderamiento comunitario.",
     },
     volunteers: {
       title: "Voluntarios",

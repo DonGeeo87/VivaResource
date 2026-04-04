@@ -8,6 +8,8 @@ import {
   VolunteerRegistrationData,
   FormSubmissionData,
 } from "@/lib/email/notifications";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
@@ -19,6 +21,24 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         { error: "Type and data are required" },
         { status: 400 }
       );
+    }
+
+    // Check notification settings for admin notifications
+    let shouldNotify = true;
+    if (type === "event-registration") {
+      const setting = await getDoc(doc(db, "site_settings", "notify_on_event_registration"));
+      shouldNotify = setting.exists() ? setting.data().value === "true" : true;
+    } else if (type === "new-volunteer") {
+      const setting = await getDoc(doc(db, "site_settings", "notify_on_volunteer_signup"));
+      shouldNotify = setting.exists() ? setting.data().value === "true" : true;
+    } else if (type === "form-submission") {
+      const setting = await getDoc(doc(db, "site_settings", "notify_on_form_submission"));
+      shouldNotify = setting.exists() ? setting.data().value === "true" : true;
+    }
+
+    if (!shouldNotify) {
+      console.log(`[Notify API] ${type} notifications disabled`);
+      return NextResponse.json({ success: true }, { status: 200 });
     }
 
     let result: { success: boolean; error?: string };

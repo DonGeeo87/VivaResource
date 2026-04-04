@@ -9,23 +9,21 @@ import ImageUpload from "@/components/ImageUpload";
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
 const categories = [
-  { value: "news", label: "Noticias" },
-  { value: "impact", label: "Historias de Impacto" },
-  { value: "resources", label: "Recursos" },
-  { value: "events", label: "Eventos" }
+  { value: "news", labelEn: "News", labelEs: "Noticias" },
+  { value: "impact", labelEn: "Impact Stories", labelEs: "Historias de Impacto" },
+  { value: "resources", labelEn: "Resources", labelEs: "Recursos" },
+  { value: "events", labelEn: "Events", labelEs: "Eventos" }
 ];
 
 export interface BlogFormData {
-  title_en: string;
-  title_es: string;
+  title: string;
   slug: string;
-  excerpt_en: string;
-  excerpt_es: string;
-  content_en: string;
-  content_es: string;
+  excerpt: string;
+  content: string;
   category: string;
   featured_image: string;
   author: string;
+  language: "en" | "es";
   published: boolean;
   status: string;
 }
@@ -59,6 +57,41 @@ const quillFormats = [
   "align"
 ];
 
+const labels = {
+  en: {
+    language: "Language",
+    title: "Title",
+    excerpt: "Excerpt",
+    content: "Content",
+    category: "Category",
+    slug: "Slug",
+    author: "Author",
+    published: "Published",
+    imageLabel: "Featured image",
+    publishSettings: "Publication",
+    saving: "Saving...",
+    create: "Create Post",
+    update: "Update Post",
+    cancel: "Cancel"
+  },
+  es: {
+    language: "Idioma",
+    title: "Título",
+    excerpt: "Extracto",
+    content: "Contenido",
+    category: "Categoría",
+    slug: "Slug",
+    author: "Autor",
+    published: "Publicado",
+    imageLabel: "Imagen destacada",
+    publishSettings: "Publicación",
+    saving: "Guardando...",
+    create: "Crear Post",
+    update: "Actualizar Post",
+    cancel: "Cancelar"
+  }
+};
+
 export default function BlogEditor({
   initialData,
   onSubmit,
@@ -67,21 +100,17 @@ export default function BlogEditor({
   isEditing
 }: BlogEditorProps) {
   const [formData, setFormData] = useState<BlogFormData>({
-    title_en: "",
-    title_es: "",
+    title: "",
     slug: "",
-    excerpt_en: "",
-    excerpt_es: "",
-    content_en: "",
-    content_es: "",
+    excerpt: "",
+    content: "",
     category: "news",
     featured_image: "",
     author: "",
+    language: "en",
     published: false,
     status: "draft"
   });
-
-  const [langTab, setLangTab] = useState<"en" | "es">("en");
 
   // Load initial data when editing
   useEffect(() => {
@@ -90,18 +119,38 @@ export default function BlogEditor({
     }
   }, [initialData]);
 
+  const lang = formData.language;
+  const l = labels[lang];
+
   const generateSlug = (title: string) => {
     return title
       .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
   };
 
   const handleChange = (field: keyof BlogFormData, value: string | boolean) => {
     setFormData(prev => {
+      // Reset content fields when language changes to avoid mixing languages
+      if (field === "language" && (prev.title || prev.content)) {
+        const confirmed = window.confirm(
+          prev.language === "en"
+            ? "Changing language will clear all content fields. Continue?"
+            : "Cambiar el idioma borrará todos los campos de contenido. ¿Continuar?"
+        );
+        if (!confirmed) return prev;
+      }
       const newData = { ...prev, [field]: value };
-      // Auto-generate slug from English title only when creating
-      if (field === "title_en" && !isEditing) {
+      if (field === "language") {
+        newData.title = "";
+        newData.excerpt = "";
+        newData.content = "";
+        newData.slug = "";
+      }
+      // Auto-generate slug from title only when creating
+      if (field === "title" && !isEditing) {
         newData.slug = generateSlug(value as string);
       }
       // Sync status with published boolean
@@ -122,118 +171,62 @@ export default function BlogEditor({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Language Tabs */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-            <div className="border-b border-gray-200 px-6 pt-4">
-              <div className="flex gap-4">
-                <button
-                  type="button"
-                  onClick={() => setLangTab("en")}
-                  className={`px-4 py-2 font-medium text-sm rounded-t-lg transition-colors ${
-                    langTab === "en"
-                      ? "bg-primary text-white"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  English
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLangTab("es")}
-                  className={`px-4 py-2 font-medium text-sm rounded-t-lg transition-colors ${
-                    langTab === "es"
-                      ? "bg-primary text-white"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  Español
-                </button>
-              </div>
-            </div>
+          {/* Language Selector */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {l.language}
+            </label>
+            <select
+              value={formData.language}
+              onChange={(e) => handleChange("language", e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+            >
+              <option value="en">English</option>
+              <option value="es">Español</option>
+            </select>
+          </div>
 
+          {/* Content Fields */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100">
             <div className="p-6 space-y-4">
-              {langTab === "en" ? (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Title *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.title_en}
-                      onChange={(e) => handleChange("title_en", e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Excerpt
-                    </label>
-                    <textarea
-                      value={formData.excerpt_en}
-                      onChange={(e) => handleChange("excerpt_en", e.target.value)}
-                      rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Content *
-                    </label>
-                    <div className="min-h-[300px] bg-white">
-                      <ReactQuill
-                        theme="snow"
-                        value={formData.content_en}
-                        onChange={(value) => handleChange("content_en", value)}
-                        modules={quillModules}
-                        formats={quillFormats}
-                        className="bg-white"
-                      />
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Título
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.title_es}
-                      onChange={(e) => handleChange("title_es", e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Extracto
-                    </label>
-                    <textarea
-                      value={formData.excerpt_es}
-                      onChange={(e) => handleChange("excerpt_es", e.target.value)}
-                      rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Contenido
-                    </label>
-                    <div className="min-h-[300px] bg-white">
-                      <ReactQuill
-                        theme="snow"
-                        value={formData.content_es}
-                        onChange={(value) => handleChange("content_es", value)}
-                        modules={quillModules}
-                        formats={quillFormats}
-                        className="bg-white"
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {l.title} *
+                </label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => handleChange("title", e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {l.excerpt}
+                </label>
+                <textarea
+                  value={formData.excerpt}
+                  onChange={(e) => handleChange("excerpt", e.target.value)}
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {l.content} *
+                </label>
+                <div className="min-h-[300px] bg-white">
+                  <ReactQuill
+                    theme="snow"
+                    value={formData.content}
+                    onChange={(value) => handleChange("content", value)}
+                    modules={quillModules}
+                    formats={quillFormats}
+                    className="bg-white"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -242,11 +235,11 @@ export default function BlogEditor({
         <div className="space-y-6">
           {/* Publication Settings */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <h2 className="font-semibold text-lg mb-4">Publicación</h2>
+            <h2 className="font-semibold text-lg mb-4">{l.publishSettings}</h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Categoría
+                  {l.category}
                 </label>
                 <select
                   value={formData.category}
@@ -255,14 +248,14 @@ export default function BlogEditor({
                 >
                   {categories.map(cat => (
                     <option key={cat.value} value={cat.value}>
-                      {cat.label}
+                      {formData.language === "es" ? cat.labelEs : cat.labelEn}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Slug
+                  {l.slug}
                 </label>
                 <input
                   type="text"
@@ -273,7 +266,7 @@ export default function BlogEditor({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Autor
+                  {l.author}
                 </label>
                 <input
                   type="text"
@@ -284,7 +277,7 @@ export default function BlogEditor({
               </div>
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-gray-700">
-                  Publicado
+                  {l.published}
                 </label>
                 <button
                   type="button"
@@ -309,7 +302,7 @@ export default function BlogEditor({
               value={formData.featured_image}
               onChange={(url) => handleChange("featured_image", url)}
               path="blog"
-              label="Imagen destacada"
+              label={l.imageLabel}
             />
           </div>
 
@@ -320,14 +313,14 @@ export default function BlogEditor({
               disabled={saving}
               className="w-full flex items-center justify-center gap-2 bg-primary text-white py-3 px-4 rounded-lg font-semibold hover:bg-primary-hover transition-colors disabled:opacity-50"
             >
-              {saving ? "Guardando..." : isEditing ? "Actualizar Post" : "Crear Post"}
+              {saving ? l.saving : isEditing ? l.update : l.create}
             </button>
             <button
               type="button"
               onClick={onCancel}
               className="w-full py-3 px-4 rounded-lg font-semibold text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors"
             >
-              Cancelar
+              {l.cancel}
             </button>
           </div>
         </div>

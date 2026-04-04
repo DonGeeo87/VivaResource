@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Save, CheckCircle, Globe, Link as LinkIcon } from "lucide-react";
+import { Save, CheckCircle, Globe, Link as LinkIcon, Bell } from "lucide-react";
 import { doc, setDoc, getDocs, collection } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -38,6 +38,17 @@ export default function AdminSettingsPage(): JSX.Element {
         { key: "instagram_url", label: "Instagram URL", type: "url" },
         { key: "twitter_url", label: "Twitter/X URL", type: "url" },
         { key: "linkedin_url", label: "LinkedIn URL", type: "url" }
+      ]
+    },
+    {
+      category: "notifications",
+      title: language === "es" ? "Notificaciones por Email" : "Email Notifications",
+      icon: Bell,
+      fields: [
+        { key: "notification_emails", label: language === "es" ? "Emails de Notificación (separados por coma)" : "Notification Emails (comma-separated)", type: "textarea", placeholder: "email1@example.com, email2@example.com" },
+        { key: "notify_on_form_submission", label: language === "es" ? "Notificar en envío de formulario" : "Notify on form submission", type: "checkbox" },
+        { key: "notify_on_event_registration", label: language === "es" ? "Notificar en registro a evento" : "Notify on event registration", type: "checkbox" },
+        { key: "notify_on_volunteer_signup", label: language === "es" ? "Notificar en registro de voluntario" : "Notify on volunteer signup", type: "checkbox" }
       ]
     },
     {
@@ -167,23 +178,42 @@ export default function AdminSettingsPage(): JSX.Element {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {section.fields.map((field) => (
                 <div key={field.key} className={field.type === "textarea" ? "md:col-span-2" : ""}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {field.label}
-                  </label>
-                  {field.type === "textarea" ? (
-                    <textarea
-                      value={settings[field.key] || ""}
-                      onChange={(e) => handleChange(field.key, e.target.value)}
-                      rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                    />
+                  {field.type === "checkbox" ? (
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        id={field.key}
+                        checked={settings[field.key] === "true"}
+                        onChange={(e) => handleChange(field.key, e.target.checked ? "true" : "false")}
+                        className="rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <label htmlFor={field.key} className="text-sm font-medium text-gray-700">
+                        {field.label}
+                      </label>
+                    </div>
                   ) : (
-                    <input
-                      type={field.type}
-                      value={settings[field.key] || ""}
-                      onChange={(e) => handleChange(field.key, e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                    />
+                    <>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {field.label}
+                      </label>
+                      {field.type === "textarea" ? (
+                        <textarea
+                          value={settings[field.key] || ""}
+                          onChange={(e) => handleChange(field.key, e.target.value)}
+                          placeholder={field.placeholder}
+                          rows={3}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                        />
+                      ) : (
+                        <input
+                          type={field.type}
+                          value={settings[field.key] || ""}
+                          onChange={(e) => handleChange(field.key, e.target.value)}
+                          placeholder={field.placeholder}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                        />
+                      )}
+                    </>
                   )}
                 </div>
               ))}

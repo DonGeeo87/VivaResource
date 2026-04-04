@@ -7,6 +7,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.0] - 2026-04-04 - Email System, Forms Bilingual, Events Registration Summary
+
+### Email System Overhaul ✅
+- **Migrated from Resend to Gmail SMTP** - Eliminated Resend dependency, now using free Gmail SMTP for all email sending
+- **New email routes**:
+  - `/api/email/send-summary` - Send summary emails for events and forms
+  - `/api/email/send` - Contact form and general email sending
+  - `/api/email/notify` - Admin notifications (event registrations, form submissions, volunteer signups)
+- **Email configuration**:
+  - Added Gmail SMTP credentials to `.env.local` (`EMAIL_USER`, `EMAIL_APP_PASSWORD`)
+  - All emails now send from configured Gmail account directly to inbox
+  - No more sandbox restrictions or domain verification needed
+- **Newsletter system**: Updated to use Gmail SMTP for bulk sending (with rate limiting delays)
+
+### Forms System - Bilingual Support ✅
+- **Fixed form saving** - Removed `undefined` fields that caused Firestore errors
+- **Bilingual form rendering** - Form fields now display in correct language (ES/EN) based on user preference
+  - Labels: `label` / `labelEs`
+  - Placeholders: `placeholder` / `placeholderEs`
+  - Descriptions: `description` / `descriptionEs`
+  - Options: `label` / `labelEs` for select/radio/checkbox
+- **Fixed form validation** - Zod schema now properly validates all field types
+- **Form submission emails** - Admin notifications now respect notification settings
+
+### Events Registration & Summary ✅
+- **Integrated registrations into events page** - Merged `/admin/event-registrations` into `/admin/events`
+- **Registration count badges** - Event cards now show number of registered attendees
+- **"View Registrations" button** - Opens modal with full registration table
+- **Summary email feature** - Send email summary of all registrations to admins
+  - Custom branded modal confirmation (Viva Resource colors)
+  - Beautiful HTML email with event details, registration stats, and attendee table
+- **Event details page** - Added summary email button, improved registration management
+
+### Admin Panel Improvements ✅
+- **Removed duplicate "Estado" dropdown** in form editor (redundant with FormSharePanel toggle)
+- **Settings page** - Added "Notificaciones por Email" section for configuring email recipients and toggles
+- **Confirmation modal** - Created `ConfirmModal` component with Viva Resource branding
+  - Gradient blue header with icon
+  - Bilingual support
+  - Loading state
+  - Customizable title, message, and button text
+- **Removed sync-conflict files** - Cleaned up Resilio Sync conflict files from git tracking
+
+### Firestore & Security ✅
+- **Added composite index** for `form_submissions` (formId ASC, submittedAt DESC)
+- **Updated security rules** - Added `allow list` for donations collection
+- **Admin SDK integration** - API routes now use Firebase Admin SDK for privileged operations
+  - Events CRUD uses Admin SDK
+  - Summary email uses Admin SDK
+  - Form submissions query uses Admin SDK
+
+### Bug Fixes 🐛
+- Fixed `AlertCircle` import error in form editor
+- Fixed Timestamp rendering error in event registration page
+- Fixed Fast Refresh errors from stale webpack cache
+- Fixed duplicate label rendering in public form fields
+- Fixed form save error from `undefined` field values
+- Fixed email permission denied errors (migrated to Admin SDK)
+
+### Dependencies 📦
+- Added `nodemailer` for Gmail SMTP email sending
+- Added `@types/nodemailer` for TypeScript support
+- Removed Resend SDK dependency (still configured via env but not used)
+
+### Breaking Changes ⚠️
+- **Resend no longer used** - All email functionality migrated to Gmail SMTP
+- **Email configuration** - Must configure `EMAIL_USER` and `EMAIL_APP_PASSWORD` in `.env.local`
+- **`/admin/event-registrations`** - Now redirects to `/admin/events`
+
+---
+
 ## [Unreleased] - Phase 6 Admin System In Progress
 
 ### Admin Infrastructure ✅

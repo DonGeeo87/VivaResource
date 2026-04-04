@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Save, ArrowLeft, Eye, Calendar, FileText, Users, MessageSquare, Star, X } from "lucide-react";
+import { Save, ArrowLeft, Eye, Calendar, FileText, Users, MessageSquare, Star, X, Copy, Check, AlertCircle } from "lucide-react";
 import { doc, getDoc, setDoc, addDoc, collection, Timestamp, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -86,6 +86,11 @@ export default function AdminFormEditorPage(): JSX.Element {
   const [events, setEvents] = useState<EventOption[]>([]);
   const [showTemplates, setShowTemplates] = useState(!isEditing);
   const [previewTemplate, setPreviewTemplate] = useState<string | null>(null);
+  
+  // Save success modal state
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [savedFormId, setSavedFormId] = useState<string>('');
+  const [copied, setCopied] = useState(false);
 
   const [formData, setFormData] = useState<Partial<Form>>({
     title: '',
@@ -185,10 +190,17 @@ export default function AdminFormEditorPage(): JSX.Element {
   const handleSave = async () => {
     setSaving(true);
     try {
+      // Limpiar campos undefined antes de guardar (Firestore no acepta undefined)
+      const cleanFormData = Object.fromEntries(
+        Object.entries(formData).filter(([, value]) => value !== undefined)
+      );
+
       const formDataToSave = {
-        ...formData,
+        ...cleanFormData,
         updatedAt: Timestamp.now(),
       };
+
+      let resultFormId = formId;
 
       if (isEditing) {
         await setDoc(doc(db, 'forms', formId), formDataToSave, { merge: true });
@@ -197,17 +209,41 @@ export default function AdminFormEditorPage(): JSX.Element {
           ...formDataToSave,
           createdAt: Timestamp.now(),
         });
-        router.push(`/admin/forms/${docRef.id}`);
-        return;
+        resultFormId = docRef.id;
       }
 
-      alert(language === 'es' ? 'Formulario guardado exitosamente' : 'Form saved successfully');
+      // Mostrar modal de éxito
+      setSavedFormId(resultFormId);
+      setShowSaveModal(true);
     } catch (error) {
       console.error('Error saving form:', error);
-      alert(language === 'es' ? 'Error al guardar' : 'Error saving');
+      alert(language === 'es' ? 'Error al guardar: ' + (error instanceof Error ? error.message : 'Error desconocido') : 'Error saving: ' + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleViewForm = () => {
+    window.open(`/forms/${savedFormId}`, '_blank');
+  };
+
+  const handleGoToForms = () => {
+    router.push('/admin/forms');
+  };
+
+  const handleCopyLink = () => {
+    if (typeof window === 'undefined') return;
+    const shareUrl = `${window.location.origin}/forms/${savedFormId}`;
+    navigator.clipboard.writeText(shareUrl).catch(() => {
+      // Fallback: select the input text
+      const input = document.getElementById('share-link-input') as HTMLInputElement;
+      if (input) {
+        input.select();
+        document.execCommand('copy');
+      }
+    });
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const updateFields = (fields: FormField[]) => {
@@ -502,22 +538,6 @@ export default function AdminFormEditorPage(): JSX.Element {
             </div>
           )}
 
-          {/* Status */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 className="font-semibold text-lg mb-4">
-              {language === 'es' ? 'Estado' : 'Status'}
-            </h3>
-            <select
-              value={formData.status || 'draft'}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value as 'draft' | 'published' | 'closed' })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-            >
-              <option value="draft">{language === 'es' ? 'Borrador' : 'Draft'}</option>
-              <option value="published">{language === 'es' ? 'Publicado' : 'Published'}</option>
-              <option value="closed">{language === 'es' ? 'Cerrado' : 'Closed'}</option>
-            </select>
-          </div>
-
           {/* Settings */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             <h3 className="font-semibold text-lg mb-4">
@@ -650,7 +670,14 @@ export default function AdminFormEditorPage(): JSX.Element {
               shareMode={formData.shareMode ?? 'both'}
               customSlug={formData.customSlug}
               linkedEventId={formData.linkedEventId}
-              onPublishChange={(published) => setFormData({ ...formData, published })}
+              onPublishChange={(published) => {
+                // Actualizar ambos campos: published (boolean) y status (string)
+                setFormData({
+                  ...formData,
+                  published,
+                  status: published ? 'published' : 'draft',
+                });
+              }}
               onShareModeChange={(shareMode) => setFormData({ ...formData, shareMode })}
             />
           )}
@@ -704,6 +731,95 @@ export default function AdminFormEditorPage(): JSX.Element {
               <button onClick={() => { loadTemplate(previewTemplate); setPreviewTemplate(null); }} className="px-4 py-2 text-white bg-primary rounded-lg hover:bg-primary-hover">
                 {language === 'es' ? 'Usar Plantilla' : 'Use Template'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Save Success Modal */}
+      {showSaveModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+            {/* Success Header */}
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-8 text-center">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Check className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-white">
+                {language === 'es' ? '¡Formulario Guardado!' : 'Form Saved!'}
+              </h2>
+              <p className="text-green-100 mt-2">
+                {language === 'es' ? 'Tu formulario está listo para compartir' : 'Your form is ready to share'}
+              </p>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-6">
+              {/* Publish Note */}
+              {!formData.published && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-start gap-2">
+                  <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-yellow-700">
+                    {language === 'es'
+                      ? 'El formulario está en borrador. Publícalo para que sea visible públicamente.'
+                      : 'Form is in draft. Publish it to make it publicly visible.'}
+                  </p>
+                </div>
+              )}
+
+              {/* Share Link */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  {language === 'es' ? 'Enlace para compartir' : 'Share Link'}
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    id="share-link-input"
+                    type="text"
+                    readOnly
+                    value={`${typeof window !== 'undefined' ? window.location.origin : ''}/forms/${savedFormId}`}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm font-mono text-gray-600"
+                  />
+                  <button
+                    onClick={handleCopyLink}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                      copied
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-primary text-white hover:bg-primary-hover'
+                    }`}
+                  >
+                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    {copied
+                      ? (language === 'es' ? '¡Copiado!' : 'Copied!')
+                      : (language === 'es' ? 'Copiar' : 'Copy')}
+                  </button>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="space-y-3">
+                <button
+                  onClick={handleViewForm}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-secondary text-white rounded-xl font-semibold hover:bg-secondary/90 transition-all"
+                >
+                  <Eye className="w-5 h-5" />
+                  {language === 'es' ? 'Ver Formulario' : 'View Form'}
+                </button>
+                <button
+                  onClick={() => setShowSaveModal(false)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all"
+                >
+                  <FileText className="w-5 h-5" />
+                  {language === 'es' ? 'Volver a Edición' : 'Back to Editing'}
+                </button>
+                <button
+                  onClick={handleGoToForms}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  {language === 'es' ? 'Volver a Formularios' : 'Back to Forms'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

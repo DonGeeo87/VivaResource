@@ -1,6 +1,36 @@
-import { db } from "@/lib/firebase/config";
-import { doc, updateDoc, deleteDoc, Timestamp, getDoc } from "firebase/firestore";
 import { NextRequest, NextResponse } from "next/server";
+import { FieldValue } from "firebase-admin/firestore";
+import { parseEventDateTime } from "@/lib/timezone";
+import { verifyIdToken, adminDb } from "@/lib/firebase/admin";
+
+// Helper para verificar autenticación del admin
+async function verifyAdmin(request: NextRequest) {
+  const authHeader = request.headers.get("authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return { error: "No autorizado", status: 401 };
+  }
+
+  const token = authHeader.split(" ")[1];
+  try {
+    const decodedToken = await verifyIdToken(token);
+    const uid = decodedToken.uid;
+
+    const userDoc = await adminDb.collection("admin_users").doc(uid).get();
+    if (!userDoc.exists) {
+      return { error: "No tienes acceso de administrador", status: 403 };
+    }
+
+    const userData = userDoc.data();
+    if (!userData || !["admin", "editor"].includes(userData.role)) {
+      return { error: "No tienes permisos suficientes", status: 403 };
+    }
+
+    return { uid, role: userData.role };
+  } catch (error) {
+    console.error("Error verifying token:", error);
+    return { error: "Token inválido", status: 401 };
+  }
+}
 
 // Update event
 export async function PUT(
@@ -8,6 +38,12 @@ export async function PUT(
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
   try {
+    // Verificar autenticación
+    const authResult = await verifyAdmin(request);
+    if ("error" in authResult && "status" in authResult) {
+      return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+    }
+
     const eventId = params.id;
     const body = await request.json();
 
@@ -19,33 +55,55 @@ export async function PUT(
       );
     }
 
-    // Verificar que el evento existe
-    const eventRef = doc(db, "events", eventId);
-    const eventSnap = await getDoc(eventRef);
+    // Validar fecha
+    if (!body.date) {
+      return NextResponse.json({ error: "La fecha es requerida" }, { status: 400 });
+    }
 
-    if (!eventSnap.exists()) {
+    // Verificar que el evento existe usando Admin SDK
+    const eventDoc = await adminDb.collection("events").doc(eventId).get();
+
+    if (!eventDoc.exists) {
       return NextResponse.json({ error: "Evento no encontrado" }, { status: 404 });
     }
 
+    // Parsear fecha con zona horaria de Peyton, CO (Mountain Time)
+    let parsedDate: Date;
+    try {
+      parsedDate = parseEventDateTime(body.date, body.time || "00:00");
+      if (isNaN(parsedDate.getTime())) {
+        throw new Error("Invalid date");
+      }
+    } catch {
+      return NextResponse.json(
+        { error: "Fecha inválida. Use formato YYYY-MM-DD" },
+        { status: 400 }
+      );
+    }
+
     // Preparar datos para actualizar
-    const updateData = {
+    const updateData: Record<string, unknown> = {
       title_en: body.title_en,
       title_es: body.title_es,
       slug: body.slug || "",
       description_en: body.description_en || "",
       description_es: body.description_es || "",
-      date: new Date(body.date), // Firestore timestamp
+      date: parsedDate,
       time: body.time || "",
       location: body.location || "",
       category: body.category || "community",
       registration_required: body.registration_required || false,
       status: body.status || "draft",
-      image_url: body.image_url || "",
-      updated_at: Timestamp.now(),
+      updated_at: FieldValue.serverTimestamp(),
     };
 
-    // Actualizar en Firestore
-    await updateDoc(eventRef, updateData);
+    // Only update image_url if explicitly provided (even if empty)
+    if ("image_url" in body) {
+      updateData.image_url = body.image_url || "";
+    }
+
+    // Actualizar en Firestore usando Admin SDK
+    await adminDb.collection("events").doc(eventId).update(updateData);
 
     return NextResponse.json({
       success: true,
@@ -54,8 +112,9 @@ export async function PUT(
     });
   } catch (error) {
     console.error("Error updating event:", error);
+    const message = error instanceof Error ? error.message : "Error actualizando evento";
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Error actualizando evento" },
+      { error: message },
       { status: 500 }
     );
   }
@@ -67,18 +126,23 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
   try {
+    // Verificar autenticación
+    const authResult = await verifyAdmin(request);
+    if ("error" in authResult && "status" in authResult) {
+      return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+    }
+
     const eventId = params.id;
 
-    // Verificar que el evento existe
-    const eventRef = doc(db, "events", eventId);
-    const eventSnap = await getDoc(eventRef);
+    // Verificar que el evento existe usando Admin SDK
+    const eventDoc = await adminDb.collection("events").doc(eventId).get();
 
-    if (!eventSnap.exists()) {
+    if (!eventDoc.exists) {
       return NextResponse.json({ error: "Evento no encontrado" }, { status: 404 });
     }
 
-    // Eliminar de Firestore
-    await deleteDoc(eventRef);
+    // Eliminar de Firestore usando Admin SDK
+    await adminDb.collection("events").doc(eventId).delete();
 
     return NextResponse.json({
       success: true,
@@ -94,23 +158,28 @@ export async function DELETE(
   }
 }
 
-// Get single event (optional)
+// Get single event
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
   try {
-    const eventId = params.id;
-    const eventRef = doc(db, "events", eventId);
-    const eventSnap = await getDoc(eventRef);
+    // Verificar autenticación
+    const authResult = await verifyAdmin(request);
+    if ("error" in authResult && "status" in authResult) {
+      return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+    }
 
-    if (!eventSnap.exists()) {
+    const eventId = params.id;
+    const eventDoc = await adminDb.collection("events").doc(eventId).get();
+
+    if (!eventDoc.exists) {
       return NextResponse.json({ error: "Evento no encontrado" }, { status: 404 });
     }
 
     return NextResponse.json({
-      id: eventSnap.id,
-      ...eventSnap.data(),
+      id: eventDoc.id,
+      ...eventDoc.data(),
     });
   } catch (error) {
     console.error("Error fetching event:", error);
