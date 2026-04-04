@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
-import { adminDb } from "@/lib/firebase/admin";
+import { adminDb as getAdminDb } from "@/lib/firebase/admin";
 
 // Configurar transporte de Gmail SMTP
 const transporter = nodemailer.createTransport({
