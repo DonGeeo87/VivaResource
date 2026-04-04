@@ -91,6 +91,7 @@ export default function Home(): JSX.Element {
   const pathwaysSection = useInView({ threshold: 0.1 });
   const pathwaysStagger = useInView({ threshold: 0.1 });
   const faqSection = useInView({ threshold: 0.1 });
+  const faqStagger = useInView({ threshold: 0.05 });
   const contactSection = useInView({ threshold: 0.15 });
 
   // Parallax refs
@@ -582,13 +583,13 @@ export default function Home(): JSX.Element {
       </section>
 
       {/* 10. FAQ */}
-      <section ref={faqSection.ref} className={`py-24 px-6 bg-surface-low animate-on-scroll animate-slide-up ${faqSection.isInView ? 'in-view' : ''}`}>
-        <div className="max-w-3xl mx-auto space-y-12">
+      <section ref={faqSection.ref} className={`py-12 md:py-24 px-6 bg-surface-low animate-on-scroll animate-slide-up ${faqSection.isInView ? 'in-view' : ''}`}>
+        <div className="max-w-3xl mx-auto space-y-8 md:space-y-12">
           <div className="text-center">
-            <h2 className="text-4xl font-headline font-bold">{translations.home.faqTitle}</h2>
-            <p className="mt-4 text-on-surface-variant">{translations.home.faqSubtitle}</p>
+            <h2 className="text-3xl md:text-4xl font-headline font-bold">{translations.home.faqTitle}</h2>
+            <p className="mt-2 md:mt-4 text-sm md:text-base text-on-surface-variant">{translations.home.faqSubtitle}</p>
           </div>
-          <div className="space-y-4 stagger-container">
+          <div ref={faqStagger.ref} className={`space-y-3 md:space-y-4 stagger-container ${faqStagger.isInView ? 'in-view' : ''}`}>
             <FAQItem
               question={translations.home.faqQ1}
               answer={translations.home.faqA1}
