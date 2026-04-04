@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { adminDb as getAdminDb } from "@/lib/firebase/admin";
 
+// Force dynamic rendering - uses Firebase Admin SDK which requires runtime env vars
+export const dynamic = "force-dynamic";
+
 // Configurar transporte de Gmail SMTP
 const transporter = nodemailer.createTransport({
   service: "gmail",

@@ -3,6 +3,9 @@ import { FieldValue } from "firebase-admin/firestore";
 import { parseEventDateTime } from "@/lib/timezone";
 import { verifyIdToken, adminDb as getAdminDb } from "@/lib/firebase/admin";
 
+// Force dynamic rendering - uses Firebase Admin SDK
+export const dynamic = "force-dynamic";
+
 // Helper para verificar autenticación del admin
 async function verifyAdmin(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
