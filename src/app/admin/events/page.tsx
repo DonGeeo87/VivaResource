@@ -43,6 +43,7 @@ export default function AdminEventsPage(): JSX.Element {
   const { language } = useLanguage();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   
@@ -101,6 +102,7 @@ export default function AdminEventsPage(): JSX.Element {
       setEvents(eventsWithCounts);
     } catch (error) {
       console.error("Error fetching events:", error);
+      setError(error instanceof Error ? error.message : "Failed to fetch events");
     } finally {
       setLoading(false);
     }

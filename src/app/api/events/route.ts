@@ -19,7 +19,8 @@ async function verifyAdmin(request: NextRequest) {
 
     const db = await adminDb();
     if (!db) {
-      return { error: "Database not configured", status: 500 };
+      console.error("[API Events] Database not configured");
+    return { error: "Database not configured - check Vercel environment variables", status: 500 };
     }
 
     // Verificar que el usuario esté en admin_users (usando Admin SDK para bypass reglas)
@@ -151,7 +152,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     if (!db) {
       return NextResponse.json({ error: "Database not configured" }, { status: 500 });
     }
+    console.log("[API Events] Fetching events...");
     const snapshot = await db.collection("events").orderBy("date", "desc").get();
+    console.log("[API Events] Found", snapshot.size, "events");
 
     const events = snapshot.docs.map(doc => ({
       id: doc.id,
