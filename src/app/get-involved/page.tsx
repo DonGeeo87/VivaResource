@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { Star, HeartHandshake, AlertCircle, GraduationCap, Package, CheckCircle, XCircle } from "lucide-react";
+import { Star, HeartHandshake, AlertCircle, GraduationCap, Package } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { useToast } from "@/components/Toast";
+import { FormField, Input, Textarea, Select, Checkbox } from "@/components/ui/FormField";
+import SuccessMessage from "@/components/ui/SuccessMessage";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
 const skillsOptions = [
   { id: "communityOutreach", label: "Community Outreach", labelEs: "Extensión Comunitaria" },
@@ -151,15 +154,15 @@ export default function GetInvolvedPage(): JSX.Element {
     // Validate all required fields
     const errors: Record<string, string> = {};
     if (!formData.firstName.trim()) {
-      errors.firstName = language === "en" ? "First name is required" : "El nombre es requerido";
+      errors.firstName = isES ? "First name is required" : "El nombre es requerido";
     }
     if (!formData.lastName.trim()) {
-      errors.lastName = language === "en" ? "Last name is required" : "El apellido es requerido";
+      errors.lastName = isES ? "Last name is required" : "El apellido es requerido";
     }
     if (!formData.email.trim()) {
-      errors.email = language === "en" ? "Email is required" : "El correo es requerido";
+      errors.email = isES ? "Email is required" : "El correo es requerido";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = language === "en" ? "Please enter a valid email" : "Ingrese un correo válido";
+      errors.email = isES ? "Please enter a valid email" : "Ingrese un correo válido";
     }
 
     if (Object.keys(errors).length > 0) {
@@ -184,31 +187,26 @@ export default function GetInvolvedPage(): JSX.Element {
       });
 
       // Send admin notification email asynchronously (don't block UI)
-      try {
-        fetch("/api/email/notify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            type: "new-volunteer",
-            data: {
-              firstName: formData.firstName,
-              lastName: formData.lastName,
-              email: formData.email,
-              phone: formData.phone || "",
-              program: formData.program,
-              skills: formData.skills,
-              interests: formData.interests,
-              availability: formData.availability,
-            },
-          }),
-        }).catch((emailErr) => console.error("Failed to send volunteer notification:", emailErr));
-      } catch (emailError) {
-        // Silently fail - don't block the main operation
-        console.error("Error triggering volunteer notification:", emailError);
-      }
+      fetch("/api/email/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "new-volunteer",
+          data: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            phone: formData.phone || "",
+            program: formData.program,
+            skills: formData.skills,
+            interests: formData.interests,
+            availability: formData.availability,
+          },
+        }),
+      }).catch((emailErr) => console.error("Failed to send volunteer notification:", emailErr));
 
       setSubmitStatus("success");
-      showToast(language === "en" ? "Application submitted successfully!" : "¡Solicitud enviada exitosamente!", "success");
+      showToast(isES ? "¡Solicitud enviada exitosamente!" : "Application submitted successfully!", "success");
       setFormData({
         firstName: "",
         lastName: "",
@@ -223,7 +221,7 @@ export default function GetInvolvedPage(): JSX.Element {
     } catch (error) {
       console.error("Error submitting volunteer registration:", error);
       setSubmitStatus("error");
-      setErrorMessage(language === "en" ? "Something went wrong. Please try again." : "Algo salió mal. Por favor intente de nuevo.");
+      setErrorMessage(isES ? "Something went wrong. Please try again." : "Algo salió mal. Por favor intente de nuevo.");
     } finally {
       setIsSubmitting(false);
     }
@@ -397,179 +395,177 @@ export default function GetInvolvedPage(): JSX.Element {
             </div>
             <div className="md:w-2/3 p-12 bg-surface-lowest">
               {submitStatus === "success" ? (
-                <div className="text-center py-12">
-                  <CheckCircle className="w-16 h-16 text-secondary mx-auto mb-4" />
-                  <h3 className="font-headline text-2xl font-bold text-primary mb-2">
-                    {language === "en" ? "Thank You!" : "¡Gracias!"}
-                  </h3>
-                  <p className="text-on-surface-variant mb-6">
-                    {language === "en" 
-                      ? "Your application has been submitted. We'll be in touch within 48 hours." 
-                      : "Su solicitud ha sido enviada. Nos pondremos en contacto en 48 horas."}
-                  </p>
+                <div className="text-center py-12 space-y-6">
+                  <SuccessMessage
+                    type="success"
+                    title={isES ? "¡Gracias!" : "Thank You!"}
+                    message={isES 
+                      ? "Su solicitud ha sido enviada. Nos pondremos en contacto en 48 horas." 
+                      : "Your application has been submitted. We'll be in touch within 48 hours."}
+                  />
                   <button
                     onClick={() => setSubmitStatus("idle")}
                     className="text-primary font-medium hover:underline"
                   >
-                    {language === "en" ? "Submit another application" : "Enviar otra solicitud"}
+                    {isES ? "Enviar otra solicitud" : "Submit another application"}
                   </button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {submitStatus === "error" && (
-                    <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-                      <XCircle className="w-5 h-5 flex-shrink-0" />
-                      <p className="text-sm">{errorMessage}</p>
-                    </div>
+                    <SuccessMessage
+                      type="error"
+                      title="Error"
+                      message={errorMessage}
+                      onClose={() => setSubmitStatus("idle")}
+                    />
                   )}
                   <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-on-surface-variant mb-2">
-                        {language === "en" ? "First Name *" : "Nombre *"}
-                      </label>
-                      <input
-                        type="text"
+                    <FormField
+                      label={isES ? "Nombre" : "First Name"}
+                      required
+                      error={fieldErrors.firstName}
+                    >
+                      <Input
+                        id="first-name"
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleInputChange}
                         placeholder="Jane"
-                        className="w-full bg-surface-highest border-none rounded-lg focus:ring-2 focus:ring-primary py-3 px-4 outline-none"
-                        required
+                        autoComplete="given-name"
+                        error={!!fieldErrors.firstName}
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-on-surface-variant mb-2">
-                        {language === "en" ? "Last Name *" : "Apellido *"}
-                      </label>
-                      <input
-                        type="text"
+                    </FormField>
+                    <FormField
+                      label={isES ? "Apellido" : "Last Name"}
+                      required
+                      error={fieldErrors.lastName}
+                    >
+                      <Input
+                        id="last-name"
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleInputChange}
                         placeholder="Doe"
-                        className="w-full bg-surface-highest border-none rounded-lg focus:ring-2 focus:ring-primary py-3 px-4 outline-none"
-                        required
+                        autoComplete="family-name"
+                        error={!!fieldErrors.lastName}
                       />
-                    </div>
+                    </FormField>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-on-surface-variant mb-2">
-                        {language === "en" ? "Email *" : "Correo Electrónico *"}
-                      </label>
-                      <input
-                        type="email"
+                    <FormField
+                      label={isES ? "Correo Electrónico" : "Email"}
+                      required
+                      error={fieldErrors.email}
+                    >
+                      <Input
+                        id="email"
                         name="email"
+                        type="email"
                         value={formData.email}
                         onChange={handleInputChange}
                         placeholder="jane@example.com"
-                        className="w-full bg-surface-highest border-none rounded-lg focus:ring-2 focus:ring-primary py-3 px-4 outline-none"
-                        required
+                        autoComplete="email"
+                        error={!!fieldErrors.email}
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-on-surface-variant mb-2">
-                        {language === "en" ? "Phone" : "Teléfono"}
-                      </label>
-                      <input
-                        type="tel"
+                    </FormField>
+                    <FormField
+                      label={isES ? "Teléfono" : "Phone"}
+                    >
+                      <Input
+                        id="phone"
                         name="phone"
+                        type="tel"
                         value={formData.phone}
                         onChange={handleInputChange}
                         placeholder="+1 (555) 000-0000"
-                        className="w-full bg-surface-highest border-none rounded-lg focus:ring-2 focus:ring-primary py-3 px-4 outline-none"
+                        autoComplete="tel"
                       />
-                    </div>
+                    </FormField>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-on-surface-variant mb-2">
-                      {language === "en" ? "Program of Interest" : "Programa de Interés"}
-                    </label>
-                    <select
+                  <FormField
+                    label={isES ? "Programa de Interés" : "Program of Interest"}
+                  >
+                    <Select
+                      id="program"
                       name="program"
                       value={formData.program}
                       onChange={handleInputChange}
-                      className="w-full bg-surface-highest border-none rounded-lg focus:ring-2 focus:ring-primary py-3 px-4 outline-none"
-                    >
-                      <option value="ambassador">{language === "en" ? "Ambassador Program" : "Programa de Embajadores"}</option>
-                      <option value="volunteer">{language === "en" ? "Volunteer Program" : "Programa de Voluntariado"}</option>
-                      <option value="general">{language === "en" ? "General Inquiry" : "Consulta General"}</option>
-                    </select>
-                  </div>
+                      options={[
+                        { value: "ambassador", label: isES ? "Programa de Embajadores" : "Ambassador Program" },
+                        { value: "volunteer", label: isES ? "Programa de Voluntariado" : "Volunteer Program" },
+                        { value: "general", label: isES ? "Consulta General" : "General Inquiry" },
+                      ]}
+                    />
+                  </FormField>
                   <div>
                     <label className="block text-sm font-medium text-on-surface-variant mb-3">
-                      {language === "en" ? "Skills (select all that apply)" : "Habilidades (seleccione todas las aplicables)"}
+                      {isES ? "Habilidades (seleccione todas las aplicables)" : "Skills (select all that apply)"}
                     </label>
                     <div className="grid grid-cols-2 gap-3">
                       {skillsOptions.map((skill) => (
-                        <label key={skill.id} className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={formData.skills.includes(skill.id)}
-                            onChange={() => handleCheckboxChange("skills", skill.id)}
-                            className="w-4 h-4 text-primary rounded focus:ring-primary"
-                          />
-                          <span className="text-sm text-on-surface-variant">
-                            {language === "en" ? skill.label : skill.labelEs}
-                          </span>
-                        </label>
+                        <Checkbox
+                          key={skill.id}
+                          id={`skill-${skill.id}`}
+                          label={isES ? skill.labelEs : skill.label}
+                          checked={formData.skills.includes(skill.id)}
+                          onChange={() => handleCheckboxChange("skills", skill.id)}
+                        />
                       ))}
                     </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-on-surface-variant mb-3">
-                      {language === "en" ? "Areas of Interest" : "Áreas de Interés"}
+                      {isES ? "Áreas de Interés" : "Areas of Interest"}
                     </label>
                     <div className="grid grid-cols-2 gap-3">
                       {interestsOptions.map((interest) => (
-                        <label key={interest.id} className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={formData.interests.includes(interest.id)}
-                            onChange={() => handleCheckboxChange("interests", interest.id)}
-                            className="w-4 h-4 text-primary rounded focus:ring-primary"
-                          />
-                          <span className="text-sm text-on-surface-variant">
-                            {language === "en" ? interest.label : interest.labelEs}
-                          </span>
-                        </label>
+                        <Checkbox
+                          key={interest.id}
+                          id={`interest-${interest.id}`}
+                          label={isES ? interest.labelEs : interest.label}
+                          checked={formData.interests.includes(interest.id)}
+                          onChange={() => handleCheckboxChange("interests", interest.id)}
+                        />
                       ))}
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-on-surface-variant mb-2">
-                      {language === "en" ? "Availability" : "Disponibilidad"}
-                    </label>
-                    <input
-                      type="text"
+                  <FormField
+                    label={isES ? "Disponibilidad" : "Availability"}
+                  >
+                    <Input
+                      id="availability"
                       name="availability"
                       value={formData.availability}
                       onChange={handleInputChange}
-                      placeholder={language === "en" ? "e.g., Weekends, Evenings" : "ej., Fines de semana, Tardes"}
-                      className="w-full bg-surface-highest border-none rounded-lg focus:ring-2 focus:ring-primary py-3 px-4 outline-none"
+                      placeholder={isES ? "ej., Fines de semana, Tardes" : "e.g., Weekends, Evenings"}
                     />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-on-surface-variant mb-2">
-                      {language === "en" ? "Relevant Experience" : "Experiencia Relevante"}
-                    </label>
-                    <textarea
+                  </FormField>
+                  <FormField
+                    label={isES ? "Experiencia Relevante" : "Relevant Experience"}
+                  >
+                    <Textarea
+                      id="experience"
                       name="experience"
                       value={formData.experience}
                       onChange={handleInputChange}
-                      placeholder={language === "en" ? "Tell us about any relevant experience..." : "Cuéntenos sobre su experiencia relevante..."}
+                      placeholder={isES ? "Cuéntenos sobre su experiencia relevante..." : "Tell us about any relevant experience..."}
                       rows={3}
-                      className="w-full bg-surface-highest border-none rounded-lg focus:ring-2 focus:ring-primary py-3 px-4 outline-none resize-none"
                     />
-                  </div>
+                  </FormField>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-secondary text-on-secondary font-headline font-bold py-4 rounded-full hover:opacity-90 transition-all shadow-md mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-secondary text-on-secondary font-headline font-bold py-4 rounded-full hover:opacity-90 transition-all shadow-md mt-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                   >
-                    {isSubmitting 
-                      ? (language === "en" ? "Submitting..." : "Enviando...")
-                      : (language === "en" ? "Submit Application" : "Enviar Solicitud")}
+                    {isSubmitting ? (
+                      <>
+                        <LoadingSpinner size="sm" color="white" />
+                        {isES ? "Enviando..." : "Submitting..."}
+                      </>
+                    ) : (
+                      isES ? "Enviar Solicitud" : "Submit Application"
+                    )}
                   </button>
                 </form>
               )}
@@ -580,16 +576,18 @@ export default function GetInvolvedPage(): JSX.Element {
         {/* Final CTA */}
         <section className="py-24 px-6 text-center max-w-4xl mx-auto">
           <h2 className="font-headline text-5xl font-extrabold text-primary mb-8 tracking-tight">
-            Ready to take the first step? / ¿Listo para dar el primer paso?
+            {isES ? "¿Listo para dar el primer paso?" : "Ready to take the first step?"}
           </h2>
           <p className="text-xl text-on-surface-variant mb-12 max-w-2xl mx-auto">
-            Your impact starts here. Join a community dedicated to resilience, equity, and hope.
+            {isES 
+              ? "Tu impacto comienza aquí. Únete a una comunidad dedicada a la resiliencia, equidad y esperanza."
+              : "Your impact starts here. Join a community dedicated to resilience, equity, and hope."}
           </p>
           <Link
             href="#apply"
             className="inline-block bg-secondary text-on-secondary px-12 py-5 rounded-full font-headline font-extrabold text-xl hover:scale-105 transition-transform duration-300 shadow-xl"
           >
-            Join Us / Únase a Nosotros
+            {isES ? "Únase a Nosotros" : "Join Us"}
           </Link>
         </section>
       </main>

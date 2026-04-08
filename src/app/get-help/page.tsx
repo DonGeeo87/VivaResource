@@ -26,6 +26,10 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 
+import { FormField, Input, Textarea } from '@/components/ui/FormField';
+import SuccessMessage from '@/components/ui/SuccessMessage';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+
 interface StepCardProps {
   number: string;
   icon: React.ReactNode;
@@ -193,8 +197,9 @@ function CrisisModal({
 }
 
 export default function GetHelpPage() {
-  const { translations } = useLanguage();
+  const { translations, language } = useLanguage();
   const t = translations.getHelp;
+  const isES = language === 'es';
 
   // Crisis modal state
   const [crisisModalOpen, setCrisisModalOpen] = useState(false);
@@ -208,6 +213,7 @@ export default function GetHelpPage() {
     description: "",
   });
   const [formSubmitting, setFormSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formSuccess, setFormSuccess] = useState(false);
   const [formError, setFormError] = useState("");
 
@@ -226,15 +232,16 @@ export default function GetHelpPage() {
 
     // Validation
     if (!formData.fullName.trim()) {
-      setFormError("Please enter your full name.");
+      setFieldErrors(prev => ({ ...prev, fullName: isES ? "El nombre completo es requerido" : "Full name is required" }));
+      setFormError(isES ? "Por favor complete los campos requeridos" : "Please fill in required fields");
       return;
     }
     if (!formData.email.trim()) {
-      setFormError("Please enter your email address.");
+      setFieldErrors(prev => ({ ...prev, email: isES ? "El correo es requerido" : "Email is required" }));
       return;
     }
     if (formData.assistanceTypes.length === 0) {
-      setFormError("Please select at least one type of assistance.");
+      setFormError(isES ? "Seleccione al menos un tipo de asistencia" : "Please select at least one type of assistance");
       return;
     }
 
@@ -394,25 +401,21 @@ export default function GetHelpPage() {
 
             {/* Success Message */}
             {formSuccess && (
-              <div className="mb-6 flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700">
-                <CheckCircle className="w-6 h-6 flex-shrink-0" />
-                <div>
-                  <p className="font-bold">
-                    Request submitted successfully! / ¡Solicitud enviada!
-                  </p>
-                  <p className="text-sm">
-                    We will contact you within 24-48 hours.
-                  </p>
-                </div>
-              </div>
+              <SuccessMessage
+                type="success"
+                title={isES ? "¡Solicitud enviada!" : "Request submitted successfully!"}
+                message={isES ? "Nos pondremos en contacto en 24-48 horas." : "We will contact you within 24-48 hours."}
+              />
             )}
 
             {/* Error Message */}
             {formError && (
-              <div className="mb-6 flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
-                <X className="w-6 h-6 flex-shrink-0" />
-                <p className="font-bold">{formError}</p>
-              </div>
+              <SuccessMessage
+                type="error"
+                title="Error"
+                message={formError}
+                onClose={() => setFormError("")}
+              />
             )}
 
             <form onSubmit={handleSubmit} className="space-y-10">
@@ -423,36 +426,40 @@ export default function GetHelpPage() {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="font-label text-sm font-semibold uppercase text-on-surface-variant">
-                      {t.fullName} *
-                    </label>
-                    <input
-                      name="fullName"
-                      className="w-full bg-surface-highest border-none rounded-lg focus:ring-2 focus:ring-primary p-4"
-                      placeholder="Jane Doe"
-                      type="text"
-                      value={formData.fullName}
-                      onChange={(e) =>
-                        setFormData({ ...formData, fullName: e.target.value })
-                      }
-                      required
-                    />
+                    <FormField label={isES ? 'Nombre Completo *' : t.fullName + ' *'} required error={fieldErrors.fullName}>
+                      <Input
+                        id="full-name"
+                        name="fullName"
+                        className="w-full bg-surface-highest border-none rounded-lg focus:ring-2 focus:ring-primary p-4"
+                        placeholder="Jane Doe"
+                        type="text"
+                        value={formData.fullName}
+                        onChange={(e) =>
+                          setFormData({ ...formData, fullName: e.target.value })
+                        }
+                        autoComplete="name"
+                        error={!!fieldErrors.fullName}
+                        required
+                      />
+                    </FormField>
                   </div>
                   <div className="space-y-2">
-                    <label className="font-label text-sm font-semibold uppercase text-on-surface-variant">
-                      {t.emailAddress} *
-                    </label>
-                    <input
-                      name="email"
-                      className="w-full bg-surface-highest border-none rounded-lg focus:ring-2 focus:ring-primary p-4"
-                      placeholder="jane@example.com"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      required
-                    />
+                    <FormField label={isES ? 'Correo Electrónico *' : t.emailAddress + ' *'} required error={fieldErrors.email}>
+                      <Input
+                        id="email"
+                        name="email"
+                        className="w-full bg-surface-highest border-none rounded-lg focus:ring-2 focus:ring-primary p-4"
+                        placeholder="jane@example.com"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) =>
+                          setFormData({ ...formData, email: e.target.value })
+                        }
+                        autoComplete="email"
+                        error={!!fieldErrors.email}
+                        required
+                      />
+                    </FormField>
                   </div>
                 </div>
               </div>
@@ -526,7 +533,8 @@ export default function GetHelpPage() {
                   <label className="font-label text-sm font-semibold uppercase text-on-surface-variant">
                     {t.briefDescriptionNeed}
                   </label>
-                  <textarea
+                  <Textarea
+                    id="description"
                     name="description"
                     className="w-full bg-surface-highest border-none rounded-lg focus:ring-2 focus:ring-primary p-4"
                     placeholder={t.tellUsHowWeCanHelp}
@@ -541,13 +549,18 @@ export default function GetHelpPage() {
 
               <div className="pt-6">
                 <button
-                  className="w-full bg-secondary text-on-secondary py-5 rounded-full font-black text-lg shadow-xl hover:shadow-2xl transition-all transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-secondary text-on-secondary py-5 rounded-full font-black text-lg shadow-xl hover:shadow-2xl transition-all transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                   type="submit"
                   disabled={formSubmitting}
                 >
-                  {formSubmitting
-                    ? "Submitting... / Enviando..."
-                    : t.sendRequest}
+                  {formSubmitting ? (
+                      <>
+                        <LoadingSpinner size="sm" color="white" />
+                        {isES ? "Enviando..." : "Submitting..."}
+                      </>
+                    ) : (
+                      t.sendRequest
+                    )}
                 </button>
                 <p className="text-center mt-4 text-sm text-on-surface-variant">
                   {t.privacyPolicyNote}{" "}

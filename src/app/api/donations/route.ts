@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// Marcar esta ruta como dinámica para evitar el error de renderizado estático
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // Lazy import Firebase Admin SDK

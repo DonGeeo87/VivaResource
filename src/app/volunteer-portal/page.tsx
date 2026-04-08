@@ -3,9 +3,13 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AdminAuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { collection, query, where, getDocs, orderBy, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
-import { CheckCircle, Clock, XCircle, Calendar, Mail, Phone } from "lucide-react";
+import { Calendar, Mail, Phone } from "lucide-react";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import Card from "@/components/ui/Card";
+import Badge from "@/components/ui/Badge";
 
 interface VolunteerApplication {
   id: string;
@@ -25,6 +29,9 @@ interface VolunteerApplication {
 export default function VolunteerPortalPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { language, translations } = useLanguage();
+  const t = translations.volunteerPortal;
+
   const [applications, setApplications] = useState<VolunteerApplication[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -59,40 +66,43 @@ export default function VolunteerPortalPage() {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "approved":
-        return <CheckCircle className="w-6 h-6 text-green-600" />;
-      case "pending":
-        return <Clock className="w-6 h-6 text-yellow-600" />;
-      case "rejected":
-        return <XCircle className="w-6 h-6 text-red-600" />;
-      default:
-        return null;
-    }
-  };
-
   const getStatusText = (status: string) => {
     switch (status) {
       case "approved":
-        return "Aprobado";
+        return t.statusApproved;
       case "pending":
-        return "Pendiente";
+        return t.statusPending;
       case "rejected":
-        return "Rechazado";
+        return t.statusRejected;
       default:
         return status;
     }
   };
 
+  const getProgramText = (program: string) => {
+    switch (program) {
+      case "ambassador":
+        return t.programAmbassador;
+      case "volunteer":
+        return t.programVolunteer;
+      default:
+        return t.programGeneral;
+    }
+  };
+
+  const formatDate = (date: Timestamp | Date) => {
+    const dateObj = date instanceof Timestamp ? date.toDate() : new Date(date);
+    const locale = language === "es" ? "es-ES" : "en-US";
+    return dateObj.toLocaleDateString(locale, {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    });
+  };
+
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4" />
-          <p className="text-gray-600">Cargando...</p>
-        </div>
-      </div>
+      <LoadingSpinner size="lg" text={t.loading} fullScreen />
     );
   }
 
@@ -101,83 +111,69 @@ export default function VolunteerPortalPage() {
       {/* Header */}
       <header className="bg-primary text-white py-6">
         <div className="max-w-7xl mx-auto px-6">
-          <h1 className="text-3xl font-bold">Portal de Voluntarios</h1>
-          <p className="text-primary-100 mt-2">Bienvenido, {user?.email}</p>
+          <h1 className="text-3xl font-bold">{t.title}</h1>
+          <p className="text-primary-100 mt-2">{t.welcome}, {user?.email}</p>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-12">
         {applications.length === 0 ? (
-          <div className="bg-white rounded-xl p-12 text-center shadow-sm">
-            <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-6" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              No tienes solicitudes registradas
-            </h2>
-            <p className="text-gray-600 mb-8">
-              ¿Te gustaría convertirte en voluntario? Envía tu solicitud.
-            </p>
-            <a
-              href="/get-involved"
-              className="inline-block bg-primary text-white px-8 py-3 rounded-full font-bold hover:bg-primary-hover transition-colors"
-            >
-              Enviar Solicitud
-            </a>
-          </div>
+          <Card className="text-center" padding="lg">
+            <div className="py-4">
+              <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-6" />
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                {t.noApplications}
+              </h2>
+              <p className="text-gray-600 mb-8">
+                {t.noApplicationsDesc}
+              </p>
+              <a
+                href="/get-involved"
+                className="inline-block bg-primary text-white px-8 py-3 rounded-full font-bold hover:bg-primary-hover transition-colors"
+              >
+                {t.submitApplication}
+              </a>
+            </div>
+          </Card>
         ) : (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Tus Solicitudes
+              {t.yourApplications}
             </h2>
 
             {applications.map((app) => (
-              <div
-                key={app.id}
-                className="bg-white rounded-xl p-6 shadow-sm border border-gray-100"
-              >
+              <Card key={app.id} padding="lg">
                 <div className="flex items-start justify-between mb-6">
                   <div className="flex items-center gap-4">
-                    {getStatusIcon(app.status)}
                     <div>
                       <h3 className="font-bold text-lg text-gray-900">
-                        {app.program === "ambassador"
-                          ? "Programa de Embajadores"
-                          : app.program === "volunteer"
-                          ? "Programa de Voluntariado"
-                          : "Consulta General"}
+                        {getProgramText(app.program)}
                       </h3>
                       <p className="text-sm text-gray-600">
-                        {app.created_at instanceof Timestamp
-                          ? app.created_at.toDate().toLocaleDateString("es-ES", {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric"
-                            })
-                          : new Date(app.created_at).toLocaleDateString("es-ES", {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric"
-                            })}
+                        {formatDate(app.created_at)}
                       </p>
                     </div>
                   </div>
-                  <span className={`px-4 py-2 rounded-full text-sm font-medium ${
-                    app.status === "approved"
-                      ? "bg-green-100 text-green-700"
-                      : app.status === "pending"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-red-100 text-red-700"
-                  }`}>
+                  <Badge
+                    variant={
+                      app.status === "approved"
+                        ? "success"
+                        : app.status === "pending"
+                        ? "warning"
+                        : "error"
+                    }
+                  >
                     {getStatusText(app.status)}
-                  </span>
+                  </Badge>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="font-semibold text-gray-700 mb-2">Información Personal</h4>
+                    <h4 className="font-semibold text-gray-700 mb-2">{t.personalInfo}</h4>
                     <div className="space-y-2 text-sm">
                       <p className="text-gray-600">
-                        <strong>Nombre:</strong> {app.firstName} {app.lastName}
+                        <strong>{t.name}:</strong> {app.firstName} {app.lastName}
                       </p>
                       <div className="flex items-center gap-2 text-gray-600">
                         <Mail className="w-4 h-4" />
@@ -194,7 +190,7 @@ export default function VolunteerPortalPage() {
 
                   {app.skills && app.skills.length > 0 && (
                     <div>
-                      <h4 className="font-semibold text-gray-700 mb-2">Habilidades</h4>
+                      <h4 className="font-semibold text-gray-700 mb-2">{t.skills}</h4>
                       <div className="flex flex-wrap gap-2">
                         {app.skills.map((skill, i) => (
                           <span
@@ -210,7 +206,7 @@ export default function VolunteerPortalPage() {
 
                   {app.interests && app.interests.length > 0 && (
                     <div>
-                      <h4 className="font-semibold text-gray-700 mb-2">Intereses</h4>
+                      <h4 className="font-semibold text-gray-700 mb-2">{t.interests}</h4>
                       <div className="flex flex-wrap gap-2">
                         {app.interests.map((interest, i) => (
                           <span
@@ -225,20 +221,20 @@ export default function VolunteerPortalPage() {
                   )}
 
                   <div>
-                    <h4 className="font-semibold text-gray-700 mb-2">Disponibilidad</h4>
-                    <p className="text-sm text-gray-600">{app.availability || "No especificada"}</p>
+                    <h4 className="font-semibold text-gray-700 mb-2">{t.availability}</h4>
+                    <p className="text-sm text-gray-600">{app.availability || t.notSpecified}</p>
                   </div>
 
                   <div>
-                    <h4 className="font-semibold text-gray-700 mb-2">Experiencia</h4>
-                    <p className="text-sm text-gray-600">{app.experience || "No especificada"}</p>
+                    <h4 className="font-semibold text-gray-700 mb-2">{t.experience}</h4>
+                    <p className="text-sm text-gray-600">{app.experience || t.notSpecified}</p>
                   </div>
                 </div>
 
                 {app.status === "approved" && (
                   <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
                     <p className="text-sm text-green-800 font-medium">
-                      ¡Tu solicitud ha sido aprobada! Nos pondremos en contacto contigo pronto para coordinar tu participación.
+                      {t.approvedMessage}
                     </p>
                   </div>
                 )}
@@ -246,7 +242,7 @@ export default function VolunteerPortalPage() {
                 {app.status === "pending" && (
                   <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <p className="text-sm text-yellow-800 font-medium">
-                      Tu solicitud está siendo revisada. Te contactaremos dentro de 48 horas.
+                      {t.pendingMessage}
                     </p>
                   </div>
                 )}
@@ -254,11 +250,11 @@ export default function VolunteerPortalPage() {
                 {app.status === "rejected" && (
                   <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                     <p className="text-sm text-red-800 font-medium">
-                      Tu solicitud no ha sido aprobada en esta ocasión. Gracias por tu interés.
+                      {t.rejectedMessage}
                     </p>
                   </div>
                 )}
-              </div>
+            </Card>
             ))}
           </div>
         )}

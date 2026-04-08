@@ -42,6 +42,8 @@ export default function ContactPage(): JSX.Element {
   const { showToast, Toast: ToastComponent } = useToast();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -184,6 +186,7 @@ export default function ContactPage(): JSX.Element {
                     value={formData.firstName}
                     onChange={handleChange}
                     required
+                    autoComplete="given-name"
                     placeholder="John / Juan"
                     className="w-full bg-surface-container border-none rounded-xl p-4 focus:ring-2 focus:ring-primary transition-all duration-300"
                   />
@@ -198,6 +201,7 @@ export default function ContactPage(): JSX.Element {
                     value={formData.lastName}
                     onChange={handleChange}
                     required
+                    autoComplete="family-name"
                     placeholder="Doe / Pérez"
                     className="w-full bg-surface-container border-none rounded-xl p-4 focus:ring-2 focus:ring-primary transition-all duration-300"
                   />
@@ -214,6 +218,7 @@ export default function ContactPage(): JSX.Element {
                     value={formData.email}
                     onChange={handleChange}
                     required
+                    autoComplete="email"
                     placeholder="email@example.com"
                     className="w-full bg-surface-container border-none rounded-xl p-4 focus:ring-2 focus:ring-primary transition-all duration-300"
                   />
@@ -227,6 +232,7 @@ export default function ContactPage(): JSX.Element {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
+                    autoComplete="tel"
                     placeholder="(000) 000-0000"
                     className="w-full bg-surface-container border-none rounded-xl p-4 focus:ring-2 focus:ring-primary transition-all duration-300"
                   />
