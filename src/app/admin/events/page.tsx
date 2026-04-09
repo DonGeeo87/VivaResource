@@ -278,8 +278,8 @@ export default function AdminEventsPage(): JSX.Element {
             ))}
           </>
         ) : filteredEvents.length === 0 ? (
-          <div className="col-span-full bg-white rounded-xl p-12 text-center text-gray-500">
-            {language === "es" ? "No se encontraron eventos" : "No events found"}
+          <div className="col-span-full bg-white rounded-xl p-12 text-center">
+            {error ? (<div className="text-red-600"><p className="font-semibold mb-2">Error: {error}</p><p className="text-sm text-gray-500">Check server logs</p></div>) : (<p className="text-gray-500">{language === "es" ? "No se encontraron eventos" : "No events found"}</p>)}
           </div>
         ) : (
           filteredEvents.map((event) => (
