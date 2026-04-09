@@ -7,13 +7,26 @@ let adminApp: App | null = null;
 let adminAuthInstance: Auth | null = null;
 let adminDbInstance: Firestore | null = null;
 
+interface ServiceAccount {
+  type: string;
+  project_id: string;
+  private_key_id?: string;
+  private_key: string;
+  client_email: string;
+  client_id?: string;
+  auth_uri?: string;
+  token_uri?: string;
+  auth_provider_x509_cert_url?: string;
+  client_x509_cert_url?: string;
+}
+
 async function initAdmin() {
   if (adminApp) return { adminApp, adminAuthInstance, adminDbInstance };
 
   console.log('[Admin SDK] Initializing...');
 
   try {
-    let serviceAccount: Record<string, string> | null = null;
+    let serviceAccount: ServiceAccount | null = null;
     
     // 1. Try FIREBASE_ADMIN_KEY environment variable (base64 encoded JSON)
     if (process.env.FIREBASE_ADMIN_KEY) {
@@ -52,7 +65,7 @@ async function initAdmin() {
       return { adminApp: null, adminAuthInstance: null, adminDbInstance: null };
     }
 
-    const { initializeApp, getApps, getApp } = await import('firebase-admin/app');
+    const { initializeApp, getApps, getApp, cert } = await import('firebase-admin/app');
     const { getAuth } = await import('firebase-admin/auth');
     const { getFirestore } = await import('firebase-admin/firestore');
 
@@ -62,13 +75,11 @@ async function initAdmin() {
     } else {
       console.log('[Admin SDK] Creating new app');
       adminApp = initializeApp({
-        credential: {
-          getCertificate: () => ({
-            projectId: serviceAccount.project_id,
-            clientEmail: serviceAccount.client_email,
-            privateKey: serviceAccount.private_key.replace(/\n/g, '\n'),
-          }),
-        },
+        credential: cert({
+          projectId: serviceAccount.project_id,
+          clientEmail: serviceAccount.client_email,
+          privateKey: serviceAccount.private_key.replace(/\n/g, '\n'),
+        }),
         projectId: serviceAccount.project_id,
       });
     }
