@@ -13,7 +13,7 @@ async function initAdmin() {
   console.log('[Admin SDK] Initializing...');
 
   try {
-    let serviceAccount: any = null;
+    let serviceAccount: Record<string, string> | null = null;
     
     // 1. Try FIREBASE_ADMIN_KEY environment variable (base64 encoded JSON)
     if (process.env.FIREBASE_ADMIN_KEY) {
