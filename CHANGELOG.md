@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.3.0] - 2026-04-04 - Email System, Forms Bilingual, Events Registration Summary
+## [0.3.1] - 2026-04-11 - SEO Settings & Admin Fixes
+
+### Admin & Permissions Fixes ✅
+- **Added SEO settings Firestore rules** - Created proper Firestore security rules for `seo_settings` collection allowing editors to read/write
+- **Fixed admin user validation** - Updated `add-admin.js` script with correct Firebase Admin SDK service account file
+- **Role-based permissions** - SEO settings now accessible to admin and editor roles
+
+### Known Issues Resolved
+- Fixed 404 errors on `/admin/events` page
+- Fixed "Missing or insufficient permissions" errors for SEO settings
+- Admin users now properly authenticated via Firestore `admin_users` collection
 
 ### Email System Overhaul ✅
 - **Migrated from Resend to Gmail SMTP** - Eliminated Resend dependency, now using free Gmail SMTP for all email sending
