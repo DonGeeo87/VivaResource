@@ -17,14 +17,14 @@ service cloud.firestore {
     
     // Blog posts - anyone can read published, editors can manage
     match /blog_posts/{postId} {
-      allow read: if true;  // Público puede leer todos los posts
+      allow read: if resource.data.status == 'published' || isEditor();
       allow create, update, delete: if isEditor();
       allow list: if true;
     }
 
     // Events - anyone can read published, editors can manage
     match /events/{eventId} {
-      allow read: if true;  // Público puede leer todos los eventos
+      allow read: if resource.data.status == 'published' || isEditor();
       allow create, update, delete: if isEditor();
       allow list: if true;
     }
@@ -49,6 +49,12 @@ service cloud.firestore {
     match /site_settings/{settingId} {
       allow read: if true;
       allow write: if isAdmin();
+    }
+    
+    // SEO settings - anyone can read, editors can write
+    match /seo_settings/{settingId} {
+      allow read: if true;
+      allow write: if isEditor();
     }
     
     // Admin users - only admins can manage
@@ -84,9 +90,9 @@ service cloud.firestore {
       allow update, delete: if isEditor();
     }
     
-    // Newsletter history - editors can manage
+    // Newsletter history - public read, editors can write
     match /newsletter_history/{histId} {
-      allow read: if isEditor();
+      allow read: if true;
       allow write: if isEditor();
     }
     
@@ -103,11 +109,39 @@ service cloud.firestore {
       allow update, delete: if isEditor();
     }
 
-    // Volunteer messages - editors can send, editors can read
+    // Volunteer messages - editors can send/manage, volunteers can read their own
     match /volunteer_messages/{msgId} {
-      allow read: if isEditor();
+      allow read: if isEditor() ||
+        (isSignedIn() && resource.data.volunteerId == request.auth.uid);
       allow create, update, delete: if isEditor();
-      allow list: if isEditor();
+      allow list: if isEditor() ||
+        (isSignedIn() && resource.data.volunteerId == request.auth.uid);
+      // Volunteers can mark messages as read
+      allow update: if isEditor() ||
+        (isSignedIn() && resource.data.volunteerId == request.auth.uid &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'readAt']));
+    }
+
+    // Volunteer users - volunteers can read/update own, editors can read
+    match /volunteer_users/{userId} {
+      allow read: if isEditor() ||
+        (isSignedIn() && request.auth.uid == userId);
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && request.auth.uid == userId;
+      allow delete: if isAdmin();
+    }
+
+    // Volunteer tasks - editors can manage, volunteers can read own
+    match /volunteer_tasks/{taskId} {
+      allow read: if isEditor() ||
+        (isSignedIn() && resource.data.volunteerId == request.auth.uid);
+      allow create, update, delete: if isEditor();
+      allow list: if isEditor() ||
+        (isSignedIn() && resource.data.volunteerId == request.auth.uid);
+      // Volunteers can mark tasks as completed
+      allow update: if isEditor() ||
+        (isSignedIn() && resource.data.volunteerId == request.auth.uid &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']));
     }
   }
 }

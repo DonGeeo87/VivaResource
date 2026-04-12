@@ -1,6 +1,6 @@
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getFirestore, Timestamp } = require('firebase-admin/firestore');
-const serviceAccount = require('../vivaresource-firebase-adminsdk-fbsvc-1c15e4d2ee.json');
+const serviceAccount = require('../vivaresource-firebase-adminsdk-fbsvc-7f4fe61009.json');
 
 initializeApp({
   credential: cert(serviceAccount),
