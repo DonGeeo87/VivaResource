@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Search, Check, X, Download, Mail, Phone, Calendar, Eye, CheckCheck, XCircle } from "lucide-react";
-import { collection, query, orderBy, getDocs, updateDoc, doc, writeBatch } from "firebase/firestore";
+import { Search, Check, X, Download, Mail, Phone, Calendar, Eye, CheckCheck, XCircle, Inbox } from "lucide-react";
+import { collection, query, orderBy, getDocs, updateDoc, doc, writeBatch, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -32,9 +32,22 @@ export default function AdminVolunteersPage(): JSX.Element {
   const [filter, setFilter] = useState("all");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [bulkAction, setBulkAction] = useState<"approve" | "reject" | null>(null);
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   useEffect(() => {
     fetchVolunteers();
+
+    // Real-time listener for unread messages count
+    const messagesQuery = query(collection(db, "volunteer_messages"));
+    const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
+      const unread = snapshot.docs.filter(doc => {
+        const data = doc.data();
+        return !data.read && !data.isReply;
+      }).length;
+      setUnreadMessages(unread);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const fetchVolunteers = async () => {
@@ -216,6 +229,25 @@ export default function AdminVolunteersPage(): JSX.Element {
           </p>
         </div>
         <div className="flex gap-2 mt-4 md:mt-0">
+          <Link
+            href="/admin/volunteers/messages"
+            className="relative inline-flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+          >
+            <Inbox className="w-4 h-4" />
+            {isES ? "Mensajes" : "Messages"}
+            {unreadMessages > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                {unreadMessages}
+              </span>
+            )}
+          </Link>
+          <button
+            onClick={exportCSV}
+            className="inline-flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            {isES ? "Exportar CSV" : "Export CSV"}
+          </button>
           {selectedIds.length > 0 && (
             <>
               <button
