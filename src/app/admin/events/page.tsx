@@ -17,6 +17,8 @@ interface Event {
   location: string;
   category: string;
   status: string;
+  is_finished?: boolean;
+  is_archived?: boolean;
   registration_required: boolean;
   image_url?: string;
   created_at: unknown;
@@ -52,6 +54,9 @@ export default function AdminEventsPage(): JSX.Element {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [loadingRegistrations, setLoadingRegistrations] = useState(false);
+
+  // Toggle action state
+  const [toggling, setToggling] = useState<string | null>(null);
 
   useEffect(() => {
     fetchEvents();
@@ -165,6 +170,68 @@ export default function AdminEventsPage(): JSX.Element {
     }
   };
 
+  const handleToggleFinish = async (event: Event) => {
+    setToggling(event.id);
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+      const token = await user.getIdToken();
+      const response = await fetch(`/api/events/${event.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          is_finished: !event.is_finished,
+        }),
+      });
+      if (response.ok) {
+        setEvents(events.map(e =>
+          e.id === event.id ? { ...e, is_finished: !e.is_finished } : e
+        ));
+      } else {
+        const errorData = await response.json();
+        console.error("Error toggling finish:", errorData);
+      }
+    } catch (error) {
+      console.error("Error toggling event finish:", error);
+    } finally {
+      setToggling(null);
+    }
+  };
+
+  const handleToggleArchive = async (event: Event) => {
+    setToggling(event.id);
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+      const token = await user.getIdToken();
+      const response = await fetch(`/api/events/${event.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          is_archived: !event.is_archived,
+        }),
+      });
+      if (response.ok) {
+        setEvents(events.map(e =>
+          e.id === event.id ? { ...e, is_archived: !e.is_archived } : e
+        ));
+      } else {
+        const errorData = await response.json();
+        console.error("Error toggling archive:", errorData);
+      }
+    } catch (error) {
+      console.error("Error toggling event archive:", error);
+    } finally {
+      setToggling(null);
+    }
+  };
+
   const exportToCSV = () => {
     if (!selectedEvent || registrations.length === 0) return;
 
@@ -196,7 +263,10 @@ export default function AdminEventsPage(): JSX.Element {
   const filteredEvents = events.filter(event => {
     const matchesSearch = event.title_en.toLowerCase().includes(search.toLowerCase()) ||
       event.title_es?.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter = filter === "all" || event.status === filter;
+    const matchesFilter = filter === "all" ||
+      (filter === "finished" && event.is_finished) ||
+      (filter === "archived" && event.is_archived) ||
+      event.status === filter;
     return matchesSearch && matchesFilter;
   });
 
@@ -251,6 +321,8 @@ export default function AdminEventsPage(): JSX.Element {
             <option value="draft">{language === "es" ? "Borrador" : "Draft"}</option>
             <option value="published">{language === "es" ? "Publicados" : "Published"}</option>
             <option value="cancelled">{language === "es" ? "Cancelados" : "Cancelled"}</option>
+            <option value="finished">{language === "es" ? "Finalizados" : "Finished"}</option>
+            <option value="archived">{language === "es" ? "Archivados" : "Archived"}</option>
           </select>
         </div>
       </div>
@@ -283,7 +355,12 @@ export default function AdminEventsPage(): JSX.Element {
           </div>
         ) : (
           filteredEvents.map((event) => (
-            <div key={event.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div
+              key={event.id}
+              className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-opacity ${
+                event.is_archived ? "opacity-60" : ""
+              }`}
+            >
               {/* Event Image */}
               {event.image_url ? (
                 <div className="h-32 relative overflow-hidden">
@@ -293,18 +370,38 @@ export default function AdminEventsPage(): JSX.Element {
                     alt={event.title_en}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute top-3 right-3">
+                  <div className="absolute top-3 right-3 flex flex-col gap-1">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[event.status]}`}>
                       {event.status}
                     </span>
+                    {event.is_finished && (
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
+                        {language === "es" ? "Finalizado" : "Finished"}
+                      </span>
+                    )}
+                    {event.is_archived && (
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                        {language === "es" ? "Archivado" : "Archived"}
+                      </span>
+                    )}
                   </div>
                 </div>
               ) : (
                 <div className="h-32 bg-gradient-to-br from-primary to-primary-container relative">
-                  <div className="absolute top-3 right-3">
+                  <div className="absolute top-3 right-3 flex flex-col gap-1">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[event.status]}`}>
                       {event.status}
                     </span>
+                    {event.is_finished && (
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
+                        {language === "es" ? "Finalizado" : "Finished"}
+                      </span>
+                    )}
+                    {event.is_archived && (
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                        {language === "es" ? "Archivado" : "Archived"}
+                      </span>
+                    )}
                   </div>
                 </div>
               )}
@@ -334,7 +431,7 @@ export default function AdminEventsPage(): JSX.Element {
                     </div>
                   )}
                 </div>
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-1 flex-wrap">
                   <Link
                     href={`/admin/events/${event.id}`}
                     className="flex-1 text-center py-2 text-sm text-primary hover:bg-gray-50 rounded-lg border border-primary"
@@ -358,8 +455,38 @@ export default function AdminEventsPage(): JSX.Element {
                     </button>
                   )}
                   <button
+                    onClick={() => handleToggleFinish(event)}
+                    disabled={toggling === event.id}
+                    className={`px-3 py-2 text-sm rounded-lg border transition-colors ${
+                      event.is_finished
+                        ? "text-orange-600 border-orange-200 bg-orange-50 hover:bg-orange-100"
+                        : "text-green-600 border-green-200 bg-green-50 hover:bg-green-100"
+                    } disabled:opacity-50`}
+                    title={event.is_finished
+                      ? (language === "es" ? "Marcar como activo" : "Mark as active")
+                      : (language === "es" ? "Finalizar evento" : "Finish event")
+                    }
+                  >
+                    {event.is_finished ? (language === "es" ? "Reactivar" : "Reopen") : (language === "es" ? "Finalizar" : "Finish")}
+                  </button>
+                  <button
+                    onClick={() => handleToggleArchive(event)}
+                    disabled={toggling === event.id}
+                    className={`px-3 py-2 text-sm rounded-lg border transition-colors ${
+                      event.is_archived
+                        ? "text-gray-600 border-gray-200 bg-gray-50 hover:bg-gray-100"
+                        : "text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100"
+                    } disabled:opacity-50`}
+                    title={event.is_archived
+                      ? (language === "es" ? "Desarchivar" : "Unarchive")
+                      : (language === "es" ? "Archivar" : "Archive")
+                    }
+                  >
+                    {event.is_archived ? (language === "es" ? "Desarchivar" : "Unarchive") : (language === "es" ? "Archivar" : "Archive")}
+                  </button>
+                  <button
                     onClick={() => handleDelete(event.id)}
-                    className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"
+                    className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-200"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>

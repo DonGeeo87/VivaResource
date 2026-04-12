@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { Save, ArrowLeft, Eye, Calendar, FileText, Users, MessageSquare, Star, X, Copy, Check, AlertCircle } from "lucide-react";
 import { doc, getDoc, setDoc, addDoc, collection, Timestamp, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
@@ -77,40 +77,77 @@ const availableTemplates: TemplateOption[] = [
 export default function AdminFormEditorPage(): JSX.Element {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const { language } = useLanguage();
   const formId = params.id as string;
   const isEditing = formId && formId !== 'new';
+
+  // Get parameters from URL
+  const eventIdFromUrl = searchParams.get('eventId') || undefined;
+  const templateFromUrl = searchParams.get('template') || undefined;
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [events, setEvents] = useState<EventOption[]>([]);
   const [showTemplates, setShowTemplates] = useState(!isEditing);
   const [previewTemplate, setPreviewTemplate] = useState<string | null>(null);
-  
+
   // Save success modal state
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [savedFormId, setSavedFormId] = useState<string>('');
   const [copied, setCopied] = useState(false);
 
-  const [formData, setFormData] = useState<Partial<Form>>({
-    title: '',
-    titleEs: '',
-    description: '',
-    descriptionEs: '',
-    fields: [],
-    status: 'draft',
-    published: false,
-    shareMode: 'both',
-    linkedEventId: undefined,
-    customSlug: '',
-    settings: {
-      allowMultipleSubmissions: true,
-      showProgressBar: true,
-      requireEmail: false,
-      thankYouMessage: 'Thank you for your submission!',
-      thankYouMessageEs: '¡Gracias por tu envío!',
+  // Initialize form data with template if provided
+  const getInitialFormData = (): Partial<Form> => {
+    // If a template is specified via URL, load it
+    if (templateFromUrl && templateFromUrl !== 'blank') {
+      const template = formTemplates[templateFromUrl as keyof typeof formTemplates];
+      if (template) {
+        return {
+          title: template.title,
+          titleEs: template.titleEs,
+          description: template.description,
+          descriptionEs: template.descriptionEs,
+          fields: template.fields,
+          status: 'draft',
+          published: false,
+          shareMode: 'both',
+          linkedEventId: eventIdFromUrl,
+          customSlug: '',
+          settings: {
+            allowMultipleSubmissions: template.settings?.allowMultipleSubmissions ?? true,
+            showProgressBar: template.settings?.showProgressBar ?? true,
+            requireEmail: template.settings?.requireEmail ?? false,
+            thankYouMessage: template.thankYouMessage || 'Thank you for your submission!',
+            thankYouMessageEs: template.thankYouMessageEs || '¡Gracias por tu envío!',
+          }
+        };
+      }
     }
-  });
+
+    // Default empty form
+    return {
+      title: '',
+      titleEs: '',
+      description: '',
+      descriptionEs: '',
+      fields: [],
+      status: 'draft',
+      published: false,
+      shareMode: 'both',
+      linkedEventId: eventIdFromUrl,
+      customSlug: '',
+      settings: {
+        allowMultipleSubmissions: true,
+        showProgressBar: true,
+        requireEmail: false,
+        thankYouMessage: 'Thank you for your submission!',
+        thankYouMessageEs: '¡Gracias por tu envío!',
+      }
+    };
+  };
+
+  const [formData, setFormData] = useState<Partial<Form>>(getInitialFormData);
 
   const loadTemplate = (templateId: string) => {
     const template = formTemplates[templateId];
@@ -489,7 +526,7 @@ export default function AdminFormEditorPage(): JSX.Element {
           </div>
 
           {/* Event Association */}
-          {isEditing && (
+          {(isEditing || eventIdFromUrl) && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
               <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-primary" />

@@ -22,7 +22,7 @@
 
 ### Project Status
 
-Phases 1-5 are **COMPLETE** (see `PLAN_DE_TRABAJO.md`). The project is currently ~92% complete with admin system (Phase 6) planned and performance/SEO (Phase 7) pending.
+Phases 1-4 are **COMPLETE**. Phases 5-7 are **IN PROGRESS** (~78% total completion). The admin system (Phase 6) is partially implemented with CRUD for blog, events, forms, and volunteers. SEO/performance optimization (Phase 7) is pending.
 
 ---
 
@@ -35,6 +35,12 @@ npm run start    # Start production server
 npm run lint     # Run ESLint (Next.js + TypeScript)
 ```
 
+**Deploy to Vercel:**
+```bash
+deploy-vercel.bat    # Windows batch script
+vercel --prod        # Manual deploy
+```
+
 ---
 
 ## Project Structure
@@ -44,8 +50,8 @@ vivaresource/
 ├── src/
 │   ├── app/                    # Next.js App Router
 │   │   ├── about/              # About Us page
-│   │   ├── admin/              # Admin dashboard (planned)
-│   │   ├── api/                # API routes
+│   │   ├── admin/              # Admin dashboard (partially implemented)
+│   │   ├── api/                # API routes (upload, etc.)
 │   │   ├── blog/               # Blog listing/posts
 │   │   ├── contact/            # Contact page/form
 │   │   ├── donate/             # Donation page (PayPal)
@@ -57,22 +63,36 @@ vivaresource/
 │   │   ├── privacy/            # Privacy policy
 │   │   ├── resources/          # Resource directory
 │   │   ├── volunteer-portal/   # Volunteer portal
+│   │   ├── error.tsx           # Global error page
+│   │   ├── not-found.tsx       # 404 page
+│   │   ├── layout.tsx          # Root layout
+│   │   ├── page.tsx            # Home page
+│   │   ├── robots.ts           # Dynamic robots.txt
 │   │   └── sitemap.ts          # Dynamic sitemap generator
-│   ├── components/
+│   ├── components/             # Reusable React components
+│   │   ├── forms/              # Form components (BlogEditor, etc.)
+│   │   ├── ui/                 # UI primitives
 │   │   ├── Header.tsx          # Global navigation header
-│   │   ├── forms/              # Form components
-│   │   └── ui/                 # Reusable UI components
+│   │   ├── Footer.tsx          # Global footer
+│   │   ├── ClientLayout.tsx    # Client-side layout wrapper
+│   │   ├── ImageUpload.tsx     # Cloudinary upload component
+│   │   ├── NewsletterForm.tsx  # Newsletter subscription form
+│   │   ├── Skeleton.tsx        # Loading skeleton
+│   │   └── Toast.tsx           # Toast notifications
 │   ├── contexts/               # React Context providers
-│   ├── data/                   # Static data files
+│   │   ├── LanguageContext.tsx # Bilingual (EN/ES) context
+│   │   └── AuthContext.tsx     # Firebase Auth context
 │   ├── hooks/                  # Custom React hooks
 │   ├── i18n/                   # Internationalization (EN/ES)
-│   ├── lib/
-│   │   ├── email/              # Resend email utilities
-│   │   └── firebase/           # Firebase configuration
-│   └── types/                  # TypeScript type definitions
+│   ├── lib/                    # Utility libraries
+│   │   ├── firebase/           # Firebase configuration
+│   │   ├── cloudinary.ts       # Cloudinary upload utility
+│   │   └── email/              # Resend email utilities
+│   ├── types/                  # TypeScript type definitions
+│   └── data/                   # Static data files
 ├── public/                     # Static assets
 ├── logos/                      # Logo source files
-├── scripts/                    # Utility scripts
+├── scripts/                    # Utility scripts (admin setup, etc.)
 ├── stitch/                     # Design mockups/wireframes
 └── [config files]              # next.config.mjs, tailwind.config.ts, etc.
 ```
@@ -204,8 +224,9 @@ Configured in `next.config.mjs` with remote patterns for:
 
 - `lh3.googleusercontent.com` (Google OAuth avatars)
 - `images.unsplash.com` / `unsplash.com` (stock photos)
-- `firebasestorage.googleapis.com` (user uploads)
+- `firebasestorage.googleapis.com` (Firebase Storage uploads)
 - `res.cloudinary.com` (Cloudinary CDN)
+- `via.placeholder.com` (placeholder images)
 
 Formats: `image/webp`, `image/avif`
 
@@ -213,17 +234,141 @@ Always use Next.js `<Image>` component (not `<img>`) with proper `sizes` attribu
 
 ---
 
-## Key Files
+## Environment Variables
 
-| File | Purpose |
-|------|---------|
-| `PLAN_DE_TRABAJO.md` | Detailed project roadmap with completed/pending phases |
-| `AGENTS.md` | Agent/coding assistant guidelines |
-| `next.config.mjs` | Next.js configuration (image domains, etc.) |
-| `tailwind.config.ts` | Design tokens (colors, fonts, shadows) |
-| `tsconfig.json` | TypeScript configuration with `@/*` path alias |
-| `.eslintrc.json` | ESLint rules (next/core-web-vitals, next/typescript) |
-| `src/app/sitemap.ts` | Dynamic sitemap generator (static + Firestore content) |
+```env
+# Firebase Configuration
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+
+# Resend API Key
+RESEND_API_KEY=
+
+# Newsletter Admin Emails
+NEWSLETTER_ADMIN_EMAILS=
+
+# PayPal
+NEXT_PUBLIC_PAYPAL_CLIENT_ID=
+PAYPAL_CLIENT_SECRET=
+PAYPAL_MODE=
+
+# Cloudinary
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
+# Other
+OPENROUTER_API_KEY=
+NEXT_PUBLIC_SITE_URL=
+```
+
+---
+
+## Firestore Collections
+
+| Collection | Purpose | Permissions |
+|-----------|---------|-------------|
+| `blog_posts` | Blog articles | Public read published, editors CRUD |
+| `events` | Community events | Public read published, editors CRUD |
+| `event_registrations` | Event sign-ups | Public create, editors manage |
+| `volunteer_registrations` | Volunteer sign-ups | Public create, editors manage |
+| `site_settings` | Site configuration | Public read, admin write |
+| `admin_users` | Admin user accounts | Signed-in read, admin write |
+| `forms` | Dynamic forms | Public read, editors CRUD |
+| `form_submissions` | Form responses | Public create, editors manage |
+| `newsletter_subscribers` | Newsletter list | Public create, editors manage |
+| `newsletter_history` | Email send history | Editors CRUD |
+| `donations` | Donation records | Editors read, server write |
+| `ai_generated_content` | AI-generated content | Editors CRUD |
+
+---
+
+## Cloudinary Storage
+
+- Images stored in Cloudinary (not Firebase Storage)
+- Upload via signed API route `/api/upload`
+- Folder: `vivaresource/{category}` (blog, events, etc.)
+- Allowed formats: JPG, PNG, WebP, GIF only
+- Max size: 5MB
+- Firebase Storage rules kept for backward compatibility with existing images
+
+---
+
+## Admin Panel
+
+- URL: `/admin`
+- Login: Firebase Auth + Firestore `admin_users` collection verification
+- **Admin UID:** `3TP4IksNrMOfTeEfmjrjiUq31nx2` (hardcoded in `scripts/add-admin.js`)
+
+### Admin Routes
+
+| Route | Description |
+|-------|-------------|
+| `/admin` | Dashboard |
+| `/admin/login` | Admin login |
+| `/admin/blog` | Blog post management |
+| `/admin/events` | Event management |
+| `/admin/event-registrations` | Event registrations viewer |
+| `/admin/volunteers` | Volunteer management |
+| `/admin/forms` | Form builder & management |
+| `/admin/users` | Admin user management |
+| `/admin/donations` | Donations configuration |
+| `/admin/newsletter` | Newsletter management |
+| `/admin/ai-generator` | AI content generator |
+| `/admin/settings` | Site settings |
+
+---
+
+## Debugging Gotchas
+
+### Silent Auth Failures
+Admin users not in `admin_users` collection get auto-signed-out without error message. Check Firestore `admin_users` collection.
+
+### Hydration Mismatches
+Language context uses `isHydrated` flag — check for SSR/CSR content mismatches. Use `if (!isHydrated) return null` before language-dependent content.
+
+### Firebase Re-initialization
+Multiple Firebase instances cause errors — always check `getApps().length === 0` before initializing.
+
+### Storage Permissions
+Two paths with different permissions: `/images/` (public read, editor write) vs `/uploads/` (authenticated read, admin write only).
+
+### Email Failures
+Resend API requires valid `RESEND_API_KEY`. Sandbox uses `onboarding@resend.dev`.
+
+### "Missing Error Components" in Development
+The message "missing required error components, refreshing..." indicates a React hydration error. Common causes:
+- Undefined Tailwind colors in config
+- Conditionally rendered components without unique keys
+- Hooks used outside the component tree
+
+---
+
+## Security Checklist (Before Commit)
+
+- [ ] No hardcoded API keys or secrets (use `.env.local`)
+- [ ] All user inputs validated with Zod schema
+- [ ] Admin routes check BOTH Firebase Auth AND Firestore `admin_users` role
+- [ ] Firestore rules reviewed: `isEditor()` = admin OR editor
+- [ ] Error messages don't leak internal details (catch `unknown`, sanitize output)
+- [ ] Never commit `.env.local`
+
+---
+
+## Architecture Notes
+
+- **Client-only Firebase**: No server-side Firebase operations (except API routes)
+- **Bilingual by Design**: All user-facing content via LanguageContext, never hardcoded
+- **Role Checks**: `isEditor()` = admin OR editor in Firestore rules
+- **Role hierarchy**: admin > editor > viewer
+- **ClientLayout**: Conditionally excludes Header/Footer for `/admin` and `/volunteer-portal`
+- **Cloudinary**: Signed uploads via `/api/upload` API route. Client utility in `src/lib/cloudinary.ts`
+- **Blog model**: Single-language posts (one doc per language, linked by `slug` + `language` fields)
+- **Blog sanitization**: Uses regex-based `sanitizeHtml` — sufficient for admin-authored content but consider `isomorphic-dompurify` for production with external authors
 
 ---
 
@@ -235,5 +380,5 @@ Always use Next.js `<Image>` component (not `<img>`) with proper `sizes` attribu
 - **Multilingual** - English and Spanish throughout
 - **SEO-optimized** - Each page has metadata (title, description, keywords, OpenGraph)
 - **Accessible** - Semantic HTML, proper form validation, loading states
-- **Phase 6 (Admin) planned** - Admin dashboard for managing blog, events, volunteer registrations, site settings
+- **Phase 6 (Admin) in progress** - Partially implemented CRUD for blog, events, forms, volunteers
 - **Phase 7 (Performance) pending** - Lighthouse improvements, dynamic lang attribute, lazy loading

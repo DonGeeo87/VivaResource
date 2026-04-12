@@ -198,6 +198,8 @@ NEXT_PUBLIC_SITE_URL
 | `newsletter_history` | Email send history | Editors CRUD |
 | `donations` | Donation records | Editors read, server write |
 | `ai_generated_content` | AI-generated content | Editors CRUD |
+| `help_requests` | Get Help form submissions | Public create, editors manage |
+| `volunteer_messages` | Messages to volunteers | Editors CRUD, volunteers read own |
 
 ---
 

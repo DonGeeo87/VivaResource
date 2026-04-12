@@ -1,22 +1,11 @@
-"use client";
+import type { Metadata } from "next";
+import { generatePageMeta } from "@/lib/metadata";
 
-import { ReactNode } from "react";
-import { AuthProvider } from "@/contexts/AdminAuthContext";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+export const metadata: Metadata = generatePageMeta({
+  title: "Volunteer Portal - Panel de Voluntarios",
+  description: "Access your volunteer dashboard, view assigned tasks, read messages from admins, and track your volunteer impact at Viva Resource Foundation Colorado.",
+  path: "/volunteer-portal",
+  keywords: ["volunteer portal Colorado", "panel de voluntarios", "volunteer dashboard", "Colorado nonprofit volunteer portal"],
+});
 
-export default function VolunteerPortalLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
-  return (
-    <AuthProvider>
-      <Header />
-      <main id="main-content" className="pt-0">
-        {children}
-      </main>
-      <Footer />
-    </AuthProvider>
-  );
-}
+export { default } from "./client-layout";

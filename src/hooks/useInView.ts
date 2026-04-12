@@ -87,6 +87,11 @@ export function useInView({
   useEffect(() => {
     return () => {
       cleanupObserver();
+      // Clean up fallback timeout to prevent memory leak
+      if (fallbackTimeoutRef.current) {
+        clearTimeout(fallbackTimeoutRef.current);
+        fallbackTimeoutRef.current = null;
+      }
     };
   }, [cleanupObserver]);
 

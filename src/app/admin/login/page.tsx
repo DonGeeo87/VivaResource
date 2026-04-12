@@ -2,14 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, LogIn, Users, Shield, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, LogIn, Shield, ArrowLeft } from "lucide-react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/i18n/translations";
-
-type PortalType = "admin" | "volunteer";
 
 export default function AdminLoginPage(): JSX.Element {
   const [email, setEmail] = useState("");
@@ -17,9 +15,7 @@ export default function AdminLoginPage(): JSX.Element {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [portal, setPortal] = useState<PortalType>("admin");
   const [isHydrated, setIsHydrated] = useState(false);
-  const [bgShift, setBgShift] = useState(false);
   const router = useRouter();
   const { language } = useLanguage();
 
@@ -27,14 +23,8 @@ export default function AdminLoginPage(): JSX.Element {
     setIsHydrated(true);
   }, []);
 
-  const handlePortalChange = (newPortal: PortalType) => {
-    setBgShift((prev) => !prev);
-    setPortal(newPortal);
-    setError("");
-  };
-
-  const t = isHydrated 
-    ? translations[language]?.admin?.login 
+  const t = isHydrated
+    ? translations[language]?.admin?.login
     : translations.en.admin.login;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,18 +34,14 @@ export default function AdminLoginPage(): JSX.Element {
 
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
-      
+
       const userDoc = await getDoc(doc(db, "admin_users", result.user.uid));
-      
+
       if (!userDoc.exists()) {
         throw new Error("No access");
       }
 
-      if (portal === "admin") {
-        router.push("/admin");
-      } else {
-        router.push("/volunteer-portal");
-      }
+      router.push("/admin");
     } catch (err: unknown) {
       console.error("Login error:", err);
       setError(t?.invalidCredentials || "Invalid credentials");
@@ -64,49 +50,24 @@ export default function AdminLoginPage(): JSX.Element {
     }
   };
 
-  const handleVolunteerRedirect = () => {
-    router.push("/get-involved");
-  };
-
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Animated Gradient Background */}
-      <div className={`absolute inset-0 bg-gradient-to-br transition-all duration-1000 ease-in-out ${
-        bgShift
-          ? "from-secondary/90 via-primary/85 to-primary/95"
-          : "from-primary/95 via-primary/90 to-secondary/80"
-      }`} />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/90 to-secondary/80" />
 
       {/* Secondary gradient layer for depth */}
-      <div className={`absolute inset-0 bg-gradient-to-tr transition-all duration-1000 ease-in-out delay-200 ${
-        bgShift
-          ? "from-primary/30 via-transparent to-secondary/20"
-          : "from-secondary/20 via-transparent to-primary/30"
-      }`} />
+      <div className="absolute inset-0 bg-gradient-to-tr from-secondary/20 via-transparent to-primary/30" />
 
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className={`absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl transition-all duration-1000 ${
-          bgShift ? "bg-secondary/20 translate-x-10" : "bg-white/5 animate-pulse"
-        }`} />
-        <div className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl transition-all duration-1000 delay-300 ${
-          bgShift ? "bg-primary/20 translate-y-10" : "bg-white/5 animate-pulse"
-        }`} style={{ animationDelay: "1s" }} />
-        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl transition-all duration-1000 delay-500 ${
-          bgShift ? "bg-primary/15 scale-110" : "bg-secondary/10 animate-pulse"
-        }`} style={{ animationDelay: "2s" }} />
-        {/* Extra floating element */}
-        <div className={`absolute top-20 left-1/4 w-64 h-64 rounded-full blur-3xl transition-all duration-1000 delay-150 ${
-          bgShift ? "bg-white/10 -translate-y-8" : "bg-primary/5 translate-y-4"
-        }`} />
-        <div className={`absolute bottom-20 right-1/4 w-72 h-72 rounded-full blur-3xl transition-all duration-1000 delay-700 ${
-          bgShift ? "bg-secondary/15 translate-y-12" : "bg-white/5 -translate-y-4"
-        }`} />
+        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl bg-white/5 animate-pulse" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl bg-white/5 animate-pulse" style={{ animationDelay: "1s" }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl bg-secondary/10 animate-pulse" style={{ animationDelay: "2s" }} />
       </div>
 
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <div className="w-full max-w-lg">
+        <div className="w-full max-w-md">
           {/* Fade-in Animation */}
           <div className="animate-fade-in">
             {/* Logo and Header */}
@@ -122,46 +83,17 @@ export default function AdminLoginPage(): JSX.Element {
               <h1 className="text-4xl font-bold text-white mb-2">
                 Viva Resource Foundation
               </h1>
-              <p className="text-white/80 text-lg">
-                {portal === "admin" ? t?.title : t?.volunteerTitle}
-              </p>
-            </div>
-
-            {/* Portal Selector */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-2 mb-6 flex gap-2">
-              <button
-                onClick={() => handlePortalChange("admin")}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold transition-all duration-500 ${
-                  portal === "admin"
-                    ? "bg-white text-primary shadow-lg scale-[1.02]"
-                    : "text-white/80 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                <Shield className="w-5 h-5" />
-                <span className="text-sm">{t?.adminPortal}</span>
-              </button>
-              <button
-                onClick={() => handlePortalChange("volunteer")}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold transition-all duration-500 ${
-                  portal === "volunteer"
-                    ? "bg-white text-secondary shadow-lg scale-[1.02]"
-                    : "text-white/80 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                <Users className="w-5 h-5" />
-                <span className="text-sm">{t?.volunteerPortal}</span>
-              </button>
+              <p className="text-white/80 text-lg">{t?.title}</p>
             </div>
 
             {/* Login Card */}
-            <div className="bg-white rounded-2xl shadow-2xl p-8 transition-all duration-500">
-              <div className="mb-6 transition-all duration-500">
-                <h2 className="text-2xl font-bold text-gray-900 transition-colors duration-300">
-                  {portal === "admin" ? t?.title : t?.volunteerTitle}
+            <div className="bg-white rounded-2xl shadow-2xl p-8">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                  <Shield className="w-7 h-7 text-primary" />
+                  {t?.title}
                 </h2>
-                <p className="text-gray-500 mt-1">
-                  {portal === "admin" ? t?.subtitle : t?.volunteerSubtitle}
-                </p>
+                <p className="text-gray-500 mt-1">{t?.subtitle}</p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
@@ -211,26 +143,20 @@ export default function AdminLoginPage(): JSX.Element {
                   </div>
                 </div>
 
-                {portal === "admin" && (
-                  <div className="flex items-center justify-between text-sm">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" className="rounded border-gray-300 text-primary focus:ring-primary" />
-                      <span className="text-gray-600">{language === "es" ? "Recordarme" : "Remember me"}</span>
-                    </label>
-                    <a href="#" className="text-primary hover:text-primary-hover transition-colors font-medium">
-                      {t?.forgotPassword}
-                    </a>
-                  </div>
-                )}
+                <div className="flex items-center justify-between text-sm">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" className="rounded border-gray-300 text-primary focus:ring-primary" />
+                    <span className="text-gray-600">{language === "es" ? "Recordarme" : "Remember me"}</span>
+                  </label>
+                  <a href="#" className="text-primary hover:text-primary-hover transition-colors font-medium">
+                    {t?.forgotPassword}
+                  </a>
+                </div>
 
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`w-full text-white py-3.5 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed ${
-                    portal === "admin"
-                      ? "bg-primary hover:bg-primary-hover"
-                      : "bg-secondary hover:bg-secondary/90"
-                  }`}
+                  className="w-full bg-primary text-white py-3.5 px-4 rounded-xl font-semibold hover:bg-primary-hover transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <>
@@ -246,26 +172,9 @@ export default function AdminLoginPage(): JSX.Element {
                 </button>
               </form>
 
-              {portal === "volunteer" && (
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <div className="text-center">
-                    <p className="text-sm text-gray-500 mb-3">
-                      {t?.orSeparator}
-                    </p>
-                    <button
-                      onClick={handleVolunteerRedirect}
-                      className="w-full py-3 px-4 border-2 border-secondary text-secondary rounded-xl font-semibold hover:bg-secondary/5 transition-all duration-200 flex items-center justify-center gap-2"
-                    >
-                      <Users className="w-5 h-5" />
-                      {t?.registerLink}
-                    </button>
-                  </div>
-                </div>
-              )}
-
               <div className="mt-6 pt-6 border-t border-gray-200">
-                <a 
-                  href="/" 
+                <a
+                  href="/"
                   className="flex items-center justify-center gap-2 text-sm text-gray-500 hover:text-primary transition-colors group"
                 >
                   <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />

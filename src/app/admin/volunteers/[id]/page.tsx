@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Send, Mail, Phone, Calendar, Check, X } from "lucide-react";
-import { doc, getDoc, updateDoc, addDoc, collection, Timestamp } from "firebase/firestore";
+import { ArrowLeft, Send, Mail, Phone, Calendar, Check, X, Plus, ClipboardList, Inbox, MessageSquare, ChevronDown, ChevronUp } from "lucide-react";
+import { doc, getDoc, updateDoc, addDoc, collection, Timestamp, query, where, orderBy, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
+import type { VolunteerMessage } from "@/types/volunteer";
 
 interface Volunteer {
   id: string;
@@ -35,11 +36,36 @@ export default function AdminVolunteerDetailPage(): JSX.Element {
   const [sending, setSending] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState(false);
 
+  // Task assignment state
+  const [showTaskForm, setShowTaskForm] = useState(false);
+  const [taskTitle, setTaskTitle] = useState("");
+  const [taskTitleEs, setTaskTitleEs] = useState("");
+  const [taskDescription, setTaskDescription] = useState("");
+  const [taskDescriptionEs, setTaskDescriptionEs] = useState("");
+  const [taskDate, setTaskDate] = useState("");
+  const [taskStartTime, setTaskStartTime] = useState("");
+  const [taskEndTime, setTaskEndTime] = useState("");
+  const [taskLocation, setTaskLocation] = useState("");
+  const [taskCreating, setTaskCreating] = useState(false);
+
+  // Messages state
+  const [messages, setMessages] = useState<VolunteerMessage[]>([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [showMessages, setShowMessages] = useState(false);
+  const [expandedMessage, setExpandedMessage] = useState<string | null>(null);
+
   useEffect(() => {
     if (volunteerId) {
       fetchVolunteer(volunteerId);
     }
   }, [volunteerId]);
+
+  useEffect(() => {
+    if (showMessages && volunteer && messages.length === 0) {
+      fetchMessages();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showMessages, volunteer]);
 
   const fetchVolunteer = async (id: string) => {
     try {
@@ -59,31 +85,44 @@ export default function AdminVolunteerDetailPage(): JSX.Element {
     }
   };
 
+  const fetchMessages = async () => {
+    if (!volunteerId) return;
+    setLoadingMessages(true);
+    try {
+      const q = query(
+        collection(db, "volunteer_messages"),
+        where("volunteerId", "==", volunteerId),
+        orderBy("createdAt", "desc")
+      );
+      const snapshot = await getDocs(q);
+      const msgs = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as VolunteerMessage[];
+      setMessages(msgs);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
   const sendStatusEmail = async (newStatus: string) => {
     if (!volunteer) return;
-    
-    try {
-      const subject = newStatus === "approved" 
-        ? (isES ? "¡Bienvenido al equipo de Viva Resource!" : "Welcome to the Viva Resource Team!")
-        : (isES ? "Actualización de su solicitud de voluntariado" : "Your Volunteer Application Update");
-      
-      const messageContent = newStatus === "approved"
-        ? isES
-          ? `Estimado/a ${volunteer.firstName} ${volunteer.lastName},\n\n¡Nos complace informarle que su solicitud de voluntariado ha sido aprobada!\n\nBienvenido/a al equipo de Viva Resource Foundation. Pronto nos pondremos en contacto con usted para coordinar los próximos pasos.\n\nSi tiene alguna pregunta, no dude en contactarnos.\n\nSaludos cordiales,\nEquipo de Viva Resource Foundation`
-          : `Dear ${volunteer.firstName} ${volunteer.lastName},\n\nWe are pleased to inform you that your volunteer application has been approved!\n\nWelcome to the Viva Resource Foundation team. We will be in touch soon to coordinate next steps.\n\nIf you have any questions, please don't hesitate to contact us.\n\nBest regards,\nViva Resource Foundation Team`
-        : isES
-          ? `Estimado/a ${volunteer.firstName} ${volunteer.lastName},\n\nGracias por su interés en ser voluntario/a de Viva Resource Foundation.\n\nDespués de revisar su solicitud, lamentamos informarle que en este momento no podemos aceptar su solicitud. Esto no refleja negativamente sobre usted, y le animamos a que vuelva a aplicar en el futuro.\n\nAgradecemos su interés en nuestra misión.\n\nSaludos cordiales,\nEquipo de Viva Resource Foundation`
-          : `Dear ${volunteer.firstName} ${volunteer.lastName},\n\nThank you for your interest in volunteering with Viva Resource Foundation.\n\nAfter reviewing your application, we regret to inform you that we cannot accept your application at this time. This does not reflect negatively on you, and we encourage you to apply again in the future.\n\nWe appreciate your interest in our mission.\n\nBest regards,\nViva Resource Foundation Team`;
 
-      await fetch("/api/email/send", {
+    try {
+      await fetch("/api/email/notify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          to: volunteer.email,
-          subject,
-          message: messageContent,
-        }),
-      });
+          type: "volunteer-status-change",
+          data: {
+            volunteerEmail: volunteer.email,
+            volunteerName: `${volunteer.firstName} ${volunteer.lastName}`,
+            status: newStatus as "approved" | "rejected",
+          }
+        })
+      }).catch((emailErr) => console.error("Failed to send status notification:", emailErr));
     } catch (error) {
       console.error("Error sending status email:", error);
     }
@@ -112,25 +151,34 @@ export default function AdminVolunteerDetailPage(): JSX.Element {
 
     setSending(true);
     try {
-      // Save message to Firestore
+      // Save message to Firestore with correct structure
       await addDoc(collection(db, "volunteer_messages"), {
-        volunteer_id: volunteerId,
-        volunteer_email: volunteer.email,
-        message,
-        sent_at: Timestamp.now(),
-        status: "sent"
+        volunteerId: volunteer.id, // Changed from volunteer_id
+        from: "admin", // TODO: Replace with actual admin UID
+        fromName: "Viva Resource Foundation",
+        subject: isES ? "Mensaje de Viva Resource Foundation" : "Message from Viva Resource Foundation",
+        subjectEs: isES ? "Mensaje de Viva Resource Foundation" : null,
+        body: message,
+        bodyEs: null,
+        read: false,
+        createdAt: Timestamp.now(),
+        priority: "normal"
       });
 
-      // Send email via Resend
-      await fetch("/api/email/send", {
+      // Send email notification via notify API
+      await fetch("/api/email/notify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          to: volunteer.email,
-          subject: isES ? "Mensaje de Viva Resource Foundation" : "Message from Viva Resource Foundation",
-          message: `${isES ? "Hola" : "Hello"} ${volunteer.firstName},\n\n${message}\n\n${isES ? "Saludos cordiales," : "Best regards,"}\n${isES ? "Equipo de Viva Resource Foundation" : "Viva Resource Foundation Team"}`
+          type: "volunteer-message",
+          data: {
+            volunteerEmail: volunteer.email,
+            volunteerName: `${volunteer.firstName} ${volunteer.lastName}`,
+            subject: isES ? "Mensaje de Viva Resource Foundation" : "Message from Viva Resource Foundation",
+            message: message,
+          }
         })
-      });
+      }).catch((emailErr) => console.error("Failed to send message notification:", emailErr));
 
       setMessage("");
       alert(isES ? "Mensaje enviado exitosamente" : "Message sent successfully");
@@ -139,6 +187,46 @@ export default function AdminVolunteerDetailPage(): JSX.Element {
       alert(isES ? "Error al enviar mensaje" : "Error sending message");
     } finally {
       setSending(false);
+    }
+  };
+
+  const createTask = async () => {
+    if (!taskTitle.trim() || !volunteer) return;
+
+    setTaskCreating(true);
+    try {
+      await addDoc(collection(db, "volunteer_tasks"), {
+        volunteerId: volunteer.id,
+        title: taskTitle,
+        titleEs: taskTitleEs || taskTitle,
+        description: taskDescription,
+        descriptionEs: taskDescriptionEs || taskDescription,
+        date: taskDate ? Timestamp.fromDate(new Date(taskDate)) : Timestamp.now(),
+        startTime: taskStartTime || null,
+        endTime: taskEndTime || null,
+        location: taskLocation || null,
+        status: "pending",
+        assignedBy: "admin", // TODO: Replace with actual admin UID
+        createdAt: Timestamp.now(),
+      });
+
+      // Reset form
+      setTaskTitle("");
+      setTaskTitleEs("");
+      setTaskDescription("");
+      setTaskDescriptionEs("");
+      setTaskDate("");
+      setTaskStartTime("");
+      setTaskEndTime("");
+      setTaskLocation("");
+      setShowTaskForm(false);
+
+      alert(isES ? "Tarea asignada exitosamente" : "Task assigned successfully");
+    } catch (error) {
+      console.error("Error creating task:", error);
+      alert(isES ? "Error al crear tarea" : "Error creating task");
+    } finally {
+      setTaskCreating(false);
     }
   };
 
@@ -400,6 +488,260 @@ export default function AdminVolunteerDetailPage(): JSX.Element {
                 {sending ? (isES ? "Enviando..." : "Sending...") : (isES ? "Enviar Mensaje" : "Send Message")}
               </button>
             </div>
+          </div>
+
+          {/* Assign Task */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-lg text-gray-900 flex items-center gap-2">
+                <ClipboardList className="w-5 h-5" />
+                {isES ? "Asignar Tarea" : "Assign Task"}
+              </h3>
+              <button
+                onClick={() => setShowTaskForm(!showTaskForm)}
+                className="p-2 hover:bg-gray-50 rounded-lg transition-colors"
+              >
+                <Plus className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+
+            {showTaskForm ? (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {isES ? "Título (EN)" : "Title (EN)"} *
+                  </label>
+                  <input
+                    type="text"
+                    value={taskTitle}
+                    onChange={(e) => setTaskTitle(e.target.value)}
+                    placeholder={isES ? "Ej: Event setup" : "e.g., Event setup"}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {isES ? "Título (ES)" : "Title (ES)"}
+                  </label>
+                  <input
+                    type="text"
+                    value={taskTitleEs}
+                    onChange={(e) => setTaskTitleEs(e.target.value)}
+                    placeholder={isES ? "Ej: Preparación de evento" : "e.g., Event preparation"}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {isES ? "Descripción (EN)" : "Description (EN)"}
+                  </label>
+                  <textarea
+                    value={taskDescription}
+                    onChange={(e) => setTaskDescription(e.target.value)}
+                    rows={3}
+                    placeholder={isES ? "Describe la tarea..." : "Describe the task..."}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {isES ? "Descripción (ES)" : "Description (ES)"}
+                  </label>
+                  <textarea
+                    value={taskDescriptionEs}
+                    onChange={(e) => setTaskDescriptionEs(e.target.value)}
+                    rows={3}
+                    placeholder={isES ? "Describe la tarea en español..." : "Describe the task in Spanish..."}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {isES ? "Fecha" : "Date"}
+                    </label>
+                    <input
+                      type="date"
+                      value={taskDate}
+                      onChange={(e) => setTaskDate(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {isES ? "Ubicación" : "Location"}
+                    </label>
+                    <input
+                      type="text"
+                      value={taskLocation}
+                      onChange={(e) => setTaskLocation(e.target.value)}
+                      placeholder={isES ? "Ej: Centro comunitario" : "e.g., Community center"}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {isES ? "Hora inicio" : "Start Time"}
+                    </label>
+                    <input
+                      type="time"
+                      value={taskStartTime}
+                      onChange={(e) => setTaskStartTime(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {isES ? "Hora fin" : "End Time"}
+                    </label>
+                    <input
+                      type="time"
+                      value={taskEndTime}
+                      onChange={(e) => setTaskEndTime(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowTaskForm(false)}
+                    className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    {isES ? "Cancelar" : "Cancel"}
+                  </button>
+                  <button
+                    onClick={createTask}
+                    disabled={taskCreating || !taskTitle.trim()}
+                    className="flex-1 flex items-center justify-center gap-2 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
+                  >
+                    <Check className="w-4 h-4" />
+                    {taskCreating ? (isES ? "Creando..." : "Creating...") : (isES ? "Asignar" : "Assign")}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-600">
+                {isES
+                  ? "Haz clic en + para asignar una tarea al voluntario"
+                  : "Click + to assign a task to the volunteer"}
+              </p>
+            )}
+          </div>
+
+          {/* Messages History */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <button
+              onClick={() => setShowMessages(!showMessages)}
+              className="w-full flex items-center justify-between"
+            >
+              <h3 className="font-bold text-lg text-gray-900 flex items-center gap-2">
+                <Inbox className="w-5 h-5" />
+                {isES ? "Mensajes" : "Messages"}
+                {messages.length > 0 && (
+                  <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
+                    {messages.length}
+                  </span>
+                )}
+              </h3>
+              {showMessages ? (
+                <ChevronUp className="w-5 h-5 text-gray-600" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-gray-600" />
+              )}
+            </button>
+
+            {showMessages && (
+              <div className="mt-4 space-y-3">
+                {loadingMessages ? (
+                  <div className="animate-pulse space-y-3">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="h-16 bg-gray-100 rounded-lg" />
+                    ))}
+                  </div>
+                ) : messages.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">
+                      {isES ? "No hay mensajes aún" : "No messages yet"}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {messages.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`border rounded-lg transition-colors ${
+                          msg.isReply
+                            ? "border-l-4 border-l-green-500 bg-green-50/30"
+                            : msg.read
+                            ? "border-gray-200"
+                            : "border-l-4 border-l-blue-500 bg-blue-50/30"
+                        }`}
+                      >
+                        <button
+                          onClick={() => setExpandedMessage(expandedMessage === msg.id ? null : msg.id)}
+                          className="w-full text-left p-3"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                {msg.isReply ? (
+                                  <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded font-medium">
+                                    {isES ? "Respuesta" : "Reply"}
+                                  </span>
+                                ) : (
+                                  <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded font-medium">
+                                    {isES ? "Enviado" : "Sent"}
+                                  </span>
+                                )}
+                                <span className="text-xs text-gray-500">
+                                  {msg.createdAt instanceof Timestamp
+                                    ? msg.createdAt.toDate().toLocaleDateString(isES ? "es-ES" : "en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+                                    : new Date(msg.createdAt as unknown as Date).toLocaleDateString(isES ? "es-ES" : "en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+                                  }
+                                </span>
+                              </div>
+                              <p className="text-sm font-medium text-gray-900 truncate">
+                                {isES && msg.subjectEs ? msg.subjectEs : msg.subject}
+                              </p>
+                            </div>
+                            {expandedMessage === msg.id ? (
+                              <ChevronUp className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                            ) : (
+                              <ChevronDown className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                            )}
+                          </div>
+                        </button>
+
+                        {expandedMessage === msg.id && (
+                          <div className="px-3 pb-3 border-t border-gray-100 pt-3">
+                            <p className="text-xs text-gray-600 mb-2">
+                              {isES ? "De:" : "From:"} <strong>{msg.fromName}</strong>
+                            </p>
+                            <div className="text-sm text-gray-700 whitespace-pre-line bg-gray-50 p-3 rounded">
+                              {isES && msg.bodyEs ? msg.bodyEs : msg.body}
+                            </div>
+                            {msg.isReply && msg.replyTo && (
+                              <p className="text-xs text-gray-500 mt-2 italic">
+                                {isES ? "Respuesta al mensaje original" : "Reply to original message"}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

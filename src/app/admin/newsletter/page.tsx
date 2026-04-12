@@ -5,6 +5,7 @@ import { Download, Mail, Trash2, Search, Send, History, Users, Eye, Clock } from
 import { collection, getDocs, query, orderBy, deleteDoc, doc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
+import NewsletterBuilder, { newsletterTemplates, NewsletterBlock, NewsletterTemplate } from "@/components/forms/NewsletterBuilder";
 
 interface Subscriber {
   id: string;
@@ -30,6 +31,7 @@ type Tab = "subscribers" | "send" | "history";
 
 export default function AdminNewsletterPage(): JSX.Element {
   const { language } = useLanguage();
+  const isES = language === "es";
   const [activeTab, setActiveTab] = useState<Tab>("subscribers");
 
   // Subscribers state
@@ -38,10 +40,14 @@ export default function AdminNewsletterPage(): JSX.Element {
   const [search, setSearch] = useState("");
 
   // Send newsletter state
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [subject, setSubject] = useState("");
-  const [content, setContent] = useState("");
+  const [blocks, setBlocks] = useState<NewsletterBlock[]>([]);
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [showBuilder, setShowBuilder] = useState(false);
+  const [sendMode, setSendMode] = useState<"all" | "selected">("all");
+  const [selectedSubscribers, setSelectedSubscribers] = useState<Set<string>>(new Set());
 
   // History state
   const [history, setHistory] = useState<NewsletterHistoryEntry[]>([]);
@@ -98,12 +104,20 @@ export default function AdminNewsletterPage(): JSX.Element {
     setLoadingHistory(true);
     try {
       const response = await fetch("/api/newsletter/history");
+      if (!response.ok) {
+        console.warn("[Newsletter] History fetch failed, using empty array");
+        setHistory([]);
+        return;
+      }
       const data = await response.json();
       if (data.success) {
         setHistory(data.history);
+      } else {
+        setHistory([]);
       }
     } catch (error) {
       console.error("Error fetching history:", error);
+      setHistory([]);
     } finally {
       setLoadingHistory(false);
     }
@@ -134,16 +148,51 @@ export default function AdminNewsletterPage(): JSX.Element {
     }
   };
 
-  const handleSendNewsletter = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSelectTemplate = (template: NewsletterTemplate) => {
+    setSelectedTemplate(template.id);
+    setBlocks(template.blocks);
+    setSubject(isES ? template.nameEs : template.name);
+    setShowBuilder(true);
+  };
 
-    if (!subject.trim() || !content.trim()) {
-      setSendResult({ success: false, message: language === "es" ? "El asunto y contenido son requeridos" : "Subject and content are required" });
+  const toggleSubscriberSelection = (id: string) => {
+    setSelectedSubscribers(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const selectAllSubscribers = () => {
+    setSelectedSubscribers(new Set(subscribers.map(s => s.id)));
+  };
+
+  const deselectAllSubscribers = () => {
+    setSelectedSubscribers(new Set());
+  };
+
+  const handleSendNewsletter = async () => {
+    if (!subject.trim() || blocks.length === 0) {
+      setSendResult({ success: false, message: isES ? "El asunto y al menos un bloque son requeridos" : "Subject and at least one block are required" });
       return;
     }
 
-    if (subscribers.filter(s => s.status === "active").length === 0) {
-      setSendResult({ success: false, message: language === "es" ? "No hay suscriptores activos para enviar" : "No active subscribers to send to" });
+    // Determine recipient count based on send mode
+    const recipientCount = sendMode === "all"
+      ? activeSubscribers
+      : selectedSubscribers.size;
+
+    if (recipientCount === 0) {
+      setSendResult({
+        success: false,
+        message: isES
+          ? (sendMode === "selected" ? "No hay suscriptores seleccionados" : "No hay suscriptores activos para enviar")
+          : (sendMode === "selected" ? "No subscribers selected" : "No active subscribers to send to")
+      });
       return;
     }
 
@@ -151,24 +200,59 @@ export default function AdminNewsletterPage(): JSX.Element {
     setSendResult(null);
 
     try {
+      // Convert blocks to HTML content
+      let htmlContent = `<h1>${subject}</h1>`;
+      blocks.forEach((block) => {
+        if (block.type === "hero") {
+          htmlContent += `<h2 style="color: #025689">${isES && block.content.headingEs ? block.content.headingEs : block.content.heading}</h2>`;
+          htmlContent += `<p>${isES && block.content.textEs ? block.content.textEs : block.content.text}</p>`;
+        } else if (block.type === "heading") {
+          htmlContent += `<h3>${isES && block.content.headingEs ? block.content.headingEs : block.content.heading}</h3>`;
+        } else if (block.type === "text") {
+          htmlContent += `<p>${isES && block.content.textEs ? block.content.textEs : block.content.text}</p>`;
+        } else if (block.type === "image" && block.content.imageUrl) {
+          htmlContent += `<img src="${block.content.imageUrl}" alt="Newsletter image" />`;
+        } else if (block.type === "button") {
+          htmlContent += `<a href="${block.content.buttonUrl}">${isES && block.content.buttonTextEs ? block.content.buttonTextEs : block.content.buttonText}</a>`;
+        } else if (block.type === "divider") {
+          htmlContent += `<hr />`;
+        }
+      });
+
+      // Get selected emails if in selected mode
+      const selectedEmails = sendMode === "selected"
+        ? subscribers
+            .filter(s => selectedSubscribers.has(s.id))
+            .map(s => s.email)
+        : [];
+
       const response = await fetch("/api/newsletter/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject, content }),
+        body: JSON.stringify({
+          subject,
+          content: htmlContent,
+          sendMode,
+          selectedEmails,
+        }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
         setSendResult({ success: true, message: data.message });
+        setShowBuilder(false);
+        setSelectedTemplate(null);
+        setBlocks([]);
         setSubject("");
-        setContent("");
+        setSelectedSubscribers(new Set());
+        setSendMode("all");
         fetchHistory();
       } else {
-        setSendResult({ success: false, message: data.error || (language === "es" ? "Error al enviar" : "Error sending") });
+        setSendResult({ success: false, message: data.error || (isES ? "Error al enviar" : "Error sending") });
       }
     } catch {
-      setSendResult({ success: false, message: language === "es" ? "Error de conexión. Intenta nuevamente." : "Connection error. Please try again." });
+      setSendResult({ success: false, message: isES ? "Error de conexión. Intenta nuevamente." : "Connection error. Please try again." });
     } finally {
       setSending(false);
     }
@@ -427,80 +511,191 @@ export default function AdminNewsletterPage(): JSX.Element {
       )}
 
       {activeTab === "send" && (
-        <div className="max-w-3xl">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Send className="w-5 h-5 text-primary" />
-              {language === "es" ? `Enviar Newsletter a ${activeSubscribers} suscriptores` : `Send Newsletter to ${activeSubscribers} subscribers`}
-            </h2>
+        <>
+          {sendResult && (
+            <div className={`mb-6 p-4 rounded-lg ${
+              sendResult.success
+                ? "bg-green-50 border border-green-200 text-green-700"
+                : "bg-red-50 border border-red-200 text-red-700"
+            }`}>
+              {sendResult.message}
+              {sendResult.success && (
+                <button
+                  onClick={() => setSendResult(null)}
+                  className="ml-4 text-sm underline"
+                >
+                  {isES ? "Cerrar" : "Close"}
+                </button>
+              )}
+            </div>
+          )}
 
-            {sendResult && (
-              <div className={`mb-6 p-4 rounded-lg ${
-                sendResult.success
-                  ? "bg-green-50 border border-green-200 text-green-700"
-                  : "bg-red-50 border border-red-200 text-red-700"
-              }`}>
-                {sendResult.message}
+          {!showBuilder ? (
+            <>
+              {/* Template Selection */}
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold text-on-surface mb-4">
+                  {isES ? "Elige una Plantilla" : "Choose a Template"}
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {newsletterTemplates.map((template) => (
+                    <button
+                      key={template.id}
+                      onClick={() => handleSelectTemplate(template)}
+                      className="group relative rounded-xl overflow-hidden border-2 border-outline-variant/20 hover:border-primary transition-all hover:shadow-lg text-left"
+                    >
+                      {/* Template Preview Header */}
+                      <div
+                        className="p-6 text-white"
+                        style={{ backgroundColor: template.headerColor }}
+                      >
+                        <h3 className="text-xl font-bold mb-1">
+                          {isES ? template.nameEs : template.name}
+                        </h3>
+                        <p className="text-sm opacity-80">
+                          {isES ? template.descriptionEs : template.description}
+                        </p>
+                      </div>
+                      {/* Template Accent */}
+                      <div className="p-4 bg-surface-lowest">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: template.accentColor }}
+                          />
+                          <span className="text-xs text-on-surface-variant">
+                            {template.blocks.length} {isES ? "bloques" : "blocks"}
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
-            )}
-
-            <form onSubmit={handleSendNewsletter} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === "es" ? "Asunto / Subject" : "Subject"} *
-                </label>
-                <input
-                  type="text"
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  placeholder="Ej: Monthly Update - November 2024"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                  required
+            </>
+          ) : (
+            <>
+              {/* Newsletter Builder */}
+              <div className="mb-6">
+                <button
+                  onClick={() => { setShowBuilder(false); setBlocks([]); setSubject(""); }}
+                  className="text-sm text-primary hover:underline flex items-center gap-1 mb-4"
+                >
+                  ← {isES ? "Volver a plantillas" : "Back to templates"}
+                </button>
+                <NewsletterBuilder
+                  template={selectedTemplate}
+                  subject={subject}
+                  onSubjectChange={setSubject}
+                  blocks={blocks}
+                  onBlocksChange={setBlocks}
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === "es" ? "Contenido / Content" : "Content"} *
-                </label>
-                <p className="text-sm text-gray-500 mb-2">
-                  {language === "es" ? "Puedes usar HTML para dar formato al contenido." : "You can use HTML to format the content."}
-                </p>
-                <textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder={language === "es"
-                    ? "Escribe el contenido del newsletter aquí...\n\nPuedes usar HTML: <h2>Título</h2>, <p>Párrafo</p>, <a href='...'>Enlace</a>"
-                    : "Write the newsletter content here...\n\nYou can use HTML: <h2>Title</h2>, <p>Paragraph</p>, <a href='...'>Link</a>"
-                  }
-                  rows={12}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary font-mono text-sm"
-                  required
-                />
-              </div>
+              {/* Send Button */}
+              <div className="bg-surface-lowest rounded-xl shadow-sm border border-outline-variant/10 p-6 mt-6">
+                {/* Send Mode Toggle */}
+                <div className="mb-4 pb-4 border-b border-outline-variant/10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Users className="w-5 h-5 text-on-surface-variant" />
+                    <h3 className="text-lg font-semibold text-on-surface">
+                      {isES ? "Destinatarios" : "Recipients"}
+                    </h3>
+                  </div>
+                  <div className="flex gap-2 mb-3 bg-surface-low p-1 rounded-lg w-fit">
+                    <button
+                      onClick={() => setSendMode("all")}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                        sendMode === "all"
+                          ? "bg-primary text-white shadow-sm"
+                          : "text-on-surface-variant hover:text-on-surface"
+                      }`}
+                    >
+                      {isES ? "Todos" : "All"} ({activeSubscribers})
+                    </button>
+                    <button
+                      onClick={() => setSendMode("selected")}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                        sendMode === "selected"
+                          ? "bg-primary text-white shadow-sm"
+                          : "text-on-surface-variant hover:text-on-surface"
+                      }`}
+                    >
+                      {isES ? "Seleccionados" : "Selected"} ({selectedSubscribers.size})
+                    </button>
+                  </div>
 
-              <div className="flex items-center gap-4">
-                <button
-                  type="submit"
-                  disabled={sending}
-                  className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
-                >
-                  <Send className="w-5 h-5" />
-                  {sending
-                    ? (language === "es" ? "Enviando..." : "Sending...")
-                    : (language === "es" ? "Enviar Newsletter" : "Send Newsletter")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setSubject(""); setContent(""); setSendResult(null); }}
-                  className="text-gray-600 hover:text-gray-800"
-                >
-                  {language === "es" ? "Limpiar" : "Clear"}
-                </button>
+                  {/* Selected Subscribers List */}
+                  {sendMode === "selected" && (
+                    <div className="border border-outline-variant/20 rounded-lg overflow-hidden max-h-64 overflow-y-auto">
+                      <div className="p-2 bg-surface-low border-b border-outline-variant/10 flex gap-2">
+                        <button
+                          onClick={selectAllSubscribers}
+                          className="text-xs text-primary hover:underline"
+                        >
+                          {isES ? "Seleccionar todos" : "Select all"}
+                        </button>
+                        <span className="text-outline-variant">|</span>
+                        <button
+                          onClick={deselectAllSubscribers}
+                          className="text-xs text-primary hover:underline"
+                        >
+                          {isES ? "Deseleccionar todos" : "Deselect all"}
+                        </button>
+                      </div>
+                      {subscribers.filter(s => s.status === "active").map((subscriber) => (
+                        <label
+                          key={subscriber.id}
+                          className="flex items-center gap-3 p-3 hover:bg-surface-low cursor-pointer border-b border-outline-variant/5 last:border-b-0"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedSubscribers.has(subscriber.id)}
+                            onChange={() => toggleSubscriberSelection(subscriber.id)}
+                            className="w-4 h-4 text-primary border-outline-variant/30 rounded focus:ring-primary"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-on-surface truncate">
+                              {subscriber.email}
+                            </p>
+                            {subscriber.name && (
+                              <p className="text-xs text-on-surface-variant truncate">
+                                {subscriber.name}
+                              </p>
+                            )}
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-on-surface">
+                      {isES ? "Enviar Newsletter" : "Send Newsletter"}
+                    </h3>
+                    <p className="text-sm text-on-surface-variant">
+                      {isES
+                        ? `Se enviará a ${sendMode === "all" ? activeSubscribers : selectedSubscribers.size} suscriptores`
+                        : `Will be sent to ${sendMode === "all" ? activeSubscribers : selectedSubscribers.size} subscribers`}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleSendNewsletter}
+                    disabled={sending || blocks.length === 0 || !subject.trim() || (sendMode === "selected" && selectedSubscribers.size === 0)}
+                    className="flex items-center gap-2 bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <Send className="w-5 h-5" />
+                    {sending
+                      ? (isES ? "Enviando..." : "Sending...")
+                      : (isES ? "Enviar" : "Send")}
+                  </button>
+                </div>
               </div>
-            </form>
-          </div>
-        </div>
+            </>
+          )}
+        </>
       )}
 
       {activeTab === "history" && (

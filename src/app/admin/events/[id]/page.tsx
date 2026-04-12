@@ -27,6 +27,9 @@ import {
   CheckCircle,
   User,
   Send,
+  Archive,
+  ArchiveRestore,
+  Flag,
 } from "lucide-react";
 import ConfirmModal from "@/components/ConfirmModal";
 
@@ -42,6 +45,8 @@ interface EventData {
   location?: string;
   category?: string;
   status: string;
+  is_finished?: boolean;
+  is_archived?: boolean;
   image_url?: string;
   registration_required?: boolean;
 }
@@ -79,6 +84,8 @@ export default function EventDetailsPage(): JSX.Element {
   const [selectedReg, setSelectedReg] = useState<Registration | null>(null);
   const [sendingSummary, setSendingSummary] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [toggling, setToggling] = useState<string | null>(null);
+  const [toggleResult, setToggleResult] = useState<{ success: boolean; message: string } | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -165,6 +172,37 @@ export default function EventDetailsPage(): JSX.Element {
     }
   };
 
+  const handleToggle = async (field: "is_finished" | "is_archived") => {
+    if (!event) return;
+    setToggling(field);
+    setToggleResult(null);
+    try {
+      const newVal = !event[field];
+      const response = await fetch(`/api/events/${eventId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...event,
+          [field]: newVal,
+        }),
+      });
+      if (response.ok) {
+        setEvent({ ...event, [field]: newVal });
+        const label = field === "is_finished"
+          ? (newVal ? (language === "es" ? "finalizado" : "finished") : (language === "es" ? "reactivado" : "reopened"))
+          : (newVal ? (language === "es" ? "archivado" : "archived") : (language === "es" ? "desarchivado" : "unarchived"));
+        setToggleResult({ success: true, message: `${language === "es" ? "Evento" : "Event"} ${label}` });
+      } else {
+        throw new Error("Failed to update");
+      }
+    } catch (err) {
+      console.error(`Error toggling ${field}:`, err);
+      setToggleResult({ success: false, message: language === "es" ? "Error al actualizar" : "Error updating" });
+    } finally {
+      setToggling(null);
+    }
+  };
+
   const sendSummaryEmail = async () => {
     if (!event) return;
 
@@ -231,7 +269,7 @@ export default function EventDetailsPage(): JSX.Element {
   return (
     <div>
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-8">
         <div>
           <button
             onClick={() => router.push("/admin/events")}
@@ -246,8 +284,72 @@ export default function EventDetailsPage(): JSX.Element {
             {event.time ? ` · ${event.time}` : ""}
             {event.location ? ` · ${event.location}` : ""}
           </p>
+          {/* Status badges */}
+          <div className="flex flex-wrap gap-2 mt-3">
+            <span
+              className={`inline-block px-3 py-1 rounded-full text-sm font-medium capitalize ${
+                event.status === "published"
+                  ? "bg-green-100 text-green-700"
+                  : event.status === "cancelled"
+                  ? "bg-red-100 text-red-700"
+                  : "bg-gray-100 text-gray-700"
+              }`}
+            >
+              {event.status}
+            </span>
+            {event.is_finished && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-700">
+                <Flag className="w-3 h-3" />
+                {language === "es" ? "Finalizado" : "Finished"}
+              </span>
+            )}
+            {event.is_archived && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
+                <Archive className="w-3 h-3" />
+                {language === "es" ? "Archivado" : "Archived"}
+              </span>
+            )}
+          </div>
+          {/* Toggle result message */}
+          {toggleResult && (
+            <div className={`mt-2 px-3 py-2 rounded-lg text-sm ${
+              toggleResult.success ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
+            }`}>
+              {toggleResult.message}
+            </div>
+          )}
         </div>
-        <div className="mt-4 md:mt-0 flex gap-3">
+        <div className="mt-4 md:mt-0 flex flex-wrap gap-3">
+          <button
+            onClick={() => handleToggle("is_finished")}
+            disabled={toggling === "is_finished"}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 ${
+              event.is_finished
+                ? "bg-orange-100 text-orange-700 hover:bg-orange-200 border border-orange-200"
+                : "bg-green-100 text-green-700 hover:bg-green-200 border border-green-200"
+            }`}
+          >
+            {event.is_finished ? <ArchiveRestore className="w-4 h-4" /> : <Flag className="w-4 h-4" />}
+            {event.is_finished
+              ? (language === "es" ? "Reactivar" : "Reopen")
+              : (language === "es" ? "Finalizar" : "Finish")
+            }
+          </button>
+          <button
+            onClick={() => handleToggle("is_archived")}
+            disabled={toggling === "is_archived"}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 ${
+              event.is_archived
+                ? "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
+                : "bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200"
+            }`}
+          >
+            {event.is_archived ? <ArchiveRestore className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
+            {event.is_archived
+              ? (language === "es" ? "Desarchivar" : "Unarchive")
+              : (language === "es" ? "Archivar" : "Archive")
+            }
+          </button>
           <button
             onClick={() => setShowConfirmModal(true)}
             disabled={registrations.length === 0}
@@ -398,12 +500,43 @@ export default function EventDetailsPage(): JSX.Element {
           </div>
 
           {/* Linked Forms */}
-          {linkedForms.length > 0 && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-primary" />
                 {language === "es" ? "Formularios Asociados" : "Linked Forms"}
               </h2>
+              <Link
+                href={`/admin/forms/new?eventId=${eventId}`}
+                className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors"
+              >
+                <FileText className="w-4 h-4" />
+                {language === "es" ? "Crear Formulario" : "Create Form"}
+              </Link>
+            </div>
+
+            {linkedForms.length === 0 ? (
+              <div className="text-center py-8">
+                <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <p className="text-gray-600 font-medium">
+                  {language === "es"
+                    ? "No hay formularios vinculados a este evento"
+                    : "No forms linked to this event"}
+                </p>
+                <p className="text-sm text-gray-500 mt-1 mb-4">
+                  {language === "es"
+                    ? "Crea un formulario personalizado para recabar más información de los registrados"
+                    : "Create a custom form to collect more information from registrants"}
+                </p>
+                <Link
+                  href={`/admin/forms/new?eventId=${eventId}`}
+                  className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-hover transition-colors"
+                >
+                  <FileText className="w-5 h-5" />
+                  {language === "es" ? "Crear Formulario para este Evento" : "Create Form for this Event"}
+                </Link>
+              </div>
+            ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {linkedForms.map((form) => (
                   <div
@@ -456,8 +589,8 @@ export default function EventDetailsPage(): JSX.Element {
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       ) : (
         /* Registrations Tab */

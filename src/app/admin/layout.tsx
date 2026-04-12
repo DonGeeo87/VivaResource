@@ -18,6 +18,7 @@ import {
   Shield,
   Image,
   HandHelping,
+  Search,
 } from "lucide-react";
 import { AuthProvider, useAuth } from "@/contexts/AdminAuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -39,6 +40,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }): JSX.Element 
     { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
     { href: "/admin/donations", label: language === "es" ? "Donaciones" : "Donations", icon: Heart },
     { href: "/admin/ai-generator", label: "AI Generator", icon: Sparkles },
+    { href: "/admin/seo", label: "SEO", icon: Search },
     { href: "/admin/users", label: language === "es" ? "Usuarios" : "Users", icon: Shield },
     { href: "/admin/help-requests", label: language === "es" ? "Solicitudes de Ayuda" : "Help Requests", icon: HandHelping },
     { href: "/admin/images", label: language === "es" ? "Imágenes" : "Images", icon: Image },

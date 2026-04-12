@@ -89,16 +89,6 @@
       ]
     },
     {
-      "collectionGroup": "newsletter_subscribers",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "subscribed_at",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
       "collectionGroup": "form_submissions",
       "queryScope": "COLLECTION",
       "fields": [

@@ -313,3 +313,128 @@ export async function sendNewsletterConfirmation(
     return { success: false, error: message };
   }
 }
+
+/**
+ * Send volunteer message notification (admin to volunteer)
+ */
+export interface VolunteerMessageData {
+  volunteerEmail: string;
+  volunteerName: string;
+  subject: string;
+  message: string;
+}
+
+export async function sendVolunteerMessageNotification(
+  data: VolunteerMessageData
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const content = `
+      <h1 style="color: #025689; font-size: 24px; margin: 0 0 16px 0;">
+        Message from Viva Resource Foundation
+      </h1>
+      <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+        Hi <strong>${data.volunteerName}</strong>,
+      </p>
+      <div style="background-color: #f9f9f9; border-radius: 8px; padding: 20px; margin: 24px 0;">
+        <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0; white-space: pre-line;">
+          ${data.message}
+        </p>
+      </div>
+      <p style="color: #333; font-size: 14px; line-height: 1.6; margin: 24px 0 0 0;">
+        You can view this message and any updates in your <a href="${SITE_URL}/volunteer-portal" style="color: #025689;">Volunteer Portal</a>.
+      </p>
+      <p style="color: #666; font-size: 14px; margin: 24px 0 0 0;">
+        If you have any questions, please contact us at <a href="mailto:contact@vivaresource.org" style="color: #025689;">contact@vivaresource.org</a>
+      </p>
+    `;
+
+    await transporter.sendMail({
+      from: `"Viva Resource Foundation" <${FROM_EMAIL}>`,
+      to: data.volunteerEmail,
+      subject: data.subject,
+      html: emailWrapper(content),
+    });
+
+    return { success: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("Error in sendVolunteerMessageNotification:", message);
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Send volunteer status change notification (approved/rejected)
+ */
+export interface VolunteerStatusChangeData {
+  volunteerEmail: string;
+  volunteerName: string;
+  status: "approved" | "rejected";
+}
+
+export async function sendVolunteerStatusChangeNotification(
+  data: VolunteerStatusChangeData
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const isApproved = data.status === "approved";
+    const subject = isApproved
+      ? "Welcome to the Viva Resource Team!"
+      : "Your Volunteer Application Update";
+
+    const content = isApproved
+      ? `
+      <h1 style="color: #025689; font-size: 24px; margin: 0 0 16px 0;">
+        Welcome to the Team!
+      </h1>
+      <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+        Dear <strong>${data.volunteerName}</strong>,
+      </p>
+      <div style="background-color: #e8f5e9; border-radius: 8px; padding: 20px; margin: 24px 0; border-left: 4px solid #4caf50;">
+        <p style="color: #2e7d32; font-size: 18px; font-weight: 600; margin: 0 0 12px 0;">
+          ✅ Your volunteer application has been approved!
+        </p>
+        <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0;">
+          We are excited to have you on our team. We will be in touch soon to coordinate next steps and assign your first tasks.
+        </p>
+      </div>
+      <p style="color: #333; font-size: 14px; line-height: 1.6; margin: 24px 0 0 0;">
+        You can access your volunteer portal at <a href="${SITE_URL}/volunteer-portal" style="color: #025689;">vivaresource.org/volunteer-portal</a>
+      </p>
+      <p style="color: #666; font-size: 14px; margin: 24px 0 0 0;">
+        If you have any questions, please contact us at <a href="mailto:contact@vivaresource.org" style="color: #025689;">contact@vivaresource.org</a>
+      </p>
+    `
+      : `
+      <h1 style="color: #025689; font-size: 24px; margin: 0 0 16px 0;">
+        Thank You for Your Interest
+      </h1>
+      <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+        Dear <strong>${data.volunteerName}</strong>,
+      </p>
+      <div style="background-color: #fff3e0; border-radius: 8px; padding: 20px; margin: 24px 0; border-left: 4px solid #ff9800;">
+        <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0;">
+          Thank you for your interest in volunteering with Viva Resource Foundation. After reviewing your application, we regret to inform you that we cannot accept your application at this time. This does not reflect negatively on you, and we encourage you to apply again in the future.
+        </p>
+      </div>
+      <p style="color: #333; font-size: 14px; line-height: 1.6; margin: 24px 0 0 0;">
+        We appreciate your interest in our mission and wish you all the best.
+      </p>
+      <p style="color: #666; font-size: 14px; margin: 24px 0 0 0;">
+        If you have any questions, please contact us at <a href="mailto:contact@vivaresource.org" style="color: #025689;">contact@vivaresource.org</a>
+      </p>
+    `;
+
+    await transporter.sendMail({
+      from: `"Viva Resource Foundation" <${FROM_EMAIL}>`,
+      to: data.volunteerEmail,
+      subject,
+      html: emailWrapper(content),
+    });
+
+    return { success: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("Error in sendVolunteerStatusChangeNotification:", message);
+    return { success: false, error: message };
+  }
+}

@@ -29,6 +29,8 @@ interface Event {
   featured: boolean;
   category: string;
   status: string;
+  is_finished?: boolean;
+  is_archived?: boolean;
   badge?: string;
   cta?: string;
 }
@@ -56,6 +58,7 @@ export default function EventsPage(): JSX.Element {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(0);
+  const [showPastEvents, setShowPastEvents] = useState(false);
 
   useEffect(() => {
     fetchEvents();
@@ -95,6 +98,22 @@ export default function EventsPage(): JSX.Element {
     }
   };
 
+  const isEventPast = (event: Event): boolean => {
+    const eventDate = parseDate(event.date);
+    const now = new Date();
+    return eventDate.getTime() < now.getTime() || event.is_finished === true;
+  };
+
+  // Active events: not archived, not finished, date in future (or not past)
+  const activeEvents = events.filter(e =>
+    e.is_archived !== true && e.is_finished !== true && !isEventPast(e)
+  );
+
+  // Past events: finished OR date is past, but not archived
+  const pastEvents = events.filter(e =>
+    e.is_archived !== true && (e.is_finished === true || isEventPast(e))
+  );
+
   const getTitle = (event: Event) => language === "es" && event.title_es ? event.title_es : event.title_en;
   const getDescription = (event: Event) => language === "es" && event.description_es ? event.description_es : event.description_en;
 
@@ -108,8 +127,14 @@ export default function EventsPage(): JSX.Element {
 
   // Filter events by selected category
   const displayEvents = selectedCategory === 0
-    ? events
-    : events.filter((e: Event) => e.category === categoryMap[selectedCategory]);
+    ? activeEvents
+    : activeEvents.filter((e: Event) => e.category === categoryMap[selectedCategory]);
+
+  const displayPastEvents = showPastEvents
+    ? (selectedCategory === 0
+      ? pastEvents
+      : pastEvents.filter((e: Event) => e.category === categoryMap[selectedCategory]))
+    : [];
 
   if (loading) {
     return (
@@ -303,6 +328,99 @@ export default function EventsPage(): JSX.Element {
             </div>
           )}
         </section>
+
+        {/* Past Events Section */}
+        {pastEvents.length > 0 && (
+          <section className="py-16 px-8 max-w-7xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="font-headline text-2xl font-bold text-on-surface">
+                  {language === "es" ? "Eventos Pasados" : "Past Events"}
+                </h2>
+                <p className="text-on-surface-variant text-sm mt-1">
+                  {language === "es"
+                    ? `Galería e historial de eventos de la fundación (${pastEvents.length})`
+                    : `Foundation event gallery and history (${pastEvents.length})`}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowPastEvents(!showPastEvents)}
+                className="px-5 py-2 rounded-full text-sm font-medium border-2 border-primary text-primary hover:bg-primary hover:text-on-primary transition-colors"
+              >
+                {showPastEvents
+                  ? (language === "es" ? "Ocultar" : "Hide")
+                  : (language === "es" ? "Ver todos" : "View all")}
+              </button>
+            </div>
+
+            {showPastEvents && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {displayPastEvents.map((event: Event) => (
+                  <div key={event.id} className="group flex flex-col h-full bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02] opacity-80">
+                    {/* Image Container */}
+                    <div className="relative w-full aspect-video overflow-hidden grayscale">
+                      {event.image ? (
+                        <Image
+                          alt={getTitle(event)}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          style={{ objectFit: 'cover' }}
+                          className="transition-transform duration-500 group-hover:scale-110"
+                          src={event.image}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+                          <Calendar className="w-16 h-16 text-gray-500" />
+                        </div>
+                      )}
+                      {/* Category Badge */}
+                      {event.category && (
+                        <div className="absolute top-3 left-3">
+                          <span className="inline-block px-3 py-1 bg-gray-400 text-white text-xs font-bold rounded-full uppercase tracking-wide">
+                            {event.category === "workshops" ? (language === "es" ? "Taller" : "Workshop") :
+                             event.category === "food" ? (language === "es" ? "Distribución" : "Food") :
+                             event.category === "meetings" ? (language === "es" ? "Reunión" : "Meeting") :
+                             event.category}
+                          </span>
+                        </div>
+                      )}
+                      {/* Past Event Badge */}
+                      <div className="absolute top-3 right-3">
+                        <span className="inline-block px-3 py-1 bg-gray-600 text-white text-xs font-bold rounded-full">
+                          {event.is_finished
+                            ? (language === "es" ? "Finalizado" : "Finished")
+                            : (language === "es" ? "Pasado" : "Past")}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex flex-col flex-1 p-6">
+                      <h3 className="font-headline text-xl font-bold text-gray-500 mb-3 line-clamp-2 min-h-[3rem]">
+                        {getTitle(event)}
+                      </h3>
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-gray-400 mb-3">
+                        <span className="flex items-center">
+                          <Calendar className="w-4 h-4 mr-1.5" />
+                          {formatDate(event.date)}
+                        </span>
+                        {event.location && (
+                          <span className="flex items-center">
+                            <MapPin className="w-4 h-4 mr-1.5" />
+                            <span className="line-clamp-1">{event.location}</span>
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-3 flex-1">
+                        {getDescription(event)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Newsletter Section */}
         <section className="bg-surface-container-low py-24 relative overflow-hidden">

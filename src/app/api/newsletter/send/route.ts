@@ -32,7 +32,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     const body = await request.json();
-    const { subject, content, html } = body;
+    const { subject, content, html, sendMode, selectedEmails } = body;
 
     // Validate required fields
     if (!subject || typeof subject !== "string" || !subject.trim()) {
@@ -49,30 +49,42 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Fetch all active subscribers (without orderBy to avoid index requirement)
+    // Fetch subscribers based on send mode
     let subscribers: Subscriber[] = [];
-    try {
-      const q = query(
-        collection(db, "newsletter_subscribers"),
-        where("status", "==", "active")
-      );
-      const snapshot = await getDocs(q);
-      subscribers = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        email: doc.data().email,
-        name: doc.data().name || "",
-        status: doc.data().status || "active",
-      })) as Subscriber[];
-    } catch (queryError) {
-      console.error("Error fetching subscribers for newsletter:", queryError);
-      // Fallback: fetch all and filter client-side
-      const snapshot = await getDocs(collection(db, "newsletter_subscribers"));
-      subscribers = snapshot.docs
-        .map((doc) => ({
+
+    if (sendMode === "selected" && Array.isArray(selectedEmails) && selectedEmails.length > 0) {
+      // Filter by selected emails
+      subscribers = selectedEmails.map(email => ({
+        id: `selected-${email}`,
+        email,
+        name: "",
+        status: "active",
+      }));
+    } else {
+      // Fetch all active subscribers
+      try {
+        const q = query(
+          collection(db, "newsletter_subscribers"),
+          where("status", "==", "active")
+        );
+        const snapshot = await getDocs(q);
+        subscribers = snapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data(),
+          email: doc.data().email,
+          name: doc.data().name || "",
+          status: doc.data().status || "active",
         })) as Subscriber[];
-      subscribers = subscribers.filter((s) => s.status === "active");
+      } catch (queryError) {
+        console.error("Error fetching subscribers for newsletter:", queryError);
+        // Fallback: fetch all and filter client-side
+        const snapshot = await getDocs(collection(db, "newsletter_subscribers"));
+        subscribers = snapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          })) as Subscriber[];
+        subscribers = subscribers.filter((s) => s.status === "active");
+      }
     }
 
     if (subscribers.length === 0) {
@@ -84,6 +96,23 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Build HTML email
     const emailHtml = html || buildEmailHtml(subject, content);
+
+    // Save to newsletter history BEFORE sending (so it exists even if send fails)
+    let historyId: string | null = null;
+    try {
+      const historyRef = await addDoc(collection(db, "newsletter_history"), {
+        subject: subject.trim(),
+        content,
+        sent_at: Timestamp.now(),
+        total_sent: 0,
+        total_failed: 0,
+        total_subscribers: subscribers.length,
+        status: "sending",
+      });
+      historyId = historyRef.id;
+    } catch (historyError) {
+      console.error("[Newsletter Send] Error saving preliminary history:", historyError);
+    }
 
     // Send emails one by one with delay to avoid rate limiting (Gmail limit: 500/day)
     const results: { success: number; failed: number; errors: string[] } = {
@@ -103,8 +132,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
         results.success++;
 
-        // Small delay between sends to avoid rate limiting
-        await new Promise((resolve) => setTimeout(resolve, 200));
+        // Delay between sends to avoid rate limiting (500ms = ~2 emails/sec)
+        await new Promise((resolve) => setTimeout(resolve, 500));
       } catch (err) {
         results.failed++;
         const message = err instanceof Error ? err.message : "Unknown error";
@@ -113,19 +142,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
     }
 
-    // Save to newsletter history
-    try {
-      await addDoc(collection(db, "newsletter_history"), {
-        subject: subject.trim(),
-        content,
-        sent_at: Timestamp.now(),
-        total_sent: results.success,
-        total_failed: results.failed,
-        total_subscribers: subscribers.length,
-        status: results.failed === 0 ? "completed" : "completed_with_errors",
-      });
-    } catch (historyError) {
-      console.error("Error saving to newsletter history:", historyError);
+    // Update history with final results
+    if (historyId) {
+      try {
+        const { doc, updateDoc } = await import("firebase/firestore");
+        await updateDoc(doc(db, "newsletter_history", historyId), {
+          total_sent: results.success,
+          total_failed: results.failed,
+          status: results.failed === 0 ? "completed" : "completed_with_errors",
+        });
+      } catch (updateError) {
+        console.error("[Newsletter Send] Error updating history:", updateError);
+      }
     }
 
     return NextResponse.json({

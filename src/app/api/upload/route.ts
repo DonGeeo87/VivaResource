@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
+import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
@@ -9,6 +10,16 @@ cloudinary.config({
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    // Rate limiting: 10 uploads per 15 minutes per IP
+    const ip = getClientIp(request);
+    const rateCheck = checkRateLimit(ip, RATE_LIMITS.upload);
+    if (rateCheck.limited) {
+      return NextResponse.json(
+        { success: false, error: `Too many uploads. Retry in ${rateCheck.retryAfter}s` },
+        { status: 429 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     const folder = (formData.get("folder") as string) || "vivaresource";

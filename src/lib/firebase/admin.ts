@@ -46,6 +46,7 @@ async function initAdmin() {
       const path = await import('path');
       
       const possiblePaths = [
+        path.join(process.cwd(), 'vivaresource-firebase-adminsdk-fbsvc-7f4fe61009.json'),
         path.join(process.cwd(), 'vivaresource-firebase-adminsdk-fbsvc-2291c133a9.json'),
         path.join(process.cwd(), 'firebase-admin-key.json'),
       ];

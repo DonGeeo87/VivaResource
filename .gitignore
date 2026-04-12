@@ -19,6 +19,7 @@
 # misc
 .DS_Store
 *.pem
+Thumbs.db
 
 # debug
 npm-debug.log*
@@ -30,6 +31,13 @@ yarn-error.log*
 
 # firebase admin
 firebase-admin-key.json
+vivaresource-firebase-adminsdk-*.json
+
+# firebase emulators
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
 
 # vercel
 .vercel
@@ -38,7 +46,10 @@ firebase-admin-key.json
 *.tsbuildinfo
 next-env.d.ts
 
-.vercel
-.env*.local
+# Environment
 .env.vercel
-vivaresource-firebase-adminsdk-*.json
+
+# Playwright
+/playwright-report/
+/test-results/
+/playwright/.cache/

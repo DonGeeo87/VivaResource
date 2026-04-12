@@ -30,9 +30,45 @@ export type EventFormData = z.infer<typeof eventSchema>;
 interface EventFormProps {
   initialData?: EventFormData & { id?: string; createdAt?: Timestamp };
   onSubmit?: (data: EventFormData) => Promise<void>;
+  template?: string | null;
 }
 
-export default function EventForm({ initialData, onSubmit }: EventFormProps) {
+const eventTemplates: Record<string, Partial<EventFormData>> = {
+  workshop: {
+    category: "workshop",
+    registration_required: true,
+    title_en: "Community Workshop",
+    title_es: "Taller Comunitario",
+    description_en: "Interactive learning session with hands-on activities for the community.",
+    description_es: "Sesión de aprendizaje interactiva con actividades prácticas para la comunidad.",
+  },
+  community_gathering: {
+    category: "community",
+    registration_required: false,
+    title_en: "Community Gathering",
+    title_es: "Reunión Comunitaria",
+    description_en: "Casual meet-and-greet for community members to connect and share.",
+    description_es: "Encuentro informal para miembros de la comunidad para conectar y compartir.",
+  },
+  fundraiser: {
+    category: "fundraiser",
+    registration_required: true,
+    title_en: "Fundraising Event",
+    title_es: "Evento de Recaudación de Fondos",
+    description_en: "Join us to support our mission and raise funds for community programs.",
+    description_es: "Únase a nosotros para apoyar nuestra misión y recaudar fondos para programas comunitarios.",
+  },
+  webinar: {
+    category: "workshop",
+    registration_required: true,
+    title_en: "Online Webinar",
+    title_es: "Seminario Web",
+    description_en: "Online educational presentation with Q&A session.",
+    description_es: "Presentación educativa en línea con sesión de preguntas y respuestas.",
+  },
+};
+
+export default function EventForm({ initialData, onSubmit, template }: EventFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,15 +85,26 @@ export default function EventForm({ initialData, onSubmit }: EventFormProps) {
       .replace(/\s+/g, "-");
   };
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-    setValue,
-  } = useForm<EventFormData>({
-    resolver: zodResolver(eventSchema),
-    defaultValues: initialData || {
+  const templateData = template && template !== "blank" ? eventTemplates[template] : null;
+
+  const getDefaultValues = (): EventFormData => {
+    if (templateData) {
+      return {
+        title_en: templateData.title_en || "",
+        title_es: templateData.title_es || "",
+        slug: "",
+        description_en: templateData.description_en || "",
+        description_es: templateData.description_es || "",
+        date: "",
+        time: "",
+        location: "",
+        category: templateData.category || "community",
+        status: "draft",
+        registration_required: templateData.registration_required ?? false,
+        image_url: "",
+      };
+    }
+    return {
       title_en: "",
       title_es: "",
       slug: "",
@@ -70,7 +117,18 @@ export default function EventForm({ initialData, onSubmit }: EventFormProps) {
       status: "draft",
       registration_required: false,
       image_url: "",
-    },
+    };
+  };
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+    setValue,
+  } = useForm<EventFormData>({
+    resolver: zodResolver(eventSchema),
+    defaultValues: initialData || getDefaultValues(),
   });
 
   const title_en = watch("title_en");

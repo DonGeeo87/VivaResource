@@ -1,27 +1,13 @@
 import type { Metadata } from "next";
+import { generatePageMeta } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "Get Involved | Volunteer & Support Colorado Immigrant Community",
-  description:
-    "Join Viva Resource Foundation as a volunteer, ambassador, or supporter. Make a difference in Colorado immigrant communities through community outreach, education, and resource distribution in Denver, Peyton, and rural Colorado.",
-  keywords: [
-    "volunteer Colorado immigrant",
-    "community ambassador Colorado",
-    "nonprofit volunteer Denver",
-    "support immigrant community CO",
-    "Colorado volunteer opportunities",
-  ],
-  openGraph: {
-    title: "Get Involved | Volunteer with Viva Resource Foundation",
-    description: "Join our mission to empower immigrant communities in Colorado. Volunteer, donate, or become an ambassador.",
-    type: "website",
-  },
-};
+export const metadata: Metadata = generatePageMeta({
+  title: "Get Involved - Únete como Voluntario o Embajador",
+  description: "Join Viva Resource Foundation as a volunteer or community ambassador. Make a difference in immigrant communities across Colorado, Denver, and Peyton.",
+  path: "/get-involved",
+  keywords: ["volunteer Colorado", "voluntariado inmigrante", "community ambassador", "Colorado nonprofit volunteer", "join Viva Resource"],
+});
 
-export default function GetInvolvedLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function GetInvolvedLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

@@ -1,31 +1,53 @@
 import { NextRequest, NextResponse } from "next/server";
-import { collection, getDocs, query, orderBy, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, deleteDoc, doc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 
 interface NewsletterHistory {
   id: string;
   subject: string;
   content: string;
-  sent_at: { toDate: () => Date } | Date;
+  sent_at: Timestamp | Date;
   total_sent: number;
   total_failed: number;
   total_subscribers: number;
   status: string;
 }
 
+function getTimestamp(date: Timestamp | Date): number {
+  if (date instanceof Timestamp) return date.toDate().getTime();
+  if (date instanceof Date) return date.getTime();
+  return 0;
+}
+
 export async function GET(): Promise<NextResponse> {
   try {
-    const q = query(
-      collection(db, "newsletter_history"),
-      orderBy("sent_at", "desc")
-    );
-    const snapshot = await getDocs(q);
-    const history = snapshot.docs.map((d) => ({
-      id: d.id,
-      ...d.data(),
-    })) as NewsletterHistory[];
+    // Try with orderBy first
+    try {
+      const q = query(
+        collection(db, "newsletter_history"),
+        orderBy("sent_at", "desc")
+      );
+      const snapshot = await getDocs(q);
+      const history = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      })) as NewsletterHistory[];
 
-    return NextResponse.json({ success: true, history });
+      return NextResponse.json({ success: true, history });
+    } catch {
+      // Fallback: fetch without ordering and sort client-side
+      console.log("[Newsletter History] Index not found, fetching without orderBy");
+      const snapshot = await getDocs(collection(db, "newsletter_history"));
+      const history = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      })) as NewsletterHistory[];
+
+      // Sort client-side
+      history.sort((a, b) => getTimestamp(b.sent_at) - getTimestamp(a.sent_at));
+
+      return NextResponse.json({ success: true, history });
+    }
   } catch (error) {
     console.error("Error fetching newsletter history:", error);
     const message = error instanceof Error ? error.message : "Unknown error";

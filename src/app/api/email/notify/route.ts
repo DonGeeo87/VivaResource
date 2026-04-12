@@ -4,15 +4,30 @@ import {
   sendNewVolunteerNotification,
   sendFormSubmissionNotification,
   sendNewsletterConfirmation,
+  sendVolunteerMessageNotification,
+  sendVolunteerStatusChangeNotification,
   EventRegistrationData,
   VolunteerRegistrationData,
   FormSubmissionData,
+  VolunteerMessageData,
+  VolunteerStatusChangeData,
 } from "@/lib/email/notifications";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
+import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    // Rate limiting: 10 emails per 15 minutes per IP
+    const ip = getClientIp(request);
+    const rateCheck = checkRateLimit(ip, RATE_LIMITS.email);
+    if (rateCheck.limited) {
+      return NextResponse.json(
+        { error: `Rate limited. Retry in ${rateCheck.retryAfter}s` },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { type, data } = body;
 
@@ -58,6 +73,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       case "newsletter-confirmation":
         result = await sendNewsletterConfirmation(data.email, data.name);
+        break;
+
+      case "volunteer-message":
+        result = await sendVolunteerMessageNotification(data as VolunteerMessageData);
+        break;
+
+      case "volunteer-status-change":
+        result = await sendVolunteerStatusChangeNotification(data as VolunteerStatusChangeData);
         break;
 
       default:

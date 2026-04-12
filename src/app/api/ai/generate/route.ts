@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
@@ -61,11 +62,25 @@ IMPORTANT: Also generate SEO metadata for this content. Include the following ad
 Return the content in JSON format with all fields. Do not include any markdown or extra text, just the raw JSON.`;
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  return handleGenerate(request);
+}
+
+async function handleGenerate(request: NextRequest): Promise<NextResponse> {
   if (!OPENROUTER_API_KEY) {
     return NextResponse.json(
       { error: "OpenRouter API key not configured" },
       { status: 500 }
+    );
+  }
+
+  // Rate limiting: 3 requests per 15 minutes per IP
+  const ip = getClientIp(request);
+  const rateCheck = checkRateLimit(ip, RATE_LIMITS.ai);
+  if (rateCheck.limited) {
+    return NextResponse.json(
+      { error: `Demasiadas solicitudes. Intenta en ${rateCheck.retryAfter} segundos.` },
+      { status: 429 }
     );
   }
 

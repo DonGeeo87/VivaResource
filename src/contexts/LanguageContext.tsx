@@ -39,6 +39,11 @@ export function LanguageProvider({ children }: LanguageProviderProps): JSX.Eleme
     }
   }, []);
 
+  // Update HTML lang attribute when language changes
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
   const setLanguage = (lang: Language): void => {
     setLanguageState(lang);
     if (typeof window !== "undefined") {

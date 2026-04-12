@@ -1,4 +1,9 @@
+"use client";
+
 import Script from "next/script";
+import { useEffect, useState } from "react";
+import { getDocs, collection } from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vivaresource.org";
 
@@ -9,8 +14,39 @@ interface SchemaMarkupProps {
 
 /**
  * Organization Schema - Always included in root layout
+ * Reads social media URLs from Firestore seo_settings collection
  */
 function OrganizationSchema() {
+  const [sameAs, setSameAs] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function fetchSocialUrls() {
+      try {
+        const snapshot = await getDocs(collection(db, "seo_settings"));
+        const settings: Record<string, string> = {};
+        snapshot.forEach((doc) => {
+          settings[doc.id] = doc.data().value as string;
+        });
+
+        const socialKeys = [
+          "facebook_url",
+          "twitter_url",
+          "instagram_url",
+          "linkedin_url",
+          "youtube_url",
+          "tiktok_url",
+        ];
+        const urls = socialKeys
+          .map((key) => settings[key])
+          .filter((url): url is string => !!url && url.startsWith("http"));
+        setSameAs(urls);
+      } catch {
+        // Use empty array if fetch fails
+      }
+    }
+    fetchSocialUrls();
+  }, []);
+
   const schema = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -36,7 +72,7 @@ function OrganizationSchema() {
       contactType: "customer service",
       availableLanguage: ["English", "Spanish"],
     },
-    sameAs: [],
+    sameAs,
     foundingDate: "2008",
     areaServed: {
       "@type": "State",

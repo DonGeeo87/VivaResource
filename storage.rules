@@ -17,13 +17,17 @@ service firebase.storage {
     // Images folder - editors can upload, anyone can read
     match /images/{allPaths=**} {
       allow read: if true;
-      allow write: if isEditor();
+      allow write: if isEditor()
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
     }
 
     // Uploads temp folder - only admins can write
     match /uploads/{allPaths=**} {
       allow read: if isSignedIn();
-      allow write: if isAdmin();
+      allow write: if isAdmin()
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
     }
   }
 }

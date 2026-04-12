@@ -109,11 +109,14 @@ service cloud.firestore {
       allow update, delete: if isEditor();
     }
 
-    // Volunteer messages - editors can send/manage, volunteers can read their own
+    // Volunteer messages - editors can send/manage, volunteers can read their own and reply
     match /volunteer_messages/{msgId} {
       allow read: if isEditor() ||
         (isSignedIn() && resource.data.volunteerId == request.auth.uid);
-      allow create, update, delete: if isEditor();
+      allow create: if isEditor() ||
+        (isSignedIn() && request.resource.data.volunteerId == request.auth.uid &&
+          request.resource.data.isReply == true);
+      allow update, delete: if isEditor();
       allow list: if isEditor() ||
         (isSignedIn() && resource.data.volunteerId == request.auth.uid);
       // Volunteers can mark messages as read

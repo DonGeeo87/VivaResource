@@ -1,28 +1,13 @@
 import type { Metadata } from "next";
+import { generatePageMeta } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "Events in Colorado | Community Events & Workshops - Viva Resource",
-  description:
-    "Join Viva Resource Foundation community events in Colorado. Free bilingual workshops, food distribution, health fairs, and community meetings in Denver, Peyton, and rural Colorado areas.",
-  keywords: [
-    "community events Colorado",
-    "immigrant workshops Denver",
-    "food distribution Colorado",
-    "bilingual events Peyton CO",
-    "community meetings Colorado",
-    "free workshops immigrant",
-  ],
-  openGraph: {
-    title: "Community Events in Colorado | Viva Resource Foundation",
-    description: "Free bilingual community events, workshops, and resources for immigrant families in Colorado.",
-    type: "website",
-  },
-};
+export const metadata: Metadata = generatePageMeta({
+  title: "Events - Eventos Comunitarios",
+  description: "Join community events, workshops, and gatherings organized by Viva Resource Foundation in Colorado. Free bilingual events for immigrant families.",
+  path: "/events",
+  keywords: ["immigrant events Colorado", "eventos comunitarios Denver", "Colorado community events", "free workshops Peyton", "Viva Resource events"],
+});
 
-export default function EventsLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function EventsLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { collection, addDoc, getDocs, query, where, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
+import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    // Rate limiting: 5 requests per 15 minutes per IP
+    const ip = getClientIp(request);
+    const rateCheck = checkRateLimit(ip, RATE_LIMITS.newsletter);
+    if (rateCheck.limited) {
+      return NextResponse.json(
+        { error: `Demasiados intentos. Intenta en ${rateCheck.retryAfter} segundos.` },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { email, name } = body;
 

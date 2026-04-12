@@ -54,19 +54,6 @@ export async function PUT(
     const eventId = params.id;
     const body = await request.json();
 
-    // Validación básica
-    if (!body.title_en || !body.title_es) {
-      return NextResponse.json(
-        { error: "Títulos en inglés y español son requeridos" },
-        { status: 400 }
-      );
-    }
-
-    // Validar fecha
-    if (!body.date) {
-      return NextResponse.json({ error: "La fecha es requerida" }, { status: 400 });
-    }
-
     // Get database instance
     const { adminDb } = await import("@/lib/firebase/admin");
     const db = await adminDb();
@@ -81,35 +68,68 @@ export async function PUT(
       return NextResponse.json({ error: "Evento no encontrado" }, { status: 404 });
     }
 
-    // Parsear fecha con zona horaria de Peyton, CO (Mountain Time)
-    let parsedDate: Date;
-    try {
-      parsedDate = parseEventDateTime(body.date, body.time || "00:00");
-      if (isNaN(parsedDate.getTime())) {
-        throw new Error("Invalid date");
+    // If this is a simple toggle (only is_finished or is_archived), skip full validation
+    const isSimpleToggle =
+      Object.keys(body).length <= 4 &&
+      ("is_finished" in body || "is_archived" in body);
+
+    if (!isSimpleToggle) {
+      // Full update validation
+      if (!body.title_en || !body.title_es) {
+        return NextResponse.json(
+          { error: "Títulos en inglés y español son requeridos" },
+          { status: 400 }
+        );
       }
-    } catch {
-      return NextResponse.json(
-        { error: "Fecha inválida. Use formato YYYY-MM-DD" },
-        { status: 400 }
-      );
+
+      // Validar fecha
+      if (!body.date) {
+        return NextResponse.json({ error: "La fecha es requerida" }, { status: 400 });
+      }
+    }
+
+    // Parsear fecha con zona horaria de Peyton, CO (Mountain Time)
+    let parsedDate: Date | undefined;
+    if (body.date) {
+      try {
+        // If it's already a Timestamp or Date, use it directly
+        if (body.date.toDate) {
+          parsedDate = body.date.toDate();
+        } else if (body.date instanceof Date) {
+          parsedDate = body.date;
+        } else {
+          parsedDate = parseEventDateTime(body.date, body.time || "00:00");
+        }
+        if (!parsedDate || isNaN(parsedDate.getTime())) {
+          throw new Error("Invalid date");
+        }
+      } catch {
+        return NextResponse.json(
+          { error: "Fecha inválida. Use formato YYYY-MM-DD" },
+          { status: 400 }
+        );
+      }
     }
 
     // Preparar datos para actualizar
     const updateData: Record<string, unknown> = {
-      title_en: body.title_en,
-      title_es: body.title_es,
-      slug: body.slug || "",
-      description_en: body.description_en || "",
-      description_es: body.description_es || "",
-      date: parsedDate,
-      time: body.time || "",
-      location: body.location || "",
-      category: body.category || "community",
-      registration_required: body.registration_required || false,
-      status: body.status || "draft",
       updated_at: new Date(),
     };
+
+    // Full update fields
+    if ("title_en" in body) updateData.title_en = body.title_en;
+    if ("title_es" in body) updateData.title_es = body.title_es;
+    if ("slug" in body) updateData.slug = body.slug || "";
+    if ("description_en" in body) updateData.description_en = body.description_en || "";
+    if ("description_es" in body) updateData.description_es = body.description_es || "";
+    if (parsedDate) updateData.date = parsedDate;
+    if ("time" in body) updateData.time = body.time || "";
+    if ("location" in body) updateData.location = body.location || "";
+    if ("category" in body) updateData.category = body.category || "community";
+    if ("registration_required" in body) updateData.registration_required = body.registration_required || false;
+    if ("status" in body) updateData.status = body.status || "draft";
+    if ("is_finished" in body) updateData.is_finished = body.is_finished ?? false;
+    if ("is_archived" in body) updateData.is_archived = body.is_archived ?? false;
 
     // Only update image_url if explicitly provided (even if empty)
     if ("image_url" in body) {
