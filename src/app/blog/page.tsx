@@ -44,6 +44,11 @@ export default function BlogPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set());
+
+  const handleImageError = (imageSrc: string) => {
+    setBrokenImages(prev => new Set(prev).add(imageSrc));
+  };
 
   useEffect(() => {
     fetchPosts();
@@ -122,7 +127,7 @@ export default function BlogPage() {
   });
 
   // Default placeholder image for posts without featured_image
-  const placeholderImage = "https://images.unsplash.com/photo-1559027615-cd4628902d42";
+  const placeholderImage = "/photo-bank/hero_01.jpg";
 
   if (loading) {
     return (
@@ -158,12 +163,13 @@ export default function BlogPage() {
           <div className="bg-white rounded-xl shadow-ambient-lg overflow-hidden flex flex-col lg:flex-row">
             <div className="lg:w-3/5 h-[400px] lg:h-auto overflow-hidden">
               <Image
-                src={filteredPosts[0].featured_image || placeholderImage}
+                src={brokenImages.has(filteredPosts[0].featured_image) ? placeholderImage : filteredPosts[0].featured_image || placeholderImage}
                 alt={filteredPosts[0].title}
                 width={800}
                 height={600}
                 className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
                 priority
+                onError={() => handleImageError(filteredPosts[0].featured_image)}
               />
             </div>
             <div className="lg:w-2/5 p-8 lg:p-12 flex flex-col justify-center">
@@ -241,11 +247,12 @@ export default function BlogPage() {
               <article key={post.id} className="group">
                 <div className="aspect-[4/3] mb-6 overflow-hidden rounded-xl relative">
                   <Image
-                    src={post.featured_image || placeholderImage}
+                    src={brokenImages.has(post.featured_image) ? placeholderImage : post.featured_image || placeholderImage}
                     alt={post.title}
                     width={600}
                     height={450}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    onError={() => handleImageError(post.featured_image)}
                   />
                   <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-[10px] font-bold text-primary">
                     {getCategory(post)}
