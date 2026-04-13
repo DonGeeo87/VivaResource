@@ -5,6 +5,8 @@ import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Send, Mail, Phone, Calendar, Check, X, Plus, ClipboardList, Inbox, MessageSquare, ChevronDown, ChevronUp } from "lucide-react";
 import { doc, getDoc, updateDoc, addDoc, collection, Timestamp, query, where, orderBy, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
+import { auth } from "@/lib/firebase/config";
+import { onAuthStateChanged } from "firebase/auth";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { VolunteerMessage } from "@/types/volunteer";
 
@@ -47,6 +49,16 @@ export default function AdminVolunteerDetailPage(): JSX.Element {
   const [taskEndTime, setTaskEndTime] = useState("");
   const [taskLocation, setTaskLocation] = useState("");
   const [taskCreating, setTaskCreating] = useState(false);
+
+  // Admin UID state
+  const [adminUid, setAdminUid] = useState<string | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) setAdminUid(user.uid);
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Messages state
   const [messages, setMessages] = useState<VolunteerMessage[]>([]);
@@ -172,7 +184,7 @@ export default function AdminVolunteerDetailPage(): JSX.Element {
       // Save message to Firestore with correct structure
       await addDoc(collection(db, "volunteer_messages"), {
         volunteerId: volunteer.id, // Changed from volunteer_id
-        from: "admin", // TODO: Replace with actual admin UID
+        from: adminUid || "unknown",
         fromName: "Viva Resource Foundation",
         subject: isES ? "Mensaje de Viva Resource Foundation" : "Message from Viva Resource Foundation",
         subjectEs: isES ? "Mensaje de Viva Resource Foundation" : null,
@@ -224,7 +236,7 @@ export default function AdminVolunteerDetailPage(): JSX.Element {
         endTime: taskEndTime || null,
         location: taskLocation || null,
         status: "pending",
-        assignedBy: "admin", // TODO: Replace with actual admin UID
+        assignedBy: adminUid || "unknown",
         createdAt: Timestamp.now(),
       });
 
