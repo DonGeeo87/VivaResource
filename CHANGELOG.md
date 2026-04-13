@@ -7,6 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.0] - 2026-04-13 - Volunteer Communication System & Security
+
+### Volunteer Communication System (Complete) ✅
+- **Bidirectional messaging** - Admins can send messages to volunteers, volunteers can reply
+- **Task assignment UI** - Admins can assign tasks to volunteers from detail page with bilingual fields
+- **Volunteer message inbox** (`/admin/volunteers/messages`) - Full inbox with filters, search, and real-time updates
+- **Real-time notifications** - Firestore `onSnapshot` listeners update inbox instantly, unread badge on header
+- **Toast notifications** - Visual alert when new message arrives
+- **Volunteer portal enhancements** - Reply to messages, view assigned tasks, mark tasks as complete
+- **Volunteer onboarding flow restructured**:
+  1. Volunteer applies via `/get-involved` (status: pending)
+  2. Admin reviews and approves from `/admin/volunteers`
+  3. Approval generates unique activation token
+  4. Activation email sent with link to create password
+  5. Volunteer creates account at `/volunteer-portal/activate`
+  6. Volunteer logs in at `/volunteer-portal/login` (login only, no public signup)
+- **Removed volunteer signup from portal** - Only approved volunteers can create accounts via activation link
+- **Activation token system** - Secure UUID tokens stored in `volunteer_registrations`
+- **Activation email template** - Professional HTML with CTA button
+
+### Security - reCAPTCHA v3 ✅
+- **reCAPTCHA v3 integration** on all public forms (Get Involved, Get Help, Newsletter)
+- **Server-side token verification** at `/api/recaptcha/verify` with score threshold (0.5)
+- **Graceful dev mode** - Skips verification when no site key configured
+- **Client-side reCAPTCHA provider** - `RecaptchaProvider` context loaded only in browser
+
+### Bug Fixes ✅
+- **Fixed volunteer fetch** - `created_at` serverTimestamp issue resolved with `new Date()` + fallback sorting
+- **Fixed broken blog images** - Local placeholder (`/photo-bank/hero_01.jpg`) + `onError` handler for broken URLs
+- **Fixed duplicate Header/Footer** - Volunteer portal now isolated from global ClientLayout (fixed navigation issues)
+- **Fixed admin UID hardcoded** - Replaced `"admin"` string with actual Firebase Auth UID via `onAuthStateChanged`
+- **Removed `useFormValidation.ts`** - Unified validation system using `react-hook-form` + `zod`
+
+### Firestore Indexes ✅
+- Added composite index for `volunteer_tasks` (`volunteerId` + `date` DESC)
+- Added composite index for `volunteer_messages` (`volunteerId` + `createdAt` DESC)
+- Deployed to production
+
+### New Files
+- `src/app/volunteer-portal/activate/page.tsx` - Account creation page for approved volunteers
+- `src/app/volunteer-portal/login/page.tsx` - Redesigned (login only, no signup)
+- `src/app/admin/volunteers/messages/page.tsx` - Full message inbox for admins
+- `src/app/api/recaptcha/verify/route.ts` - Server-side reCAPTCHA verification
+- `src/contexts/RecaptchaProvider.tsx` - reCAPTCHA v3 context provider
+- `src/lib/recaptcha.ts` - reCAPTCHA utility functions
+
+### Environment Variables (New)
+- `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` - reCAPTCHA v3 site key
+- `RECAPTCHA_SECRET_KEY` - reCAPTCHA v3 secret key
+
+### Dependencies Added
+- `react-google-recaptcha-v3` - Google reCAPTCHA v3 React integration
+
+---
+
 ## [0.3.1] - 2026-04-11 - SEO Settings & Admin Fixes
 
 ### Admin & Permissions Fixes ✅
