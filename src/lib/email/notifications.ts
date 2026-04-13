@@ -438,3 +438,57 @@ export async function sendVolunteerStatusChangeNotification(
     return { success: false, error: message };
   }
 }
+
+/**
+ * Send volunteer activation email with link to create account
+ */
+export interface VolunteerActivationData {
+  volunteerEmail: string;
+  volunteerName: string;
+  activationUrl: string;
+}
+
+export async function sendVolunteerActivationNotification(
+  data: VolunteerActivationData
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const content = `
+      <h1 style="color: #025689; font-size: 24px; margin: 0 0 16px 0;">
+        Your Volunteer Application Was Approved!
+      </h1>
+      <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+        Dear <strong>${data.volunteerName}</strong>,
+      </p>
+      <div style="background-color: #e8f5e9; border-radius: 8px; padding: 20px; margin: 24px 0; border-left: 4px solid #4caf50;">
+        <p style="color: #2e7d32; font-size: 18px; font-weight: 600; margin: 0 0 12px 0;">
+          Welcome to the Viva Resource Foundation team!
+        </p>
+        <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0;">
+          Your volunteer application has been approved. To access your volunteer portal and start receiving tasks and messages, please create your account password by clicking the button below:
+        </p>
+      </div>
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${data.activationUrl}" style="display: inline-block; background-color: #025689; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+          Create Your Account
+        </a>
+      </div>
+      <p style="color: #666; font-size: 14px; margin: 24px 0 0 0;">
+        If the button doesn't work, copy and paste this link into your browser:<br/>
+        <a href="${data.activationUrl}" style="color: #025689; word-break: break-all;">${data.activationUrl}</a>
+      </p>
+    `;
+
+    await transporter.sendMail({
+      from: `"Viva Resource Foundation" <${FROM_EMAIL}>`,
+      to: data.volunteerEmail,
+      subject: "Your Volunteer Application Was Approved!",
+      html: emailWrapper(content),
+    });
+
+    return { success: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("Error in sendVolunteerActivationNotification:", message);
+    return { success: false, error: message };
+  }
+}

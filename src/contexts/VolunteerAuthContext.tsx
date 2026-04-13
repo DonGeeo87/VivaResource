@@ -17,7 +17,7 @@ interface VolunteerAuthContextType {
   user: VolunteerUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
+  activateAccount: (email: string, password: string, firstName: string, lastName: string, registrationId?: string) => Promise<void>;
   logout: () => Promise<void>;
   error: string | null;
 }
@@ -80,11 +80,14 @@ export function VolunteerAuthProvider({ children }: { children: ReactNode }) {
     setError(null);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      // Check if user is a volunteer
+
+      // Check if user exists in volunteer_users collection
       const userDoc = await getDoc(doc(db, "volunteer_users", userCredential.user.uid));
       if (!userDoc.exists()) {
+        // User authenticated but not in volunteer_users - sign out
         await firebaseSignOut(auth);
         setError("Esta cuenta no está registrada como voluntario. Contacta al administrador.");
+        return;
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Error al iniciar sesión";
@@ -93,11 +96,12 @@ export function VolunteerAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signup = async (email: string, password: string, firstName: string, lastName: string) => {
+  const activateAccount = async (email: string, password: string, firstName: string, lastName: string, registrationId?: string) => {
     setError(null);
     try {
+      // Create Firebase Auth account
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      
+
       // Update display name
       await updateProfile(userCredential.user, {
         displayName: `${firstName} ${lastName}`
@@ -108,7 +112,8 @@ export function VolunteerAuthProvider({ children }: { children: ReactNode }) {
         email,
         firstName,
         lastName,
-        status: "pending",
+        status: "active",
+        registrationId: registrationId || null,
         joinedAt: serverTimestamp(),
         lastLoginAt: serverTimestamp(),
         language: "en",
@@ -133,7 +138,16 @@ export function VolunteerAuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <VolunteerAuthContext.Provider value={{ user, loading, login, signup, logout, error }}>
+    <VolunteerAuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        activateAccount,
+        logout,
+        error,
+      }}
+    >
       {children}
     </VolunteerAuthContext.Provider>
   );
@@ -142,7 +156,14 @@ export function VolunteerAuthProvider({ children }: { children: ReactNode }) {
 export function useVolunteerAuth(): VolunteerAuthContextType {
   const context = useContext(VolunteerAuthContext);
   if (context === undefined) {
-    throw new Error("useVolunteerAuth must be used within a VolunteerAuthProvider");
+    return {
+      user: null,
+      loading: false,
+      login: async () => {},
+      activateAccount: async () => {},
+      logout: async () => {},
+      error: null,
+    };
   }
   return context;
 }

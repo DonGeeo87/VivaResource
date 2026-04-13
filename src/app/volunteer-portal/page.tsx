@@ -86,7 +86,13 @@ export default function VolunteerPortalPage() {
         pendingTasks: pending,
       }));
     }, (error) => {
-      console.error("Error fetching tasks:", error);
+      // Silently handle missing index error - will show empty state
+      if (error.code === "failed-precondition") {
+        console.warn("Firestore index needed for volunteer_tasks. Creating index...");
+      } else {
+        console.error("Error fetching tasks:", error);
+      }
+      setTasks([]);
     });
 
     // Fetch messages
@@ -109,7 +115,13 @@ export default function VolunteerPortalPage() {
         unreadMessages: unread,
       }));
     }, (error) => {
-      console.error("Error fetching messages:", error);
+      // Silently handle missing index error - will show empty state
+      if (error.code === "failed-precondition") {
+        console.warn("Firestore index needed for volunteer_messages. Creating index...");
+      } else {
+        console.error("Error fetching messages:", error);
+      }
+      setMessages([]);
     });
 
     setLoading(false);

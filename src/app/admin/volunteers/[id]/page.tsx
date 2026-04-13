@@ -107,38 +107,56 @@ export default function AdminVolunteerDetailPage(): JSX.Element {
     }
   };
 
-  const sendStatusEmail = async (newStatus: string) => {
-    if (!volunteer) return;
-
-    try {
-      await fetch("/api/email/notify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "volunteer-status-change",
-          data: {
-            volunteerEmail: volunteer.email,
-            volunteerName: `${volunteer.firstName} ${volunteer.lastName}`,
-            status: newStatus as "approved" | "rejected",
-          }
-        })
-      }).catch((emailErr) => console.error("Failed to send status notification:", emailErr));
-    } catch (error) {
-      console.error("Error sending status email:", error);
-    }
-  };
-
   const updateStatus = async (newStatus: "pending" | "approved" | "rejected") => {
     setStatusUpdating(true);
     try {
-      await updateDoc(doc(db, "volunteer_registrations", volunteerId), {
+      const updateData: Record<string, unknown> = {
         status: newStatus,
         updated_at: new Date().toISOString()
-      });
+      };
+
+      // Generate activation token if approved
+      if (newStatus === "approved") {
+        const token = crypto.randomUUID();
+        updateData.activation_token = token;
+        updateData.approved_at = new Date().toISOString();
+      }
+
+      await updateDoc(doc(db, "volunteer_registrations", volunteerId), updateData);
       setVolunteer(volunteer ? { ...volunteer, status: newStatus } : null);
-      
-      // Send email notification
-      await sendStatusEmail(newStatus);
+
+      // If approved, send activation email with link
+      if (newStatus === "approved" && volunteer) {
+        const token = updateData.activation_token as string;
+        const activationUrl = `${window.location.origin}/volunteer-portal/activate?token=${token}&reg=${volunteerId}&email=${encodeURIComponent(volunteer.email)}`;
+
+        await fetch("/api/email/notify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "volunteer-activation",
+            data: {
+              volunteerEmail: volunteer.email,
+              volunteerName: `${volunteer.firstName} ${volunteer.lastName}`,
+              activationUrl,
+            }
+          })
+        }).catch((emailErr) => console.error("Failed to send activation email:", emailErr));
+      } else {
+        // Send status change notification for non-approved statuses
+        await fetch("/api/email/notify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "volunteer-status-change",
+            data: {
+              volunteerEmail: volunteer?.email,
+              volunteerName: volunteer ? `${volunteer.firstName} ${volunteer.lastName}` : "",
+              status: newStatus as "approved" | "rejected",
+            }
+          })
+        }).catch((emailErr) => console.error("Failed to send status notification:", emailErr));
+      }
     } catch (error) {
       console.error("Error updating status:", error);
     } finally {

@@ -6,11 +6,13 @@ import {
   sendNewsletterConfirmation,
   sendVolunteerMessageNotification,
   sendVolunteerStatusChangeNotification,
+  sendVolunteerActivationNotification,
   EventRegistrationData,
   VolunteerRegistrationData,
   FormSubmissionData,
   VolunteerMessageData,
   VolunteerStatusChangeData,
+  VolunteerActivationData,
 } from "@/lib/email/notifications";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
@@ -81,6 +83,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       case "volunteer-status-change":
         result = await sendVolunteerStatusChangeNotification(data as VolunteerStatusChangeData);
+        break;
+
+      case "volunteer-activation":
+        result = await sendVolunteerActivationNotification(data as VolunteerActivationData);
         break;
 
       default:

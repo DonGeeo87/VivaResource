@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { Star, HeartHandshake, AlertCircle, GraduationCap, Package } from "lucide-react";
+import { Star, HeartHandshake, AlertCircle, GraduationCap, Package, Users, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -183,7 +183,8 @@ export default function GetInvolvedPage(): JSX.Element {
         availability: formData.availability,
         experience: formData.experience,
         status: "pending",
-        created_at: serverTimestamp(),
+        created_at: new Date(),
+        server_timestamp: serverTimestamp(),
       });
 
       // Send admin notification email asynchronously (don't block UI)
@@ -287,8 +288,8 @@ export default function GetInvolvedPage(): JSX.Element {
               </div>
               <div className="mt-8 rounded-lg overflow-hidden h-64 shadow-sm">
                 <Image
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5bCa0b1mqp5EScbVI4PyP4NJKaz5fZ4EQlskc5FlVxMPK4BxqyJltpR8x_9IIUG2889TOJPsn4MZ7hNOInv9ILKf59VWnmJKMXJbwU0Wx2PSZ_QZqJW4Ib19TFasv--CypnOXQIg_qIqR0KF8vFTRRAu3kWkpKbyLgr2AYC17f3uXDd-LqXQwNvGnvpZBTa8TOrQ77cQ-he0P8kY16GkpbUrEjmjIXS55pW1-C7QNMX7vDAZ3aOz2Puk0bcrdzh1t0P-W5cLwyg8"
-                  alt="Community ambassador speaking to diverse audience"
+                  src="/photo-bank/vivaresource (10).jpg"
+                  alt="Community ambassador leading neighborhood initiative"
                   width={800}
                   height={256}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
@@ -570,6 +571,29 @@ export default function GetInvolvedPage(): JSX.Element {
                 </form>
               )}
             </div>
+          </div>
+        </section>
+
+        {/* Volunteer Portal CTA */}
+        <section className="py-16 px-6 bg-primary/5">
+          <div className="max-w-4xl mx-auto text-center">
+            <Users className="w-12 h-12 text-primary mx-auto mb-4" />
+            <h2 className="font-headline text-3xl font-bold text-primary mb-4">
+              {isES ? "¿Ya eres voluntario?" : "Already a Volunteer?"}
+            </h2>
+            <p className="text-lg text-on-surface-variant mb-8 max-w-2xl mx-auto">
+              {isES
+                ? "Accede a tu portal personal para ver tus tareas, mensajes y horarios asignados."
+                : "Access your personal portal to view your assigned tasks, messages, and schedule."
+              }
+            </p>
+            <Link
+              href="/volunteer-portal"
+              className="inline-flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-full font-headline font-bold text-lg hover:bg-primary-hover transition-all shadow-lg hover:scale-105"
+            >
+              {isES ? "Ir al Portal de Voluntarios" : "Go to Volunteer Portal"}
+              <ArrowRight className="w-5 h-5" />
+            </Link>
           </div>
         </section>
 

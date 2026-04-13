@@ -1,38 +1,37 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useVolunteerAuth } from "@/contexts/VolunteerAuthContext";
-import { HandHeart, Mail, Lock, UserPlus, LogIn, AlertCircle } from "lucide-react";
+import { HandHeart, Mail, Lock, LogIn, AlertCircle } from "lucide-react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { Suspense } from "react";
 
-export default function VolunteerLoginPage() {
+function VolunteerLoginForm() {
   const { language } = useLanguage();
   const isES = language === "es";
-  const { login, signup, error, loading } = useVolunteerAuth();
+  const { login, error, loading, user } = useVolunteerAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const activated = searchParams.get("activated");
 
-  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      router.push("/volunteer-portal");
+    }
+  }, [user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
 
     try {
-      if (isSignUp) {
-        if (!firstName.trim() || !lastName.trim()) {
-          return;
-        }
-        await signup(email, password, firstName, lastName);
-      } else {
-        await login(email, password);
-      }
+      await login(email, password);
       router.push("/volunteer-portal");
     } catch {
       // Error already set in context
@@ -63,34 +62,29 @@ export default function VolunteerLoginPage() {
           </p>
         </div>
 
+        {/* Activation Success Message */}
+        {activated === "true" && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
+            <div className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5">✓</div>
+            <div>
+              <p className="text-sm font-medium text-green-800">
+                {isES ? "¡Perfil creado exitosamente!" : "Profile created successfully!"}
+              </p>
+              <p className="text-xs text-green-700 mt-1">
+                {isES ? "Ahora inicia sesión con tu correo y contraseña." : "Now sign in with your email and password."}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Auth Card */}
         <div className="bg-surface-lowest rounded-2xl shadow-ambient-md p-8 border border-outline-variant/10">
-          {/* Toggle */}
-          <div className="flex gap-2 mb-6 bg-surface-low p-1 rounded-lg">
-            <button
-              type="button"
-              onClick={() => setIsSignUp(false)}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
-                !isSignUp
-                  ? "bg-primary text-white shadow-sm"
-                  : "text-on-surface-variant hover:text-on-surface"
-              }`}
-            >
-              <LogIn className="w-4 h-4" />
+          {/* Title */}
+          <div className="flex items-center gap-3 mb-6">
+            <LogIn className="w-6 h-6 text-primary" />
+            <h2 className="text-xl font-headline font-bold text-on-surface">
               {isES ? "Iniciar Sesión" : "Sign In"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsSignUp(true)}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
-                isSignUp
-                  ? "bg-secondary text-white shadow-sm"
-                  : "text-on-surface-variant hover:text-on-surface"
-              }`}
-            >
-              <UserPlus className="w-4 h-4" />
-              {isES ? "Crear Cuenta" : "Sign Up"}
-            </button>
+            </h2>
           </div>
 
           {/* Error Message */}
@@ -103,38 +97,6 @@ export default function VolunteerLoginPage() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Name fields (Sign Up only) */}
-            {isSignUp && (
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-on-surface-variant mb-1">
-                    {isES ? "Nombre" : "First Name"} *
-                  </label>
-                  <input
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    className="w-full px-4 py-3 bg-surface-highest border border-outline-variant/20 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-on-surface placeholder-on-surface-variant/50"
-                    placeholder="Jane"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-on-surface-variant mb-1">
-                    {isES ? "Apellido" : "Last Name"} *
-                  </label>
-                  <input
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    className="w-full px-4 py-3 bg-surface-highest border border-outline-variant/20 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-on-surface placeholder-on-surface-variant/50"
-                    placeholder="Doe"
-                    required
-                  />
-                </div>
-              </div>
-            )}
-
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-on-surface-variant mb-1">
@@ -180,11 +142,6 @@ export default function VolunteerLoginPage() {
             >
               {submitting ? (
                 <LoadingSpinner size="sm" color="white" />
-              ) : isSignUp ? (
-                <>
-                  <UserPlus className="w-5 h-5" />
-                  {isES ? "Crear Cuenta" : "Create Account"}
-                </>
               ) : (
                 <>
                   <LogIn className="w-5 h-5" />
@@ -195,11 +152,17 @@ export default function VolunteerLoginPage() {
           </form>
 
           {/* Help Text */}
-          <p className="text-center text-xs text-on-surface-variant mt-6">
-            {isES
-              ? "Si no tienes una cuenta, contacta al administrador para registrarte como voluntario."
-              : "If you don't have an account, contact the administrator to register as a volunteer."}
-          </p>
+          <div className="mt-6 pt-4 border-t border-outline-variant/10">
+            <p className="text-xs text-on-surface-variant text-center">
+              {isES
+                ? "¿No tienes cuenta? Aplica como voluntario en nuestra página de "
+                : "Don't have an account? Apply as a volunteer on our "}
+              <a href="/get-involved" className="text-primary hover:underline font-medium">
+                {isES ? "Únete a Nuestra Causa" : "Get Involved"}
+              </a>
+              {isES ? ". Una vez aprobado, recibirás un correo para crear tu contraseña." : " page. Once approved, you'll receive an email to create your password."}
+            </p>
+          </div>
         </div>
 
         {/* Back to Home */}
@@ -213,5 +176,13 @@ export default function VolunteerLoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function VolunteerLoginPage() {
+  return (
+    <Suspense fallback={<LoadingSpinner size="lg" fullScreen />}>
+      <VolunteerLoginForm />
+    </Suspense>
   );
 }

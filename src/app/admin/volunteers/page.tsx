@@ -61,6 +61,23 @@ export default function AdminVolunteersPage(): JSX.Element {
       setVolunteers(data);
     } catch (error) {
       console.error("Error fetching volunteers:", error);
+      // Fallback: try without ordering if index is missing
+      try {
+        const snapshot = await getDocs(collection(db, "volunteer_registrations"));
+        const data = snapshot.docs.map(docSnap => ({
+          id: docSnap.id,
+          ...docSnap.data()
+        })) as Volunteer[];
+        // Sort client-side
+        data.sort((a, b) => {
+          const dateA = a.created_at ? (a.created_at.toDate ? a.created_at.toDate() : new Date()) : new Date(0);
+          const dateB = b.created_at ? (b.created_at.toDate ? b.created_at.toDate() : new Date()) : new Date(0);
+          return dateB.getTime() - dateA.getTime();
+        });
+        setVolunteers(data);
+      } catch (fallbackError) {
+        console.error("Fallback fetch also failed:", fallbackError);
+      }
     } finally {
       setLoading(false);
     }
