@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { CheckCircle, XCircle, Mail } from "lucide-react";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 
 interface NewsletterFormProps {
   variant?: "simple" | "footer";
@@ -13,11 +15,20 @@ export default function NewsletterForm({ variant = "simple" }: NewsletterFormPro
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    // Verify reCAPTCHA
+    const recaptchaToken = await verifyRecaptcha(executeRecaptcha, "newsletter_subscribe");
+    if (!recaptchaToken && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+      setError("Security verification failed. Please try again.");
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch("/api/newsletter/subscribe", {

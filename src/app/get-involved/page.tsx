@@ -5,6 +5,8 @@ import { Star, HeartHandshake, AlertCircle, GraduationCap, Package, Users, Arrow
 import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { useToast } from "@/components/Toast";
@@ -100,6 +102,7 @@ const testimonials = [
 export default function GetInvolvedPage(): JSX.Element {
   const { translations, language } = useLanguage();
   const t = translations.getInvolved;
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -167,6 +170,15 @@ export default function GetInvolvedPage(): JSX.Element {
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Verify reCAPTCHA
+    const recaptchaToken = await verifyRecaptcha(executeRecaptcha, "volunteer_signup");
+    if (!recaptchaToken && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+      setErrorMessage(isES ? "Verificación de seguridad fallida. Intente nuevamente." : "Security verification failed. Please try again.");
+      setSubmitStatus("error");
       setIsSubmitting(false);
       return;
     }

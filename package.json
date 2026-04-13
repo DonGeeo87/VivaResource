@@ -25,6 +25,7 @@
     "qrcode.react": "^4.2.0",
     "react": "^18",
     "react-dom": "^18",
+    "react-google-recaptcha-v3": "^1.11.0",
     "react-hook-form": "^7.72.0",
     "react-quill": "^2.0.0",
     "resend": "^6.10.0",

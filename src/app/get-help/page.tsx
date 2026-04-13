@@ -23,6 +23,8 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 
@@ -200,6 +202,7 @@ export default function GetHelpPage() {
   const { translations, language } = useLanguage();
   const t = translations.getHelp;
   const isES = language === 'es';
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   // Crisis modal state
   const [crisisModalOpen, setCrisisModalOpen] = useState(false);
@@ -246,6 +249,14 @@ export default function GetHelpPage() {
     }
 
     setFormSubmitting(true);
+
+    // Verify reCAPTCHA
+    const recaptchaToken = await verifyRecaptcha(executeRecaptcha, "help_request");
+    if (!recaptchaToken && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+      setFormError(isES ? "Verificación de seguridad fallida. Intente nuevamente." : "Security verification failed. Please try again.");
+      setFormSubmitting(false);
+      return;
+    }
 
     try {
       await addDoc(collection(db, "help_requests"), {

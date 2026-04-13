@@ -102,7 +102,7 @@ export default function RootLayout({
         className={`${plusJakarta.variable} ${publicSans.variable} font-body antialiased bg-surface text-on-surface`}
       >
         <SchemaMarkup />
-        <LanguageProvider>
+          <LanguageProvider>
           <LanguageDir />
           {/* Skip Link for accessibility */}
           <a
