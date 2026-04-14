@@ -6,6 +6,16 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  // Optimización: purgar CSS no utilizado en producción
+  safelist: [
+    // Clases dinámicas que Tailwind podría no detectar
+    {
+      pattern: /text-(sm|base|lg|xl|2xl|3xl|4xl)/,
+    },
+    {
+      pattern: /bg-(primary|secondary|surface|white)/,
+    },
+  ],
   theme: {
     extend: {
       colors: {

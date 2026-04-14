@@ -28,6 +28,10 @@ export const metadata: Metadata = {
   },
   description:
     "Viva Resource Foundation provides essential immigrant resources, community services, and advocacy in Colorado, USA. Free bilingual support for housing, food, legal aid, healthcare, and education in Denver, Peyton, and rural Colorado communities.",
+  // Canonical URL para evitar contenido duplicado
+  alternates: {
+    canonical: siteUrl,
+  },
   keywords: [
     "immigrant resources Colorado",
     "ayuda inmigrante Denver",
@@ -98,6 +102,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
+      <head>
+        {/* Preconnect a orígenes externos para reducir latency */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://firestore.googleapis.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://www.google.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://www.gstatic.com" crossOrigin="anonymous" />
+        
+        {/* DNS Prefetch para orígenes adicionales */}
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+      </head>
       <body
         className={`${plusJakarta.variable} ${publicSans.variable} font-body antialiased bg-surface text-on-surface`}
       >

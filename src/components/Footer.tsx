@@ -130,9 +130,9 @@ export default function Footer(): JSX.Element {
 
         {/* Column 2: Quick Links */}
         <div className="space-y-6">
-          <h4 className="font-bold text-on-primary uppercase tracking-widest text-sm font-body">
+          <h3 className="font-bold text-on-primary uppercase tracking-widest text-sm font-body">
             {footer.footerNavTitle}
-          </h4>
+          </h3>
           <ul className="space-y-4">
             {footerLinks.map((link) => (
               <li key={link.href}>
@@ -149,9 +149,9 @@ export default function Footer(): JSX.Element {
 
         {/* Column 3: Contact Details + Newsletter */}
         <div className="space-y-6">
-          <h4 className="font-bold text-on-primary uppercase tracking-widest text-sm font-body">
+          <h3 className="font-bold text-on-primary uppercase tracking-widest text-sm font-body">
             {footer.footerContactTitle}
-          </h4>
+          </h3>
           <div className="space-y-4">
             {contactDetails.map((detail, index) => (
               <div
@@ -179,7 +179,7 @@ export default function Footer(): JSX.Element {
 
       {/* Copyright Bar */}
       <div className="border-t border-on-primary/10 py-8 px-6">
-        <div className="max-w-7xl mx-auto text-center text-on-primary/50 text-sm font-body">
+        <div className="max-w-7xl mx-auto text-center text-on-primary/80 text-sm font-body">
           © {new Date().getFullYear()} Viva Resource Foundation. {footer.footerCopyright}
         </div>
       </div>

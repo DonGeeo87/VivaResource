@@ -177,10 +177,11 @@ export default function ContactPage(): JSX.Element {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-outline font-label">
+                  <label htmlFor="firstName" className="text-xs font-bold uppercase tracking-wider text-outline font-label">
                     {t.name}* / Nombre*
                   </label>
                   <input
+                    id="firstName"
                     type="text"
                     name="firstName"
                     value={formData.firstName}
@@ -192,10 +193,11 @@ export default function ContactPage(): JSX.Element {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-outline font-label">
+                  <label htmlFor="lastName" className="text-xs font-bold uppercase tracking-wider text-outline font-label">
                     {t.name}* / Apellido*
                   </label>
                   <input
+                    id="lastName"
                     type="text"
                     name="lastName"
                     value={formData.lastName}
@@ -209,10 +211,11 @@ export default function ContactPage(): JSX.Element {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-outline font-label">
+                  <label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-outline font-label">
                     {t.email}* / Correo*
                   </label>
                   <input
+                    id="email"
                     type="email"
                     name="email"
                     value={formData.email}
@@ -224,10 +227,11 @@ export default function ContactPage(): JSX.Element {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-outline font-label">
+                  <label htmlFor="phone" className="text-xs font-bold uppercase tracking-wider text-outline font-label">
                     Phone / Teléfono
                   </label>
                   <input
+                    id="phone"
                     type="tel"
                     name="phone"
                     value={formData.phone}
@@ -239,10 +243,11 @@ export default function ContactPage(): JSX.Element {
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-outline font-label">
+                <label htmlFor="subject" className="text-xs font-bold uppercase tracking-wider text-outline font-label">
                   {t.subject} / Asunto
                 </label>
                 <input
+                  id="subject"
                   type="text"
                   name="subject"
                   value={formData.subject}
@@ -252,10 +257,11 @@ export default function ContactPage(): JSX.Element {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-outline font-label">
+                <label htmlFor="message" className="text-xs font-bold uppercase tracking-wider text-outline font-label">
                   {t.message}* / Mensaje*
                 </label>
                 <textarea
+                  id="message"
                   name="message"
                   value={formData.message}
                   onChange={handleChange}

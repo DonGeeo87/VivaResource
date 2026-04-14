@@ -1,0 +1,7 @@
+# Soporte para navegadores modernos (últimos 2 años)
+# Esto elimina polyfills innecesarios para navegadores antiguos
+> 0.5%
+last 2 versions
+Firefox ESR
+not dead
+not IE 11

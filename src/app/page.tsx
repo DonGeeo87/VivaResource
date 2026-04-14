@@ -77,6 +77,20 @@ export default function Home(): JSX.Element {
   const [heroAnimationsComplete, setHeroAnimationsComplete] = useState(false);
   const prefersReducedMotion = useReducedMotion();
 
+  // Precargar imagen hero para mejorar LCP
+  useEffect(() => {
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "image";
+    link.href = "/photo-bank/hero_01.jpg";
+    link.fetchPriority = "high";
+    document.head.appendChild(link);
+    
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, []);
+
   // Intersection Observer hooks for each section
   const heroRef = useRef<HTMLDivElement | null>(null);
   const getHelpSection = useInView({ threshold: 0.15 });
@@ -355,22 +369,22 @@ export default function Home(): JSX.Element {
               <div ref={donateStagger.ref} className={`grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8 stagger-container ${donateStagger.isInView ? 'in-view' : ''}`}>
                 <div className="space-y-4 p-4 md:p-6 bg-surface-lowest rounded-2xl stagger-item">
                   <Star className="w-8 h-8 md:w-10 md:h-10 text-secondary" />
-                  <h4 className="font-bold text-lg md:text-xl">{translations.home.reason1Title}</h4>
+                  <h3 className="font-bold text-lg md:text-xl">{translations.home.reason1Title}</h3>
                   <p className="text-sm opacity-70">{translations.home.reason1Desc}</p>
                 </div>
                 <div className="space-y-4 p-4 md:p-6 bg-surface-lowest rounded-2xl stagger-item">
                   <Flower2 className="w-8 h-8 md:w-10 md:h-10 text-secondary" />
-                  <h4 className="font-bold text-lg md:text-xl">{translations.home.reason2Title}</h4>
+                  <h3 className="font-bold text-lg md:text-xl">{translations.home.reason2Title}</h3>
                   <p className="text-sm opacity-70">{translations.home.reason2Desc}</p>
                 </div>
                 <div className="space-y-4 p-4 md:p-6 bg-surface-lowest rounded-2xl stagger-item">
                   <Heart className="w-8 h-8 md:w-10 md:h-10 text-secondary" />
-                  <h4 className="font-bold text-lg md:text-xl">{translations.home.reason3Title}</h4>
+                  <h3 className="font-bold text-lg md:text-xl">{translations.home.reason3Title}</h3>
                   <p className="text-sm opacity-70">{translations.home.reason3Desc}</p>
                 </div>
                 <div className="space-y-4 p-4 md:p-6 bg-surface-lowest rounded-2xl stagger-item">
                   <Handshake className="w-8 h-8 md:w-10 md:h-10 text-secondary" />
-                  <h4 className="font-bold text-lg md:text-xl">{translations.home.reason4Title}</h4>
+                  <h3 className="font-bold text-lg md:text-xl">{translations.home.reason4Title}</h3>
                   <p className="text-sm opacity-70">{translations.home.reason4Desc}</p>
                 </div>
               </div>
@@ -486,12 +500,12 @@ export default function Home(): JSX.Element {
       {/* 7. OUR PARTNERS */}
       <section ref={partnersSection.ref} className={`py-20 px-6 border-y border-outline-low/20 animate-on-scroll animate-scale-up ${partnersSection.isInView ? 'in-view' : ''}`}>
         <div className="max-w-7xl mx-auto flex flex-col items-center gap-12">
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-on-surface-variant opacity-60">{translations.home.partnersTitle}</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center justify-items-center opacity-70 hover:opacity-100 transition-opacity">
-            <a href="https://www.facebook.com/lanzatumarcadigital" target="_blank" rel="noopener noreferrer" className="text-xl font-bold font-headline text-slate-400 hover:text-primary transition-colors">
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-on-surface">{translations.home.partnersTitle}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center justify-items-center">
+            <a href="https://www.facebook.com/lanzatumarcadigital" target="_blank" rel="noopener noreferrer" className="text-xl font-bold font-headline text-primary hover:text-primary-hover transition-colors">
               Lanza tu Marca Digital
             </a>
-            <a href="https://www.codigoguerrero.dev" target="_blank" rel="noopener noreferrer" className="text-xl font-bold font-headline text-slate-400 hover:text-primary transition-colors">
+            <a href="https://www.codigoguerrero.dev" target="_blank" rel="noopener noreferrer" className="text-xl font-bold font-headline text-primary hover:text-primary-hover transition-colors">
               Código Guerrero Dev
             </a>
           </div>
@@ -534,9 +548,9 @@ export default function Home(): JSX.Element {
                 />
                 <div className="absolute top-3 left-3 md:top-4 md:left-4 bg-white/90 backdrop-blur-md w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-black text-primary text-lg md:text-xl shadow-lg">01</div>
               </div>
-              <h4 className="text-xl md:text-2xl font-headline font-bold mb-2 md:mb-3 group-hover:text-primary transition-colors">{translations.home.pathway01Title}</h4>
+              <h3 className="text-xl md:text-2xl font-headline font-bold mb-2 md:mb-3 group-hover:text-primary transition-colors">{translations.home.pathway01Title}</h3>
               <p className="text-on-surface-variant line-clamp-3 text-sm md:text-base">{translations.home.pathway01Desc}</p>
-              <Link href="/get-involved" className="mt-3 md:mt-4 flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all">
+              <Link href="/get-involved" className="mt-3 md:mt-4 flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all" aria-label={`Más información sobre ${translations.home.pathway01Title}`}>
                 {translations.home.learnMore} <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
               </Link>
             </div>
@@ -553,9 +567,9 @@ export default function Home(): JSX.Element {
                 />
                 <div className="absolute top-3 left-3 md:top-4 md:left-4 bg-white/90 backdrop-blur-md w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-black text-primary text-lg md:text-xl shadow-lg">02</div>
               </div>
-              <h4 className="text-xl md:text-2xl font-headline font-bold mb-2 md:mb-3 group-hover:text-primary transition-colors">{translations.home.pathway02Title}</h4>
+              <h3 className="text-xl md:text-2xl font-headline font-bold mb-2 md:mb-3 group-hover:text-primary transition-colors">{translations.home.pathway02Title}</h3>
               <p className="text-on-surface-variant line-clamp-3 text-sm md:text-base">{translations.home.pathway02Desc}</p>
-              <Link href="/get-help" className="mt-3 md:mt-4 flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all">
+              <Link href="/get-help" className="mt-3 md:mt-4 flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all" aria-label={`Más información sobre ${translations.home.pathway02Title}`}>
                 {translations.home.learnMore} <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
               </Link>
             </div>
@@ -572,9 +586,9 @@ export default function Home(): JSX.Element {
                 />
                 <div className="absolute top-3 left-3 md:top-4 md:left-4 bg-white/90 backdrop-blur-md w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-black text-primary text-lg md:text-xl shadow-lg">03</div>
               </div>
-              <h4 className="text-xl md:text-2xl font-headline font-bold mb-2 md:mb-3 group-hover:text-primary transition-colors">{translations.home.pathway03Title}</h4>
+              <h3 className="text-xl md:text-2xl font-headline font-bold mb-2 md:mb-3 group-hover:text-primary transition-colors">{translations.home.pathway03Title}</h3>
               <p className="text-on-surface-variant line-clamp-3 text-sm md:text-base">{translations.home.pathway03Desc}</p>
-              <Link href="/resources" className="mt-3 md:mt-4 flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all">
+              <Link href="/resources" className="mt-3 md:mt-4 flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all" aria-label={`Más información sobre ${translations.home.pathway03Title}`}>
                 {translations.home.learnMore} <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
               </Link>
             </div>
@@ -665,7 +679,7 @@ export default function Home(): JSX.Element {
                   <Mail className="w-5 h-5 md:w-6 md:h-6" />
                 </div>
                 <div>
-                  <p className="text-xs uppercase font-bold tracking-widest opacity-60 mb-1">{translations.home.emailUs}</p>
+                  <p className="text-xs uppercase font-bold tracking-widest text-on-primary/90 mb-1">{translations.home.emailUs}</p>
                   <p className="text-base md:text-lg">{translations.home.email}</p>
                 </div>
               </div>
@@ -674,13 +688,13 @@ export default function Home(): JSX.Element {
                   <MapPin className="w-5 h-5 md:w-6 md:h-6" />
                 </div>
                 <div>
-                  <p className="text-xs uppercase font-bold tracking-widest opacity-60 mb-1">{translations.home.ourOffice}</p>
+                  <p className="text-xs uppercase font-bold tracking-widest text-on-primary/90 mb-1">{translations.home.ourOffice}</p>
                   <p className="text-base md:text-lg">{translations.home.address}</p>
                 </div>
               </div>
             </div>
             <div className="pt-4 md:pt-8">
-              <p className="text-xs uppercase font-bold tracking-widest opacity-60 mb-4">{translations.home.followJourney}</p>
+              <p className="text-xs uppercase font-bold tracking-widest text-on-primary/90 mb-4">{translations.home.followJourney}</p>
               <div className="flex gap-4">
                 <div className="w-10 h-10 md:w-12 md:h-12 bg-primary-container rounded-full flex items-center justify-center cursor-pointer hover:bg-white hover:text-primary transition-colors">
                   <Trophy className="w-5 h-5 md:w-6 md:h-6" />
