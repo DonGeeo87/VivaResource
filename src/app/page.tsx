@@ -77,20 +77,6 @@ export default function Home(): JSX.Element {
   const [heroAnimationsComplete, setHeroAnimationsComplete] = useState(false);
   const prefersReducedMotion = useReducedMotion();
 
-  // Precargar imagen hero para mejorar LCP
-  useEffect(() => {
-    const link = document.createElement("link");
-    link.rel = "preload";
-    link.as = "image";
-    link.href = "/photo-bank/hero_01.jpg";
-    link.fetchPriority = "high";
-    document.head.appendChild(link);
-    
-    return () => {
-      document.head.removeChild(link);
-    };
-  }, []);
-
   // Intersection Observer hooks for each section
   const heroRef = useRef<HTMLDivElement | null>(null);
   const getHelpSection = useInView({ threshold: 0.15 });

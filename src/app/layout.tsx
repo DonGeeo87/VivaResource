@@ -93,6 +93,17 @@ export const metadata: Metadata = {
     // google: "your-verification-code",
   },
   category: "Nonprofit Organization",
+  // Preconnect y DNS prefetch para mejorar performance
+  other: {
+    'preconnect': [
+      'https://fonts.googleapis.com',
+      'https://fonts.gstatic.com',
+      'https://firestore.googleapis.com',
+      'https://www.google.com',
+      'https://www.gstatic.com',
+    ],
+    'dns-prefetch': 'https://res.cloudinary.com',
+  },
 };
 
 export default function RootLayout({
@@ -102,17 +113,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <head>
-        {/* Preconnect a orígenes externos para reducir latency */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://firestore.googleapis.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://www.google.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://www.gstatic.com" crossOrigin="anonymous" />
-        
-        {/* DNS Prefetch para orígenes adicionales */}
-        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
-      </head>
       <body
         className={`${plusJakarta.variable} ${publicSans.variable} font-body antialiased bg-surface text-on-surface`}
       >
