@@ -109,6 +109,12 @@ service cloud.firestore {
       allow update, delete: if isEditor();
     }
 
+    // Site images - public can read, editors can manage
+    match /site_images/{imageId} {
+      allow read: if true;
+      allow write: if isEditor();
+    }
+
     // Volunteer messages - editors can send/manage, volunteers can read their own and reply
     match /volunteer_messages/{msgId} {
       allow read: if isEditor() ||

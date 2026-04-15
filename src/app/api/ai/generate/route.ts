@@ -8,10 +8,10 @@ const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
 // Pool de modelos gratuitos para fallback
 const freeModels = [
-  "google/gemini-2.0-flash-exp:free",
-  "meta-llama/llama-3.3-70b-instruct:free",
-  "mistralai/mistral-7b-instruct:free",
-  "qwen/qwen-2.5-72b-instruct:free",
+  "meta-llama/llama-3.1-8b-instruct",
+  "mistralai/mistral-7b-instruct",
+  "qwen/qwen-2.5-7b-instruct",
+  "google/gemma-2-9b-it",
 ];
 
 interface GenerateRequest {

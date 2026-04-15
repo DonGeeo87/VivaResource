@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import EmbeddedAIGenerator from "./EmbeddedAIGenerator";
 
 export type BlockType = "hero" | "heading" | "text" | "image" | "button" | "divider" | "spacer";
 
@@ -205,6 +206,8 @@ interface NewsletterBuilderProps {
   onSubjectChange: (subject: string) => void;
   onBlocksChange: (blocks: NewsletterBlock[]) => void;
   blocks: NewsletterBlock[];
+  onSubjectChangeEs?: (subject: string) => void;
+  subjectEs?: string;
 }
 
 export default function NewsletterBuilder({
@@ -213,10 +216,30 @@ export default function NewsletterBuilder({
   onSubjectChange,
   onBlocksChange,
   blocks,
+  subjectEs: subjectEsProp,
+  onSubjectChangeEs,
 }: NewsletterBuilderProps): JSX.Element {
   const { language } = useLanguage();
   const isES = language === "es";
   const [selectedBlock, setSelectedBlock] = useState<string | null>(null);
+  const [subjectEs, setSubjectEs] = useState(subjectEsProp || "");
+
+  useEffect(() => {
+    if (subjectEsProp !== undefined) {
+      setSubjectEs(subjectEsProp);
+    }
+  }, [subjectEsProp]);
+
+  const handleAIApply = (en: Record<string, unknown>, es: Record<string, unknown>) => {
+    if (en.subject) {
+      onSubjectChange(en.subject as string);
+    }
+    if (es.subject && onSubjectChangeEs) {
+      onSubjectChangeEs(es.subject as string);
+    } else if (es.subject) {
+      setSubjectEs(es.subject as string);
+    }
+  };
 
   const addBlock = (type: BlockType) => {
     const newBlock: NewsletterBlock = {
@@ -305,6 +328,31 @@ export default function NewsletterBuilder({
               onChange={(e) => onSubjectChange(e.target.value)}
               placeholder={isES ? "Asunto del newsletter..." : "Newsletter subject..."}
               className="w-full px-4 py-2 border border-outline-variant/20 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-surface-highest"
+            />
+          </div>
+
+          {/* Subject ES */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-on-surface-variant mb-1">
+              {isES ? "Asunto (Español)" : "Subject (Spanish)"} 
+            </label>
+            <input
+              type="text"
+              value={subjectEs}
+              onChange={(e) => {
+                setSubjectEs(e.target.value);
+                if (onSubjectChangeEs) onSubjectChangeEs(e.target.value);
+              }}
+              placeholder={isES ? "Asunto del newsletter..." : "Asunto en español..."}
+              className="w-full px-4 py-2 border border-outline-variant/20 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-surface-highest"
+            />
+          </div>
+
+          {/* AI Generator */}
+          <div className="mb-6">
+            <EmbeddedAIGenerator
+              onApplySeparate={handleAIApply}
+              defaultLanguage="both"
             />
           </div>
 

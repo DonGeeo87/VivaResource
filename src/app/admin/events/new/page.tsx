@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Calendar, Users, Star, HeartHandshake, PenTool } from "lucide-react";
+import { ArrowLeft, Calendar, Users, Star, HeartHandshake, PenTool, FileText, HelpCircle, ChevronRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface EventTemplate {
@@ -15,6 +15,9 @@ interface EventTemplate {
   color: string;
   category: string;
   requiresRegistration: boolean;
+  suggestedFormTemplate?: string;
+  suggestedFormTemplateEs?: string;
+  formFields?: string[];
 }
 
 const eventTemplates: EventTemplate[] = [
@@ -28,6 +31,9 @@ const eventTemplates: EventTemplate[] = [
     color: "bg-blue-500",
     category: "workshop",
     requiresRegistration: true,
+    suggestedFormTemplate: "workshop_registration",
+    suggestedFormTemplateEs: "Formulario de Registro a Taller",
+    formFields: ["full_name", "email", "phone", "experience_level", "learning_goals", "accessibility"],
   },
   {
     id: "community_gathering",
@@ -39,17 +45,23 @@ const eventTemplates: EventTemplate[] = [
     color: "bg-green-500",
     category: "community",
     requiresRegistration: false,
+    suggestedFormTemplate: "event_registration",
+    suggestedFormTemplateEs: "Formulario de Registro a Evento",
+    formFields: ["full_name", "email", "guests", "dietary_restrictions"],
   },
   {
     id: "fundraiser",
     name: "Fundraiser",
     nameEs: "Recaudación de Fondos",
     description: "Event to raise funds for the foundation",
-    descriptionEs: "Evento para recaudar fondos para la fundación",
+    descriptionEs: "Evento para recaudación de fondos para la fundación",
     icon: <HeartHandshake className="w-6 h-6" />,
     color: "bg-amber-500",
     category: "fundraiser",
     requiresRegistration: true,
+    suggestedFormTemplate: "event_registration",
+    suggestedFormTemplateEs: "Formulario de Registro a Evento",
+    formFields: ["full_name", "email", "phone", "attendance", "guests", "dietary_restrictions"],
   },
   {
     id: "webinar",
@@ -61,6 +73,9 @@ const eventTemplates: EventTemplate[] = [
     color: "bg-purple-500",
     category: "webinar",
     requiresRegistration: true,
+    suggestedFormTemplate: "workshop_registration",
+    suggestedFormTemplateEs: "Formulario de Registro a Taller",
+    formFields: ["full_name", "email", "phone", "experience_level", "learning_goals"],
   },
 ];
 
@@ -69,6 +84,8 @@ export default function EventTemplateSelectPage(): JSX.Element {
   const { language } = useLanguage();
   const isES = language === "es";
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [showFormModal, setShowFormModal] = useState(false);
+  const [needsForm, setNeedsForm] = useState<boolean | null>(null);
 
   const handleStartFromScratch = () => {
     router.push("/admin/events/new/builder?template=blank");
@@ -76,12 +93,51 @@ export default function EventTemplateSelectPage(): JSX.Element {
 
   const handleSelectTemplate = (templateId: string) => {
     setSelectedTemplate(templateId);
+    setNeedsForm(null);
   };
 
   const handleConfirmTemplate = () => {
     if (!selectedTemplate) return;
-    router.push(`/admin/events/new/builder?template=${selectedTemplate}`);
+    
+    const template = eventTemplates.find(t => t.id === selectedTemplate);
+    if (!template) return;
+
+    const params = new URLSearchParams();
+    params.set("template", selectedTemplate);
+    
+    if (needsForm === true && template.suggestedFormTemplate) {
+      params.set("formTemplate", template.suggestedFormTemplate);
+      router.push(`/admin/events/new/builder?${params.toString()}`);
+    } else if (needsForm === false) {
+      params.set("noForm", "true");
+      router.push(`/admin/events/new/builder?${params.toString()}`);
+    } else {
+      setShowFormModal(true);
+    }
   };
+
+  const handleFormDecision = (needsForm: boolean) => {
+    setNeedsForm(needsForm);
+    setShowFormModal(false);
+    
+    if (!selectedTemplate) return;
+    
+    const template = eventTemplates.find(t => t.id === selectedTemplate);
+    if (!template) return;
+
+    const params = new URLSearchParams();
+    params.set("template", selectedTemplate);
+    
+    if (needsForm && template.suggestedFormTemplate) {
+      params.set("formTemplate", template.suggestedFormTemplate);
+    } else {
+      params.set("noForm", "true");
+    }
+    
+    router.push(`/admin/events/new/builder?${params.toString()}`);
+  };
+
+  const selectedTemplateData = eventTemplates.find(t => t.id === selectedTemplate);
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
@@ -174,11 +230,78 @@ export default function EventTemplateSelectPage(): JSX.Element {
         <button
           onClick={handleConfirmTemplate}
           disabled={!selectedTemplate}
-          className="px-8 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-8 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
         >
-          {isES ? "Continuar" : "Continue"} →
+          {isES ? "Continuar" : "Continue"}
+          <ChevronRight className="w-4 h-4" />
         </button>
       </div>
+
+      {/* Form Modal */}
+      {showFormModal && selectedTemplateData && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <FileText className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  {isES ? "¿Necesitas un formulario de registro?" : "Do you need a registration form?"}
+                </h2>
+                <p className="text-sm text-gray-500">
+                  {selectedTemplateData.name} - {isES ? selectedTemplateData.nameEs : selectedTemplateData.name}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 rounded-xl p-4 mb-6">
+              <div className="flex items-start gap-2">
+                <HelpCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-blue-800">
+                  {isES 
+                    ? "Recomendamos crear un formulario para este tipo de evento. Puedes personalizar los campos después."
+                    : "We recommend creating a form for this event type. You can customize the fields afterwards."}
+                </p>
+              </div>
+            </div>
+
+            {selectedTemplateData.suggestedFormTemplate && (
+              <div className="mb-6">
+                <p className="text-sm font-medium text-gray-700 mb-2">
+                  {isES ? "Formulario sugerido:" : "Suggested form:"}
+                </p>
+                <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                  <p className="font-medium text-gray-900">
+                    {isES ? selectedTemplateData.suggestedFormTemplateEs : selectedTemplateData.suggestedFormTemplate.replace(/_/g, " ")}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {isES 
+                      ? `${selectedTemplateData.formFields?.length || 0} campos incluidos`
+                      : `${selectedTemplateData.formFields?.length || 0} fields included`}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleFormDecision(false)}
+                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+              >
+                {isES ? "No, gracias" : "No, thanks"}
+              </button>
+              <button
+                onClick={() => handleFormDecision(true)}
+                className="flex-1 px-4 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-hover transition-colors flex items-center justify-center gap-2"
+              >
+                <FileText className="w-4 h-4" />
+                {isES ? "Sí, crear formulario" : "Yes, create form"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -2,41 +2,44 @@
 
 ## Overview
 
-This is a Next.js 14 + TypeScript project with Firebase backend, Tailwind CSS for styling, and multilingual (English/Spanish) support.
+Next.js 14 + TypeScript + Firebase (Firestore, Auth, Storage) + Tailwind CSS + multilingual (EN/ES).
 
 ---
 
-## Build & Development Commands
+## Build & Test Commands
 
 ```bash
-npm run dev      # Start development server
-npm run build    # Production build
-npm run start    # Start production server
-npm run lint     # Run ESLint (Next.js + TypeScript)
-```
+npm run dev          # Dev server (localhost:3000)
+npm run build       # Production build
+npm run start      # Production server
+npm run lint       # ESLint (Next.js + TypeScript)
 
-There are currently no dedicated test commands or test files in this project.
+# Testing - Vitest configured
+npm run test         # Run all tests
+npm run test:watch  # Watch mode
+npm run test:coverage # With coverage
+
+# Single test file
+npx vitest run src/components/SomeComponent.test.ts
+```
 
 ---
 
-## Code Style Guidelines
+## Code Style
 
 ### General Rules
+- **TypeScript everywhere** - No plain JS
+- **Define return types** (`: JSX.Element`, `: void`)
+- **Use path aliases** (`@/components`, `@/lib`, `@/contexts`)
+- **"use client"** - Add ONLY when using hooks
+- **No `any` types**
 
-- **Use TypeScript everywhere** - No plain JavaScript files
-- **Always define return types** for functions and components (`: JSX.Element`, `: void`, etc.)
-- **Use path aliases** (`@/components`, `@/lib`, `@/contexts`) - never relative imports beyond parent directory
-- **"use client" directive** - Add at top of any component using hooks (useState, useEffect, useContext, etc.)
-
-### Component Structure
-
+### Component Template
 ```typescript
 "use client";
 
-import { useState, useEffect } from "react";
-import { SomeIcon } from "lucide-react";
+import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import SomeComponent from "@/components/SomeComponent";
 
 interface Props {
   title: string;
@@ -44,229 +47,136 @@ interface Props {
 }
 
 export default function ComponentName({ title, onSubmit }: Props): JSX.Element {
-  const { language, translations } = useLanguage();
+  const { language, isHydrated } = useLanguage();
   const [state, setState] = useState<string>("");
 
-  // ...
+  if (!isHydrated) return null;
 
-  return (
-    <div>...</div>
-  );
+  return <div>{title}</div>;
 }
 ```
-
-### Naming Conventions
-
-- **Components**: PascalCase (`BlogEditor.tsx`, `Header.tsx`)
-- **Interfaces/Types**: PascalCase (`BlogFormData`, `SiteSettings`)
-- **Functions**: camelCase (`handleSubmit`, `fetchSettings`)
-- **Files**: kebab-case or PascalCase for components
-- **Variables**: camelCase, descriptive names
 
 ### Imports Order
+1. React/Next (`useState`, `Link`, `Image`)
+2. Third-party (`lucide-react`, `firebase`)
+3. Path aliases (`@/components`, `@/lib`)
+4. CSS
 
-1. React/Next imports (`useState`, `usePathname`, `Link`, `Image`)
-2. Third-party libraries (`lucide-react`, `firebase/firestore`)
-3. Path alias imports (`@/components`, `@/lib`, `@/contexts`)
-4. CSS imports (e.g., `react-quill/dist/quill.snow.css`)
-
-### Types & Interfaces
-
-```typescript
-interface FormData {
-  title: string;
-  slug: string;
-  status: "draft" | "published";
-  language: "en" | "es";
-}
-
-// Use explicit types, avoid 'any'
-```
+### Naming
+- Components: PascalCase (`Header.tsx`)
+- Types: PascalCase (`BlogFormData`)
+- Functions: camelCase (`handleSubmit`)
 
 ### Error Handling
-
 ```typescript
 try {
   const snapshot = await getDocs(collection(db, "collection"));
-  // process data
-} catch (error) {
-  console.error("Error fetching data:", error);
-  // Optionally show user-facing error
+} catch (error: unknown) {
+  console.error("Error:", error);
 } finally {
   setLoading(false);
 }
 ```
 
-### Forms & Validation
+---
 
-- Use `react-hook-form` with `zod` for validation
-- Use existing form components in `@/components/forms/`
-- Handle loading/saving states with boolean flags
+## Firebase Patterns
 
-### Tailwind CSS
+### Init Guard (required)
+```typescript
+import { getApps, initializeApp } from "firebase/app";
+if (getApps().length === 0) initializeApp(firebaseConfig);
+```
 
-- Use custom color palette defined in `tailwind.config.ts`
-- Use `font-headline`, `font-body` for typography
-- Use `shadow-ambient*` for soft shadows (no hard shadows)
-- Use semantic class names, avoid magic numbers
+### Admin Auth (dual check)
+```typescript
+const firebaseUser = auth.currentUser;
+const adminDoc = await getDoc(doc(db, "admin_users", firebaseUser.uid));
+if (!adminDoc.exists() || adminDoc.data().role !== 'admin') {
+  // auto-logout
+}
+```
 
-### Multilingual Support
-
-- Import and use `useLanguage` hook from `@/contexts/LanguageContext`
-- Use language-aware strings: `language === "es" ? "Texto español" : "English text"`
-- Store translations in `translations` object from context
-
-### Firebase Usage
-
-- Firestore operations via `@/lib/firebase/config` (exports `db`)
-- Use async/await with proper error handling
-- Use `getDocs`, `getDoc`, `setDoc`, `doc`, `collection` from firebase/firestore
+### Security Rules
+- `isEditor()` = admin OR editor
+- Role hierarchy: admin > editor > viewer
 
 ---
 
-## Project Structure
+## Multilingual
 
-```
-src/
-├── app/              # Next.js App Router pages
-│   ├── admin/        # Admin dashboard pages
-│   ├── api/          # API routes (if any)
-│   └── [routes]/     # Public pages
-├── components/       # Reusable React components
-│   ├── forms/        # Form components (BlogEditor, etc.)
-│   └── *.tsx         # UI components
-├── contexts/         # React Context providers (LanguageContext)
-├── lib/              # Utility libraries (firebase config)
-└── styles/           # Global styles
-```
+- Use `useLanguage` from `@/contexts/LanguageContext`
+- Check `isHydrated` before language content
+- Use `translations.key` or `language === "es" ? "ES" : "EN"`
+- Never hardcode user-facing strings
 
 ---
 
-## ESLint Configuration
+## Security Checklist
 
-The project uses Next.js TypeScript ESLint config (`next/core-web-vitals`, `next/typescript`). Run `npm run lint` to check.
+- [ ] No hardcoded API keys (use `.env.local`)
+- [ ] All inputs validated with Zod schema
+- [ ] Admin routes check Firebase Auth AND Firestore `admin_users`
+- [ ] Catch `unknown`, never `any`
+- [ ] Never commit `.env.local`
+
+---
+
+## Debugging Gotchas
+
+| Issue | Cause | Fix |
+|-------|-------|-----|
+| Admin logged out | UID in Auth, not in `admin_users` | Add doc with `role`, `email` |
+| Hydration mismatch | SSR EN, client ES | Check `isHydrated` |
+| Firebase re-init error | Multiple `initializeApp()` | Check `getApps().length === 0` |
+| Email fails | Missing `RESEND_API_KEY` | Sandbox: `onboarding@resend.dev` |
 
 ---
 
 ## Environment Variables
 
 ```env
-# Firebase Configuration
 NEXT_PUBLIC_FIREBASE_PROJECT_ID
 NEXT_PUBLIC_FIREBASE_APP_ID
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
 NEXT_PUBLIC_FIREBASE_API_KEY
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
-
-# Resend API Key
 RESEND_API_KEY
-
-# Newsletter Admin Emails
-NEWSLETTER_ADMIN_EMAILS (comma-separated)
-
-# PayPal
+NEWSLETTER_ADMIN_EMAILS
 NEXT_PUBLIC_PAYPAL_CLIENT_ID
 PAYPAL_CLIENT_SECRET
-PAYPAL_MODE
-
-# Cloudinary
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
 CLOUDINARY_API_KEY
 CLOUDINARY_API_SECRET
-
-# Other
-OPENROUTER_API_KEY
-NEXT_PUBLIC_SITE_URL
 ```
 
 ---
 
-## Firestore Collections
+## Key Reference Files
 
-| Collection | Purpose | Permissions |
-|-----------|---------|-------------|
-| `blog_posts` | Blog articles | Public read published, editors CRUD |
-| `events` | Community events | Public read published, editors CRUD |
-| `event_registrations` | Event sign-ups | Public create, editors manage |
-| `volunteer_registrations` | Volunteer sign-ups | Public create, editors manage |
-| `site_settings` | Site configuration | Public read, admin write |
-| `admin_users` | Admin user accounts | Signed-in read, admin write |
-| `forms` | Dynamic forms | Public read, editors CRUD |
-| `form_submissions` | Form responses | Public create, editors manage |
-| `newsletter_subscribers` | Newsletter list | Public create, editors manage |
-| `newsletter_history` | Email send history | Editors CRUD |
-| `donations` | Donation records | Editors read, server write |
-| `ai_generated_content` | AI-generated content | Editors CRUD |
-| `help_requests` | Get Help form submissions | Public create, editors manage |
-| `volunteer_messages` | Messages to volunteers | Editors CRUD, volunteers read own |
+- `tailwind.config.ts` - Design tokens
+- `src/lib/firebase/config.ts` - Firebase init
+- `src/contexts/AdminAuthContext.tsx` - Role-based auth
+- `src/contexts/LanguageContext.tsx` - i18n + hydration
+- `src/i18n/translations.ts` - EN/ES translations
 
 ---
 
-## Cloudinary Storage
+## Additional Rules
 
-- Images stored in Cloudinary (not Firebase Storage)
-- Upload via signed API route `/api/upload`
-- Folder: `vivaresource/{category}` (blog, events, etc.)
-- Allowed formats: JPG, PNG, WebP, GIF only
-- Max size: 5MB
-- Firebase Storage rules kept for backward compatibility with existing images
-
----
-
-## Debugging Gotchas
-
-### Silent Auth Failures
-Admin users not in `admin_users` collection get auto-signed-out without error message. Check Firestore `admin_users` collection.
-
-### Hydration Mismatches
-Language context uses `isHydrated` flag — check for SSR/CSR content mismatches. Use `if (!isHydrated) return null` before language-dependent content.
-
-### Firebase Re-initialization
-Multiple Firebase instances cause errors — always check `getApps().length === 0` before initializing.
-
-### Storage Permissions
-Two paths with different permissions: `/images/` (public read, editor write) vs `/uploads/` (authenticated read, admin write only).
-
-### Email Failures
-Resend API requires valid `RESEND_API_KEY`. Sandbox uses `onboarding@resend.dev`.
-
-### "Missing Error Components" in Development
-The message "missing required error components, refreshing..." indicates a React hydration error. Common causes:
-- Undefined Tailwind colors in config
-- Conditionally rendered components without unique keys
-- Hooks used outside the component tree
-
----
-
-## Security Checklist (Before Commit)
-
-- [ ] No hardcoded API keys or secrets (use `.env.local`)
-- [ ] All user inputs validated with Zod schema
-- [ ] Admin routes check BOTH Firebase Auth AND Firestore `admin_users` role
-- [ ] Firestore rules reviewed: `isEditor()` = admin OR editor
-- [ ] Error messages don't leak internal details (catch `unknown`, sanitize output)
-- [ ] Never commit `.env.local`
-
----
-
-## Architecture Notes
-
-- **Client-only Firebase**: No server-side Firebase operations (except API routes)
-- **Bilingual by Design**: All user-facing content via LanguageContext, never hardcoded
-- **Role Checks**: `isEditor()` = admin OR editor in Firestore rules
-- **Role hierarchy**: admin > editor > viewer
-- **Admin UID**: `3TP4IksNrMOfTeEfmjrjiUq31nx2` (hardcoded in `scripts/add-admin.js`)
-- **ClientLayout**: Conditionally excludes Header/Footer for `/admin` and `/volunteer-portal`
-- **Cloudinary**: Signed uploads via `/api/upload` API route. Client utility in `src/lib/cloudinary.ts`
-- **Blog model**: Single-language posts (one doc per language, linked by `slug` + `language` fields)
-- **Blog sanitization**: Uses regex-based `sanitizeHtml` — sufficient for admin-authored content but consider `isomorphic-dompurify` for production with external authors
+Supplemented by:
+- `.kilocode/rules-code/AGENTS.md` - Code rules
+- `.kilocode/rules-ask/AGENTS.md` - Ask mode rules
+- `.kilocode/rules-architect/AGENTS.md` - Architecture rules
+- `.kilocode/rules-debug/AGENTS.md` - Debugging rules
+- `.github/copilot-instructions.md` - Copilot guidance
 
 ---
 
 ## Notes
 
-- No test framework currently configured
-- This is a Firebase-backed app (Firestore, Storage)
-- Supports multilingual content (English/Spanish)
-- Uses React Quill for rich text editing in blog admin
+- No server-side Firebase (client SDK only)
+- Role hierarchy: admin > editor > viewer
+- Admin UID: `3TP4IksNrMOfTeEfmjrjiUq31nx2`
+- Images use Cloudinary via `/api/upload`

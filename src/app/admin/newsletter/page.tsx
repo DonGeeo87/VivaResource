@@ -42,6 +42,7 @@ export default function AdminNewsletterPage(): JSX.Element {
   // Send newsletter state
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [subject, setSubject] = useState("");
+  const [subjectEs, setSubjectEs] = useState("");
   const [blocks, setBlocks] = useState<NewsletterBlock[]>([]);
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -151,7 +152,8 @@ export default function AdminNewsletterPage(): JSX.Element {
   const handleSelectTemplate = (template: NewsletterTemplate) => {
     setSelectedTemplate(template.id);
     setBlocks(template.blocks);
-    setSubject(isES ? template.nameEs : template.name);
+    setSubject(isES ? "" : template.name);
+    setSubjectEs(isES ? template.nameEs : "");
     setShowBuilder(true);
   };
 
@@ -578,7 +580,7 @@ export default function AdminNewsletterPage(): JSX.Element {
               {/* Newsletter Builder */}
               <div className="mb-6">
                 <button
-                  onClick={() => { setShowBuilder(false); setBlocks([]); setSubject(""); }}
+                  onClick={() => { setShowBuilder(false); setBlocks([]); setSubject(""); setSubjectEs(""); }}
                   className="text-sm text-primary hover:underline flex items-center gap-1 mb-4"
                 >
                   ← {isES ? "Volver a plantillas" : "Back to templates"}
@@ -586,7 +588,9 @@ export default function AdminNewsletterPage(): JSX.Element {
                 <NewsletterBuilder
                   template={selectedTemplate}
                   subject={subject}
+                  subjectEs={subjectEs}
                   onSubjectChange={setSubject}
+                  onSubjectChangeEs={setSubjectEs}
                   blocks={blocks}
                   onBlocksChange={setBlocks}
                 />

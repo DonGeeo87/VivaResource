@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import "react-quill/dist/quill.snow.css";
 import ImageUpload from "@/components/ImageUpload";
+import EmbeddedAIGenerator from "./EmbeddedAIGenerator";
 
 // Dynamic import to avoid SSR issues with react-quill
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
@@ -185,6 +186,26 @@ export default function BlogEditor({
               <option value="es">Español</option>
             </select>
           </div>
+
+          {/* AI Content Generator */}
+          <EmbeddedAIGenerator
+            onApply={(content) => {
+              if (formData.language === "en") {
+                if (content.title) handleChange("title", content.title);
+                if (content.excerpt) handleChange("excerpt", content.excerpt);
+                if (content.content) handleChange("content", content.content);
+              } else if (content.es) {
+                if (content.es.title) handleChange("title", content.es.title);
+                if (content.es.excerpt) handleChange("excerpt", content.es.excerpt);
+                if (content.es.content) handleChange("content", content.es.content);
+              } else if (content.title) {
+                handleChange("title", content.title);
+                if (content.excerpt) handleChange("excerpt", content.excerpt);
+                if (content.content) handleChange("content", content.content);
+              }
+            }}
+            compact
+          />
 
           {/* Content Fields */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100">
