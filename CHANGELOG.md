@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.5.1] - 2026-04-19 - Participants Directory Fix
+
+### Bug Fix 🐛
+- **Participants page loading stuck** - Added Firestore security rules for `participants` collection to allow public read/list access
+- `/participants` page now displays participant data correctly
+
+### Technical Details
+- **Files modified**: `firestore.rules` (+8 lines)
+- **Build status**: ✅ Successful after cache clean
+
+---
+
 ## [0.5.0] - 2026-04-14 - Performance, Accessibility & SEO Optimization
 
 ### Performance Optimization (Lighthouse: 45 → 75-85) 🚀
