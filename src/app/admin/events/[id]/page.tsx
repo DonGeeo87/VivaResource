@@ -30,8 +30,11 @@ import {
   Archive,
   ArchiveRestore,
   Flag,
+  QrCode,
 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import ConfirmModal from "@/components/ConfirmModal";
+import { formTemplates } from "@/data/formTemplates";
 
 interface EventData {
   id: string;
@@ -49,6 +52,11 @@ interface EventData {
   is_archived?: boolean;
   image_url?: string;
   registration_required?: boolean;
+  formTemplate?: string;
+  formId?: string;
+  maxParticipants?: number;
+  generateQR?: boolean;
+  showQROnPage?: boolean;
 }
 
 interface Registration {
@@ -136,6 +144,28 @@ export default function EventDetailsPage(): JSX.Element {
             responseCount: subSnap.size,
           });
         }
+        // Also check if event.formId points to a form
+        if (eventData.formId) {
+          try {
+            const formDoc = await getDoc(doc(db, "forms", eventData.formId));
+            if (formDoc.exists() && formDoc.data().linkedEventId === eventId) {
+              const formData = formDoc.data();
+              const subQuery = query(
+                collection(db, "form_submissions"),
+                where("formId", "==", formDoc.id)
+              );
+              const subSnap = await getDocs(subQuery);
+              forms.push({
+                id: formDoc.id,
+                title: formData.title || "",
+                published: formData.published ?? false,
+                responseCount: subSnap.size,
+              });
+            }
+          } catch (err) {
+            console.error("Error fetching form by formId:", err);
+          }
+        }
         setLinkedForms(forms);
       } catch (err) {
         console.error("Error fetching event details:", err);
@@ -198,6 +228,44 @@ export default function EventDetailsPage(): JSX.Element {
     } catch (err) {
       console.error(`Error toggling ${field}:`, err);
       setToggleResult({ success: false, message: language === "es" ? "Error al actualizar" : "Error updating" });
+    } finally {
+      setToggling(null);
+    }
+  };
+
+  const handlePublish = async () => {
+    if (!event || event.status === "published") return;
+    setToggling("publishing");
+    setToggleResult(null);
+    try {
+      const response = await fetch(`/api/events/${eventId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...event,
+          status: "published",
+          formId: event.formId || undefined,
+        }),
+      });
+      if (response.ok) {
+        setEvent({ ...event, status: "published" });
+        setToggleResult({
+          success: true,
+          message: language === "es"
+            ? "Evento publicado exitosamente"
+            : "Event published successfully",
+        });
+      } else {
+        throw new Error("Failed to publish");
+      }
+    } catch (err) {
+      console.error("Error publishing event:", err);
+      setToggleResult({
+        success: false,
+        message: language === "es"
+          ? "Error al publicar el evento"
+          : "Error publishing event",
+      });
     } finally {
       setToggling(null);
     }
@@ -320,6 +388,21 @@ export default function EventDetailsPage(): JSX.Element {
           )}
         </div>
         <div className="mt-4 md:mt-0 flex flex-wrap gap-3">
+          {/* Publish Event Button - Only show when draft */}
+          {event.status !== "published" && !event.is_finished && (
+            <button
+              onClick={handlePublish}
+              disabled={toggling === "publishing"}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 bg-green-600 text-white hover:bg-green-700"
+            >
+              {toggling === "publishing" ? (
+                <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+              ) : (
+                <CheckCircle className="w-4 h-4" />
+              )}
+              {language === "es" ? "Publicar" : "Publish"}
+            </button>
+          )}
           <button
             onClick={() => handleToggle("is_finished")}
             disabled={toggling === "is_finished"}
@@ -485,6 +568,12 @@ export default function EventDetailsPage(): JSX.Element {
                     {language === "es" ? "Requiere registro" : "Registration required"}
                   </div>
                 )}
+                {event.generateQR && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <QrCode className="w-4 h-4 text-purple-600" />
+                    {language === "es" ? "QR habilitado" : "QR enabled"}
+                  </div>
+                )}
               </div>
               <div>
                 <p className="text-sm text-gray-500 mb-1">
@@ -498,6 +587,42 @@ export default function EventDetailsPage(): JSX.Element {
               </div>
             </div>
           </div>
+
+          {/* QR Code Section */}
+          {event.generateQR && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <QrCode className="w-5 h-5 text-primary" />
+                {language === "es" ? "Código QR del Evento" : "Event QR Code"}
+              </h2>
+              <div className="flex flex-col sm:flex-row items-center gap-6">
+                <div className="p-4 bg-white border-2 border-gray-200 rounded-lg">
+                  <QRCodeSVG
+                    value={`${typeof window !== "undefined" ? window.location.origin : ""}/events/register/${eventId}`}
+                    size={180}
+                    level="M"
+                    includeMargin={true}
+                  />
+                </div>
+                <div className="flex flex-col gap-3">
+                  <p className="text-sm text-gray-600">
+                    {language === "es"
+                      ? "Comparte este código QR para que los asistentes puedan registrarse fácilmente"
+                      : "Share this QR code so attendees can register easily"}
+                  </p>
+                  <a
+                    href={`/events/register/${eventId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-hover transition-colors"
+                  >
+                    <Eye className="w-4 h-4" />
+                    {language === "es" ? "Ver página de registro" : "View registration page"}
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Linked Forms */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -515,7 +640,7 @@ export default function EventDetailsPage(): JSX.Element {
               </Link>
             </div>
 
-            {linkedForms.length === 0 ? (
+            {linkedForms.length === 0 && !event.formTemplate ? (
               <div className="text-center py-8">
                 <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                 <p className="text-gray-600 font-medium">
@@ -535,6 +660,62 @@ export default function EventDetailsPage(): JSX.Element {
                   <FileText className="w-5 h-5" />
                   {language === "es" ? "Crear Formulario para este Evento" : "Create Form for this Event"}
                 </Link>
+              </div>
+            ) : event.formTemplate ? (
+              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900">
+                      {language === "es" ? "Plantilla: " : "Template: "}
+                      {formTemplates[event.formTemplate]?.titleEs ||
+                       formTemplates[event.formTemplate]?.title ||
+                       event.formTemplate}
+                    </p>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                        {language === "es" ? "Plantilla predefinida" : "Predefined template"}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {formTemplates[event.formTemplate]?.fields?.length || 0}{" "}
+                        {language === "es" ? "campos" : "fields"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600 mt-2">
+                  {language === "es"
+                    ? "Este evento usa una plantilla predefinida para el registro."
+                    : "This event uses a predefined template for registration."}
+                </p>
+                {event.formId ? (
+                  <div className="flex gap-2 mt-3">
+                    <Link
+                      href={`/admin/forms/${event.formId}`}
+                      className="flex items-center gap-1 text-xs text-primary hover:text-primary-hover font-medium"
+                    >
+                      <Edit className="w-3 h-3" />
+                      {language === "es" ? "Editar formulario" : "Edit form"}
+                    </Link>
+                    <Link
+                      href={`/forms/${event.formId}`}
+                      target="_blank"
+                      className="flex items-center gap-1 text-xs text-gray-600 hover:text-gray-800 font-medium"
+                    >
+                      <Eye className="w-3 h-3" />
+                      {language === "es" ? "Ver formulario" : "View form"}
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="flex gap-2 mt-3">
+                    <Link
+                      href={`/admin/forms/new?eventId=${eventId}&template=${event.formTemplate}`}
+                      className="flex items-center gap-1 text-xs text-primary hover:text-primary-hover font-medium"
+                    >
+                      <FileText className="w-3 h-3" />
+                      {language === "es" ? "Crear formulario ahora" : "Create form now"}
+                    </Link>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

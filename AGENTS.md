@@ -1,126 +1,67 @@
 # VivaResource - Agent Guidelines
 
-## Overview
-
 Next.js 14 + TypeScript + Firebase (Firestore, Auth, Storage) + Tailwind CSS + multilingual (EN/ES).
 
----
-
-## Build & Test Commands
+## Developer Commands
 
 ```bash
-npm run dev          # Dev server (localhost:3000)
-npm run build       # Production build
-npm run start      # Production server
-npm run lint       # ESLint (Next.js + TypeScript)
-
-# Testing - Vitest configured
-npm run test         # Run all tests
-npm run test:watch  # Watch mode
-npm run test:coverage # With coverage
-
-# Single test file
-npx vitest run src/components/SomeComponent.test.ts
+npm run dev          # Dev server localhost:3000
+npm run build        # Production build
+npm run lint         # ESLint (run before build)
+npm run test         # Vitest run all tests
+npm run test:watch   # Vitest watch mode
+npm run test:coverage
+npx vitest run src/__tests__/setup.ts  # Single test file
 ```
 
----
+Tests live in `src/__tests__/**/*.test.ts`.
 
-## Code Style
+## Domain & Email
 
-### General Rules
-- **TypeScript everywhere** - No plain JS
-- **Define return types** (`: JSX.Element`, `: void`)
-- **Use path aliases** (`@/components`, `@/lib`, `@/contexts`)
-- **"use client"** - Add ONLY when using hooks
-- **No `any` types**
+- **Website**: www.vivaresource.com
+- **Foundation email**: vivaresourcefoundation@gmail.com
+- **Social handles**: @vivaresource (Facebook, X, Instagram, LinkedIn, YouTube, TikTok)
 
-### Component Template
-```typescript
-"use client";
+## Timezone
 
-import { useState } from "react";
-import { useLanguage } from "@/contexts/LanguageContext";
+All events/activities are scheduled in **America/Denver** (Peyton, Colorado / Mountain Time). Display times include `(MT)` suffix.
 
-interface Props {
-  title: string;
-  onSubmit: () => void;
-}
+## Code Rules
 
-export default function ComponentName({ title, onSubmit }: Props): JSX.Element {
-  const { language, isHydrated } = useLanguage();
-  const [state, setState] = useState<string>("");
-
-  if (!isHydrated) return null;
-
-  return <div>{title}</div>;
-}
-```
-
-### Imports Order
-1. React/Next (`useState`, `Link`, `Image`)
-2. Third-party (`lucide-react`, `firebase`)
-3. Path aliases (`@/components`, `@/lib`)
-4. CSS
-
-### Naming
-- Components: PascalCase (`Header.tsx`)
-- Types: PascalCase (`BlogFormData`)
-- Functions: camelCase (`handleSubmit`)
-
-### Error Handling
-```typescript
-try {
-  const snapshot = await getDocs(collection(db, "collection"));
-} catch (error: unknown) {
-  console.error("Error:", error);
-} finally {
-  setLoading(false);
-}
-```
-
----
+- TypeScript everywhere, no `any`, explicit return types (`JSX.Element`, `void`)
+- `"use client"` ONLY when using hooks
+- Check `isHydrated` from `useLanguage()` before rendering language-dependent content
+- All inputs: Zod schema + `@hookform/resolvers` + `zodResolver`
+- Error handling: `catch (error: unknown)`, never `any`
+- User-facing strings: use `translations` object, never hardcode
 
 ## Firebase Patterns
 
-### Init Guard (required)
+Init guard (required in every file using Firebase):
 ```typescript
 import { getApps, initializeApp } from "firebase/app";
 if (getApps().length === 0) initializeApp(firebaseConfig);
 ```
 
-### Admin Auth (dual check)
-```typescript
-const firebaseUser = auth.currentUser;
-const adminDoc = await getDoc(doc(db, "admin_users", firebaseUser.uid));
-if (!adminDoc.exists() || adminDoc.data().role !== 'admin') {
-  // auto-logout
-}
-```
+Admin auth: requires BOTH Firebase Auth AND Firestore `admin_users` collection check.
+Role hierarchy: admin > editor > viewer. `isEditor()` = admin OR editor.
 
-### Security Rules
-- `isEditor()` = admin OR editor
-- Role hierarchy: admin > editor > viewer
+## Key Files
 
----
+- `src/lib/firebase/config.ts` - Firebase init
+- `src/contexts/AdminAuthContext.tsx` - Role-based auth
+- `src/contexts/LanguageContext.tsx` - i18n + hydration
+- `src/i18n/translations.ts` - EN/ES translations
+- `src/lib/timezone.ts` - Peyton, CO timezone (America/Denver)
+- `tailwind.config.ts` - Design tokens (primary=#025689, secondary=#416900)
 
-## Multilingual
+## Event Wizard
 
-- Use `useLanguage` from `@/contexts/LanguageContext`
-- Check `isHydrated` before language content
-- Use `translations.key` or `language === "es" ? "ES" : "EN"`
-- Never hardcode user-facing strings
-
----
-
-## Security Checklist
-
-- [ ] No hardcoded API keys (use `.env.local`)
-- [ ] All inputs validated with Zod schema
-- [ ] Admin routes check Firebase Auth AND Firestore `admin_users`
-- [ ] Catch `unknown`, never `any`
-- [ ] Never commit `.env.local`
-
----
+- Step 1 (Event Details): title, description, date/time, location, category, status, registration toggle
+- Step 2 (Registration): form template selection, participant limit, QR options
+- Step 3 (Publish): image upload, submit
+- AI Generator is NOT shown in event wizard (removed)
+- QR code display is in admin event details page (`/admin/events/[id]`)
 
 ## Debugging Gotchas
 
@@ -131,11 +72,9 @@ if (!adminDoc.exists() || adminDoc.data().role !== 'admin') {
 | Firebase re-init error | Multiple `initializeApp()` | Check `getApps().length === 0` |
 | Email fails | Missing `RESEND_API_KEY` | Sandbox: `onboarding@resend.dev` |
 
----
-
 ## Environment Variables
 
-```env
+```
 NEXT_PUBLIC_FIREBASE_PROJECT_ID
 NEXT_PUBLIC_FIREBASE_APP_ID
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
@@ -151,32 +90,9 @@ CLOUDINARY_API_KEY
 CLOUDINARY_API_SECRET
 ```
 
----
+## Security
 
-## Key Reference Files
-
-- `tailwind.config.ts` - Design tokens
-- `src/lib/firebase/config.ts` - Firebase init
-- `src/contexts/AdminAuthContext.tsx` - Role-based auth
-- `src/contexts/LanguageContext.tsx` - i18n + hydration
-- `src/i18n/translations.ts` - EN/ES translations
-
----
-
-## Additional Rules
-
-Supplemented by:
-- `.kilocode/rules-code/AGENTS.md` - Code rules
-- `.kilocode/rules-ask/AGENTS.md` - Ask mode rules
-- `.kilocode/rules-architect/AGENTS.md` - Architecture rules
-- `.kilocode/rules-debug/AGENTS.md` - Debugging rules
-- `.github/copilot-instructions.md` - Copilot guidance
-
----
-
-## Notes
-
-- No server-side Firebase (client SDK only)
-- Role hierarchy: admin > editor > viewer
-- Admin UID: `3TP4IksNrMOfTeEfmjrjiUq31nx2`
-- Images use Cloudinary via `/api/upload`
+- Never commit `.env.local`
+- Admin routes: Firebase Auth + Firestore `admin_users` role check
+- Cloudinary uploads via `/api/upload` (signed, secret never client-side)
+- AI-generated HTML: sanitize with `sanitizeHtml()` before `dangerouslySetInnerHTML`

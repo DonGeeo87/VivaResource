@@ -8,6 +8,8 @@ export default function EventBuilderPage(): JSX.Element {
   const { language } = useLanguage();
   const searchParams = useSearchParams();
   const template = searchParams.get("template");
+  const formTemplate = searchParams.get("formTemplate");
+  const noForm = searchParams.get("noForm");
 
   return (
     <div className="p-6 md:p-8">
@@ -23,7 +25,11 @@ export default function EventBuilderPage(): JSX.Element {
       </div>
 
       <div className="bg-surface-lowest rounded-lg shadow p-6">
-        <EventForm template={template} />
+        <EventForm
+          template={template}
+          formTemplate={noForm === "true" ? null : (formTemplate || null)}
+          skipForm={noForm === "true"}
+        />
       </div>
     </div>
   );

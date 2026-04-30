@@ -219,12 +219,12 @@ export default function Home(): JSX.Element {
               </div>
               <div className="absolute bottom-10 left-0 w-80 h-80 rounded-[100px] overflow-hidden border-8 border-surface-lowest shadow-2xl z-20">
                 <Image
-                  src="/photo-bank/hero_02.jpg"
-                  alt="community meeting outdoors"
-                  fill
-                  sizes="320px"
-                  style={{ objectFit: 'cover' }}
-                />
+                src="/photo-bank/hero_02.jpg"
+                alt="community meeting outdoors"
+                fill
+                sizes="320px"
+                style={{ objectFit: 'cover' }}
+              />
               </div>
               <div className="absolute top-1/4 left-1/4 w-48 h-48 rounded-full overflow-hidden border-4 border-primary z-0 opacity-20 bg-primary-container"></div>
               <div className="absolute top-10 left-10 w-56 h-72 rounded-full overflow-hidden border-8 border-surface-lowest shadow-2xl rotate-12 z-10">

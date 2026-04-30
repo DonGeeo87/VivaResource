@@ -64,7 +64,7 @@ const DEFAULT_SETTINGS: SeoSettings = {
     "Viva Resource Foundation empowers immigrant families in Colorado with resources, legal guidance, community events, and advocacy. Fundación sin fines de lucro 501(c)(3).",
   site_keywords:
     "immigrant resources colorado, apoyo inmigrantes, familia inmigrante, colorado nonprofit, 501c3, immigration support, recursos para inmigrantes, fundacion colorado",
-  canonical_url: "https://vivaresource.org",
+  canonical_url: "https://vivaresourcefoundation.org",
   site_locale: "en_US",
   facebook_url: "",
   twitter_url: "",
@@ -73,7 +73,7 @@ const DEFAULT_SETTINGS: SeoSettings = {
   youtube_url: "",
   tiktok_url: "",
   og_site_name: "Viva Resource Foundation",
-  og_default_image: "https://vivaresource.org/og-default.jpg",
+  og_default_image: "https://vivaresourcefoundation.org/og-default.jpg",
   og_locale: "en_US",
   og_locale_alternate: "es_419",
   google_verification_code: "",
@@ -419,7 +419,7 @@ export default function AdminSeoPage(): JSX.Element {
                 value={settings.canonical_url}
                 onChange={(e) => handleChange("canonical_url", e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                placeholder="https://vivaresource.org"
+                placeholder="https://vivaresourcefoundation.org"
               />
             </div>
             <div>
@@ -480,7 +480,7 @@ export default function AdminSeoPage(): JSX.Element {
                 {settings.site_title || "Viva Resource Foundation"}
               </p>
               <p className="text-sm text-[#006621] truncate">
-                {settings.canonical_url || "https://vivaresource.org"}
+                {settings.canonical_url || "https://vivaresourcefoundation.org"}
               </p>
               <p className="text-sm text-[#545454] mt-1 line-clamp-2">
                 {settings.site_description || language === "es"
@@ -560,7 +560,7 @@ export default function AdminSeoPage(): JSX.Element {
                 value={settings.og_default_image}
                 onChange={(e) => handleChange("og_default_image", e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                placeholder="https://vivaresource.org/og-default.jpg"
+                placeholder="https://vivaresourcefoundation.org/og-default.jpg"
               />
               <p className="mt-1 text-xs text-gray-500">
                 {language === "es"

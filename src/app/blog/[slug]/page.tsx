@@ -8,7 +8,7 @@ import { collection, query, where, getDocs, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import SchemaMarkup from "@/components/SchemaMarkup";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vivaresource.org";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vivaresourcefoundation.org";
 
 interface BlogPost {
   id: string;

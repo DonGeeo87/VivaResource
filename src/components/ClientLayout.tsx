@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import RecaptchaProvider from "@/contexts/RecaptchaProvider";
+import { CookieProvider } from "@/contexts/CookieContext";
+import CookieBanner from "@/components/CookieBanner";
 
 interface ClientLayoutProps {
   children: ReactNode;
@@ -15,22 +17,28 @@ export default function ClientLayout({ children }: ClientLayoutProps): JSX.Eleme
   const isAdminRoute = pathname.startsWith("/admin");
   const isVolunteerPortal = pathname === "/volunteer-portal" || pathname.startsWith("/volunteer-portal/");
 
-  // Para rutas admin y volunteer-portal, NO envolvemos con Header/Footer globales
-  // (ellos tienen sus propios layouts)
+  const content = (
+    <>
+      <Header />
+      <main id="main-content">{children}</main>
+      <Footer />
+      <CookieBanner />
+    </>
+  );
+
   if (isAdminRoute || isVolunteerPortal) {
     return (
       <RecaptchaProvider>
-        <>{children}</>
+        <CookieProvider>{children}</CookieProvider>
       </RecaptchaProvider>
     );
   }
 
-  // Para rutas públicas, envolvemos con Header y Footer
   return (
     <RecaptchaProvider>
-      <Header />
-      <main id="main-content">{children}</main>
-      <Footer />
+      <CookieProvider>
+        {content}
+      </CookieProvider>
     </RecaptchaProvider>
   );
 }

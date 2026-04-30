@@ -235,14 +235,14 @@ export default function EventsPage(): JSX.Element {
               {displayEvents.map((event: Event) => (
                 <div key={event.id} className="group flex flex-col h-full bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02]">
                   {/* Image Container */}
-                  <div className="relative w-full aspect-video overflow-hidden">
+                  <div className="relative w-full aspect-video overflow-hidden bg-primary-container">
                     {event.image ? (
                       <Image
                         alt={getTitle(event)}
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        style={{ objectFit: 'cover' }}
-                        className="transition-transform duration-500 group-hover:scale-110"
+                        style={{ objectFit: 'contain', objectPosition: 'center' }}
+                        className="transition-transform duration-500"
                         src={event.image}
                       />
                     ) : (
@@ -287,7 +287,7 @@ export default function EventsPage(): JSX.Element {
                       {event.time && (
                         <span className="flex items-center">
                           <Clock className="w-4 h-4 mr-1.5 text-secondary" />
-                          {event.time}
+                          {event.time} <span className="text-xs text-gray-400 ml-1">(MT)</span>
                         </span>
                       )}
                     </div>
@@ -358,14 +358,14 @@ export default function EventsPage(): JSX.Element {
                 {displayPastEvents.map((event: Event) => (
                   <div key={event.id} className="group flex flex-col h-full bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02] opacity-80">
                     {/* Image Container */}
-                    <div className="relative w-full aspect-video overflow-hidden grayscale">
+                    <div className="relative w-full aspect-video overflow-hidden grayscale bg-gray-200">
                       {event.image ? (
                         <Image
                           alt={getTitle(event)}
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                          style={{ objectFit: 'cover' }}
-                          className="transition-transform duration-500 group-hover:scale-110"
+                          style={{ objectFit: 'contain', objectPosition: 'center' }}
+                          className="transition-transform duration-500"
                           src={event.image}
                         />
                       ) : (

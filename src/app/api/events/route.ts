@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parseEventDateTime } from "@/lib/timezone";
+import { formTemplates } from "@/data/formTemplates";
 
 // Force dynamic rendering - uses Firebase Admin SDK
 export const dynamic = "force-dynamic";
@@ -107,6 +108,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       registration_required: body.registration_required || false,
       status: body.status || "draft",
       image_url: body.image_url || "",
+      formTemplate: body.formTemplate || "",
+      formId: body.formId || "",
+      maxParticipants: body.maxParticipants || null,
+      generateQR: body.generateQR || false,
+      showQROnPage: body.showQROnPage || false,
       created_at: new Date(),
       updated_at: new Date(),
     };
@@ -119,11 +125,62 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
     const docRef = await db.collection("events").add(eventData);
 
+    // If a template was selected, create the form in Firestore automatically
+    let createdFormId = null;
+    if (body.formTemplate && body.formTemplate !== "") {
+      try {
+        const template = formTemplates[body.formTemplate as keyof typeof formTemplates];
+
+        if (template) {
+          // Use custom fields if they were edited inline, otherwise use template defaults
+          let formFields = template.fields;
+          if (body.customFormFields) {
+            try {
+              const parsed = JSON.parse(body.customFormFields);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                formFields = parsed;
+              }
+            } catch {
+              console.log("[API Events] No custom fields provided, using template defaults");
+            }
+          }
+
+          const formDocRef = await db.collection("forms").add({
+            title: template.title,
+            titleEs: template.titleEs,
+            description: template.description,
+            descriptionEs: template.descriptionEs,
+            fields: formFields,
+            status: "draft",
+            published: false,
+            shareMode: "event",
+            linkedEventId: docRef.id,
+            settings: template.settings || {
+              allowMultipleSubmissions: true,
+              showProgressBar: true,
+              requireEmail: false,
+            },
+            thankYouMessage: template.thankYouMessage || "",
+            thankYouMessageEs: template.thankYouMessageEs || "",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
+
+          createdFormId = formDocRef.id;
+          await docRef.update({ formId: formDocRef.id });
+          console.log("[API Events] Created form", formDocRef.id, "linked to event", docRef.id);
+        }
+      } catch (formError) {
+        console.error("[API Events] Error creating form from template:", formError);
+      }
+    }
+
     return NextResponse.json(
       {
         success: true,
         message: "Evento creado exitosamente",
         id: docRef.id,
+        formId: createdFormId,
       },
       { status: 201 }
     );

@@ -23,10 +23,11 @@ import {
 import { AuthProvider, useAuth } from "@/contexts/AdminAuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState } from "react";
+import { Globe } from "lucide-react";
 
 function AdminLayoutContent({ children }: { children: ReactNode }): JSX.Element | null {
   const { user, loading, logout } = useAuth();
-  const { language } = useLanguage();
+  const { language, setLanguage } = useLanguage();
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -97,9 +98,18 @@ function AdminLayoutContent({ children }: { children: ReactNode }): JSX.Element 
         <div className="p-6 border-b border-slate-700">
           <h1 className="text-xl font-bold">Viva Admin</h1>
           <p className="text-sm text-slate-400 truncate">{user.email}</p>
-          <span className="inline-block mt-2 px-2 py-1 bg-primary text-xs rounded uppercase">
-            {user.role}
-          </span>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="inline-block px-2 py-1 bg-primary text-xs rounded uppercase">
+              {user.role}
+            </span>
+            <button
+              onClick={() => setLanguage(language === "es" ? "en" : "es")}
+              className="flex items-center gap-1 px-2 py-1 bg-slate-700 hover:bg-slate-600 text-xs rounded transition-colors"
+            >
+              <Globe className="w-3 h-3" />
+              {language === "es" ? "EN" : "ES"}
+            </button>
+          </div>
         </div>
 
         <nav className="p-4 space-y-1">

@@ -96,7 +96,7 @@ export const newsletterTemplates: NewsletterTemplate[] = [
         content: {
           buttonText: "View Events",
           buttonTextEs: "Ver Eventos",
-          buttonUrl: "https://vivaresource.org/events",
+          buttonUrl: "https://vivaresourcefoundation.org/events",
         },
       },
     ],
@@ -142,7 +142,7 @@ export const newsletterTemplates: NewsletterTemplate[] = [
         content: {
           buttonText: "Register Now",
           buttonTextEs: "Registrarse Ahora",
-          buttonUrl: "https://vivaresource.org/events",
+          buttonUrl: "https://vivaresourcefoundation.org/events",
         },
       },
     ],
@@ -193,7 +193,7 @@ export const newsletterTemplates: NewsletterTemplate[] = [
         content: {
           buttonText: "Learn More",
           buttonTextEs: "Saber Más",
-          buttonUrl: "https://vivaresource.org/about",
+          buttonUrl: "https://vivaresourcefoundation.org/about",
         },
       },
     ],

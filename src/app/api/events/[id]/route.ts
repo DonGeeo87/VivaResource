@@ -130,6 +130,11 @@ export async function PUT(
     if ("status" in body) updateData.status = body.status || "draft";
     if ("is_finished" in body) updateData.is_finished = body.is_finished ?? false;
     if ("is_archived" in body) updateData.is_archived = body.is_archived ?? false;
+    if ("formTemplate" in body) updateData.formTemplate = body.formTemplate || "";
+    if ("formId" in body) updateData.formId = body.formId || "";
+    if ("maxParticipants" in body) updateData.maxParticipants = body.maxParticipants || null;
+    if ("generateQR" in body) updateData.generateQR = body.generateQR ?? false;
+    if ("showQROnPage" in body) updateData.showQROnPage = body.showQROnPage ?? false;
 
     // Only update image_url if explicitly provided (even if empty)
     if ("image_url" in body) {
@@ -138,6 +143,47 @@ export async function PUT(
 
     // Actualizar en Firestore usando Admin SDK
     await db.collection("events").doc(eventId).update(updateData);
+
+    // Sync custom form fields to linked form if provided
+    if (body.customFormFields && body.formId) {
+      try {
+        let parsedFields: unknown[];
+        try {
+          parsedFields = JSON.parse(body.customFormFields);
+        } catch {
+          parsedFields = [];
+        }
+        if (Array.isArray(parsedFields) && parsedFields.length > 0) {
+          const formDoc = await db.collection("forms").doc(body.formId).get();
+          if (formDoc.exists) {
+            await db.collection("forms").doc(body.formId).update({
+              fields: parsedFields,
+              updatedAt: new Date(),
+            });
+            console.log("[API Events] Synced custom fields to linked form", body.formId);
+          }
+        }
+      } catch (formErr) {
+        console.error("[API Events] Error syncing custom fields to form:", formErr);
+      }
+    }
+
+    // If event is being published and has a linked form, also publish the form
+    if (updateData.status === "published" && body.formId) {
+      try {
+        const formDoc = await db.collection("forms").doc(body.formId).get();
+        if (formDoc.exists) {
+          await db.collection("forms").doc(body.formId).update({
+            published: true,
+            status: "published",
+            updatedAt: new Date(),
+          });
+          console.log("[API Events] Also published linked form", body.formId);
+        }
+      } catch (formErr) {
+        console.error("[API Events] Error publishing linked form:", formErr);
+      }
+    }
 
     return NextResponse.json({
       success: true,

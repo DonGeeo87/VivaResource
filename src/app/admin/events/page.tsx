@@ -439,7 +439,7 @@ export default function AdminEventsPage(): JSX.Element {
                     {language === "es" ? "Detalles" : "Details"}
                   </Link>
                   <Link
-                    href={`/admin/events/${event.id}/edit`}
+                    href={`/admin/events/${event.id}`}
                     className="flex-1 text-center py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg border border-gray-300"
                   >
                     {language === "es" ? "Editar" : "Edit"}

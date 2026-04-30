@@ -18,7 +18,7 @@ const publicSans = Public_Sans({
   weight: ["400", "500", "600"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vivaresource.org";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vivaresourcefoundation.org";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

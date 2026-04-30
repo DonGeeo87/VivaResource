@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { getDocs, collection } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vivaresource.org";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vivaresourcefoundation.org";
 
 interface SchemaMarkupProps {
   type?: "organization" | "localBusiness" | "event" | "article" | "breadcrumb";
