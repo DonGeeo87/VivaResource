@@ -88,9 +88,9 @@ export async function PUT(
       }
     }
 
-    // Parsear fecha con zona horaria de Peyton, CO (Mountain Time)
+    // Parsear fecha con zona horaria de Peyton, CO (Mountain Time) - solo si no es un toggle simple
     let parsedDate: Date | undefined;
-    if (body.date) {
+    if (body.date && !isSimpleToggle) {
       try {
         // If it's already a Timestamp or Date, use it directly
         if (body.date.toDate) {

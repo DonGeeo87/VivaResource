@@ -221,7 +221,6 @@ export default function EventDetailsPage(): JSX.Element {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          ...event,
           [field]: newVal,
         }),
       });
@@ -260,9 +259,8 @@ export default function EventDetailsPage(): JSX.Element {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          ...event,
           status: "published",
-          formId: event.formId || undefined,
+          ...(event.formId ? { formId: event.formId } : {}),
         }),
       });
       if (response.ok) {
