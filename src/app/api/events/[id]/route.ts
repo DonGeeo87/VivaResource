@@ -68,10 +68,10 @@ export async function PUT(
       return NextResponse.json({ error: "Evento no encontrado" }, { status: 404 });
     }
 
-    // If this is a simple toggle (only is_finished or is_archived), skip full validation
+    // If this is a simple toggle/status change (only is_finished, is_archived, or status), skip full validation
     const isSimpleToggle =
       Object.keys(body).length <= 4 &&
-      ("is_finished" in body || "is_archived" in body);
+      ("is_finished" in body || "is_archived" in body || "status" in body);
 
     if (!isSimpleToggle) {
       // Full update validation
