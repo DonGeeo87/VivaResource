@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { db } from "@/lib/firebase/config";
+import { auth } from "@/lib/firebase/config";
 import {
   doc,
   getDoc,
@@ -207,10 +208,18 @@ export default function EventDetailsPage(): JSX.Element {
     setToggling(field);
     setToggleResult(null);
     try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error(language === "es" ? "Debes iniciar sesión" : "You must be logged in");
+      }
+      const token = await user.getIdToken();
       const newVal = !event[field];
       const response = await fetch(`/api/events/${eventId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           ...event,
           [field]: newVal,
@@ -223,11 +232,12 @@ export default function EventDetailsPage(): JSX.Element {
           : (newVal ? (language === "es" ? "archivado" : "archived") : (language === "es" ? "desarchivado" : "unarchived"));
         setToggleResult({ success: true, message: `${language === "es" ? "Evento" : "Event"} ${label}` });
       } else {
-        throw new Error("Failed to update");
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || `Error ${response.status}`);
       }
     } catch (err) {
       console.error(`Error toggling ${field}:`, err);
-      setToggleResult({ success: false, message: language === "es" ? "Error al actualizar" : "Error updating" });
+      setToggleResult({ success: false, message: err instanceof Error ? err.message : (language === "es" ? "Error al actualizar" : "Error updating") });
     } finally {
       setToggling(null);
     }
@@ -238,9 +248,17 @@ export default function EventDetailsPage(): JSX.Element {
     setToggling("publishing");
     setToggleResult(null);
     try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error(language === "es" ? "Debes iniciar sesión" : "You must be logged in");
+      }
+      const token = await user.getIdToken();
       const response = await fetch(`/api/events/${eventId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           ...event,
           status: "published",
@@ -256,15 +274,16 @@ export default function EventDetailsPage(): JSX.Element {
             : "Event published successfully",
         });
       } else {
-        throw new Error("Failed to publish");
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || `Error ${response.status}`);
       }
     } catch (err) {
       console.error("Error publishing event:", err);
       setToggleResult({
         success: false,
-        message: language === "es"
+        message: err instanceof Error ? err.message : (language === "es"
           ? "Error al publicar el evento"
-          : "Error publishing event",
+          : "Error publishing event"),
       });
     } finally {
       setToggling(null);
