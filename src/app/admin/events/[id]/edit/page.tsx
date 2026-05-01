@@ -39,7 +39,7 @@ export default function EventEditPage(): JSX.Element {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [initialData, setInitialData] = useState<EventFormData | null>(null);
+  const [initialData, setInitialData] = useState<(EventFormData & { id?: string }) | null>(null);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -93,7 +93,7 @@ export default function EventEditPage(): JSX.Element {
           showQROnPage: data.showQROnPage ?? false,
         };
 
-        setInitialData(formData);
+        setInitialData({ ...formData, id: eventId });
       } catch (err) {
         console.error("Error fetching event:", err);
         setError(isES ? "Error al cargar el evento" : "Error loading event");

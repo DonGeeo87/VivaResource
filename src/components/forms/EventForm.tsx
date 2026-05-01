@@ -268,6 +268,17 @@ export default function EventForm({ initialData, onSubmit, template, formTemplat
 
       if (onSubmit) {
         await onSubmit(data);
+        setSuccess(true);
+        setSuccessMessage(
+          isES ? "¡Evento actualizado exitosamente!" : "Event updated successfully!"
+        );
+        setTimeout(() => {
+          if (initialData?.id) {
+            router.push(`/admin/events/${initialData.id}`);
+          } else {
+            router.push("/admin/events");
+          }
+        }, 1500);
       } else {
         // Default submit logic
         const method = initialData?.id ? "PUT" : "POST";
@@ -507,21 +518,6 @@ export default function EventForm({ initialData, onSubmit, template, formTemplat
               {errors.category && <p className="text-red-600 text-sm mt-1">{errors.category.message}</p>}
             </div>
 
-            {/* Estado */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Estado *</label>
-              <select
-                {...register("status")}
-                disabled={registrationRequired && currentStep !== 1}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
-              >
-                <option value="draft">Borrador</option>
-                <option value="published">Publicado</option>
-                <option value="cancelled">Cancelado</option>
-              </select>
-              {errors.status && <p className="text-red-600 text-sm mt-1">{errors.status.message}</p>}
-            </div>
-
             {/* Requiere Registro */}
             <div className="flex items-center">
               <input
@@ -753,6 +749,45 @@ export default function EventForm({ initialData, onSubmit, template, formTemplat
                 </label>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Paso 3: Publicación */}
+      {currentStep === 3 && registrationRequired && (
+        <div className="border-t pt-6 mt-6 space-y-6">
+          <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <Eye className="w-5 h-5" />
+            {isES ? "Revisar y Publicar" : "Review and Publish"}
+          </h3>
+
+          {/* Estado del evento */}
+          <div className={`p-4 border rounded-lg ${registrationRequired && currentStep !== 3 ? 'bg-gray-50' : ''}`}>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {isES ? "Estado del evento *" : "Event status *"}
+              </label>
+              <select
+                {...register("status")}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              >
+                <option value="draft">
+                  {isES ? "Borrador" : "Draft"}
+                </option>
+                <option value="published">
+                  {isES ? "Publicado" : "Published"}
+                </option>
+                <option value="cancelled">
+                  {isES ? "Cancelado" : "Cancelled"}
+                </option>
+              </select>
+              {errors.status && <p className="text-red-600 text-sm mt-1">{errors.status.message}</p>}
+              <p className="text-gray-500 text-xs mt-1">
+                {isES
+                  ? "Borrador = solo visible en admin. Publicado = visible en la web."
+                  : "Draft = admin only. Published = visible on website."}
+              </p>
+            </div>
           </div>
         </div>
       )}
