@@ -5,8 +5,7 @@ import { Star, HeartHandshake, AlertCircle, GraduationCap, Package, Users, Arrow
 import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useSiteImages } from "@/hooks/useSiteImage";
-import type { SiteImageKey } from "@/types/site-images";
+import { useSiteImages } from "@/contexts/SiteImageContext";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { verifyRecaptcha } from "@/lib/recaptcha";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
@@ -106,7 +105,7 @@ export default function GetInvolvedPage(): JSX.Element {
   const t = translations.getInvolved;
   const { executeRecaptcha } = useGoogleReCaptcha();
 
-  const { images: siteImages } = useSiteImages(['get-involved-hero', 'get-involved-program'] as SiteImageKey[]);
+  const siteImages = useSiteImages();
 
   const [formData, setFormData] = useState({
     firstName: "",

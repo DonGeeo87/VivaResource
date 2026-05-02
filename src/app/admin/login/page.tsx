@@ -8,7 +8,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/i18n/translations";
-import { useSiteImage } from "@/hooks/useSiteImage";
+import { useSiteImage } from "@/contexts/SiteImageContext";
 
 export default function AdminLoginPage(): JSX.Element {
   const [email, setEmail] = useState("");
@@ -19,7 +19,7 @@ export default function AdminLoginPage(): JSX.Element {
   const [isHydrated, setIsHydrated] = useState(false);
   const router = useRouter();
   const { language } = useLanguage();
-  const { src: logoSrc } = useSiteImage('login-logo');
+  const logoSrc = useSiteImage('login-logo');
 
   useEffect(() => {
     setIsHydrated(true);

@@ -23,7 +23,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useSiteImage } from "@/hooks/useSiteImage";
+import { useSiteImage } from "@/contexts/SiteImageContext";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { verifyRecaptcha } from "@/lib/recaptcha";
 import { collection, addDoc, doc, getDoc, serverTimestamp } from "firebase/firestore";
@@ -203,8 +203,8 @@ export default function GetHelpPage() {
   const { translations, language } = useLanguage();
   const t = translations.getHelp;
   const isES = language === 'es';
-  const { src: heroSrc } = useSiteImage('get-help-hero');
-  const { src: accentSrc } = useSiteImage('get-help-accent');
+  const heroSrc = useSiteImage('get-help-hero');
+  const accentSrc = useSiteImage('get-help-accent');
   const { executeRecaptcha } = useGoogleReCaptcha();
 
   // Crisis modal state

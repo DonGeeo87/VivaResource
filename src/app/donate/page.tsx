@@ -5,8 +5,7 @@ import { Verified, Lock, Package, HeartHandshake, Handshake, Quote, CheckCircle,
 import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useSiteImages } from "@/hooks/useSiteImage";
-import type { SiteImageKey } from "@/types/site-images";
+import { useSiteImages } from "@/contexts/SiteImageContext";
 import { PayPalScriptProvider, PayPalButtons, FUNDING } from "@paypal/react-paypal-js";
 
 const donationAmounts = [
@@ -300,7 +299,7 @@ export default function DonatePage(): JSX.Element {
   const { translations } = useLanguage();
   const { donate: t } = translations;
   const [paypalReady, setPaypalReady] = useState(false);
-  const { images: siteImages } = useSiteImages(['donate-hero', 'donate-card'] as SiteImageKey[]);
+  const siteImages = useSiteImages();
 
   useEffect(() => {
     setPaypalReady(true);

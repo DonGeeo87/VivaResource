@@ -10,8 +10,7 @@ import {
   Eye,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useSiteImages } from "@/hooks/useSiteImage";
-import type { SiteImageKey } from "@/types/site-images";
+import { useSiteImages } from "@/contexts/SiteImageContext";
 
 interface TimelineItemProps {
   year: string;
@@ -68,11 +67,7 @@ function TeamMember({ name, role, imageSrc }: TeamMemberProps) {
 export default function AboutPage(): JSX.Element {
   const { translations } = useLanguage();
 
-  const aboutKeys: SiteImageKey[] = [
-    'about-hero', 'about-gallery-1', 'about-gallery-2', 'about-gallery-3', 'about-gallery-4',
-    'team-eva', 'team-monserrat',
-  ];
-  const { images: siteImages } = useSiteImages(aboutKeys);
+  const siteImages = useSiteImages();
 
   const stats = [
     { value: "45k+", label: translations.about.livesTouched, color: "text-primary" },

@@ -5,6 +5,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import LanguageDir from "@/components/LanguageDir";
 import ClientLayout from "@/components/ClientLayout";
 import SchemaMarkup from "@/components/SchemaMarkup";
+import { SiteImageProvider } from "@/contexts/SiteImageContext";
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -18,16 +19,16 @@ const publicSans = Public_Sans({
   weight: ["400", "500", "600"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vivaresourcefoundation.org";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.vivaresource.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Viva Resource Foundation | Immigrant Resources in Colorado, USA",
-    template: "%s | Viva Resource Foundation",
+    default: "Viva Resource | Immigrant Resources in Colorado, USA",
+    template: "%s | Viva Resource",
   },
   description:
-    "Viva Resource Foundation provides essential immigrant resources, community services, and advocacy in Colorado, USA. Free bilingual support for housing, food, legal aid, healthcare, and education in Denver, Peyton, and rural Colorado communities.",
+    "Viva Resource provides essential immigrant resources, community services, and advocacy in Colorado, USA. Free bilingual support for housing, food, legal aid, healthcare, and education in Denver, Peyton, and rural Colorado communities.",
   // Canonical URL para evitar contenido duplicado
   alternates: {
     canonical: siteUrl,
@@ -44,9 +45,13 @@ export const metadata: Metadata = {
     "immigrant advocacy Denver",
     "rural community services Colorado",
   ],
-  authors: [{ name: "Viva Resource Foundation", url: siteUrl }],
-  creator: "Viva Resource Foundation",
-  publisher: "Viva Resource Foundation",
+  authors: [{ name: "Viva Resource", url: siteUrl }],
+  creator: "Viva Resource",
+  publisher: "Viva Resource",
+  icons: {
+    icon: "/favicon-vivaresource.png",
+    apple: "/favicon-vivaresource.png",
+  },
   formatDetection: {
     email: false,
     address: false,
@@ -57,25 +62,25 @@ export const metadata: Metadata = {
     locale: "en_US",
     alternateLocale: "es_ES",
     url: siteUrl,
-    siteName: "Viva Resource Foundation",
-    title: "Viva Resource Foundation | Immigrant Resources in Colorado, USA",
+    siteName: "Viva Resource",
+    title: "Viva Resource | Immigrant Resources in Colorado, USA",
     description:
       "Essential immigrant resources and community services in Colorado. Free bilingual support for housing, food, legal aid, healthcare, and education.",
     images: [
       {
-        url: "/logo-rectangular.png",
+        url: `${siteUrl}/logo-rectangular.png`,
         width: 1400,
         height: 600,
-        alt: "Viva Resource Foundation Logo",
+        alt: "Viva Resource Logo",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Viva Resource Foundation | Immigrant Resources in Colorado",
+    title: "Viva Resource | Immigrant Resources in Colorado",
     description:
       "Essential immigrant resources and community services in Colorado. Free bilingual support.",
-    images: ["/logo-rectangular.png"],
+    images: [`${siteUrl}/logo-rectangular.png`],
   },
   robots: {
     index: true,
@@ -118,6 +123,7 @@ export default function RootLayout({
       >
         <SchemaMarkup />
           <LanguageProvider>
+          <SiteImageProvider>
           <LanguageDir />
           {/* Skip Link for accessibility */}
           <a
@@ -129,6 +135,7 @@ export default function RootLayout({
           <ClientLayout>
             {children}
           </ClientLayout>
+          </SiteImageProvider>
         </LanguageProvider>
       </body>
     </html>

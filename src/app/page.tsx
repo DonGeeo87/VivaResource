@@ -22,8 +22,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useInView } from "@/hooks/useInView";
-import { useSiteImages } from "@/hooks/useSiteImage";
-import type { SiteImageKey } from "@/types/site-images";
+import { useSiteImages } from "@/contexts/SiteImageContext";
 
 function useReducedMotion(): boolean {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -96,14 +95,8 @@ export default function Home(): JSX.Element {
   const faqStagger = useInView({ threshold: 0.05 });
   const contactSection = useInView({ threshold: 0.15 });
 
-  // Site images from CMS
-  const homeImageKeys: SiteImageKey[] = [
-    'hero-01', 'hero-02', 'hero-03',
-    'home-get-help', 'about-section',
-    'pathway-food', 'pathway-education', 'pathway-community',
-    'team-eva', 'team-monserrat',
-  ];
-  const { images: siteImages } = useSiteImages(homeImageKeys);
+  // Site images from CMS context
+  const siteImages = useSiteImages();
 
   // Parallax refs
   const parallaxRef1 = useRef<HTMLDivElement | null>(null);

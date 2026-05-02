@@ -11,8 +11,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useSiteImages } from "@/hooks/useSiteImage";
-import type { SiteImageKey } from "@/types/site-images";
+import { useSiteImages } from "@/contexts/SiteImageContext";
 import { useToast } from "@/components/Toast";
 
 const faqs = [
@@ -43,11 +42,7 @@ export default function ContactPage(): JSX.Element {
   const { contact: t } = translations;
   const { showToast, Toast: ToastComponent } = useToast();
 
-  const { images: siteImages } = useSiteImages([
-    'contact-hero',
-    'contact-office',
-    'contact-team',
-  ] as SiteImageKey[]);
+  const siteImages = useSiteImages();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   

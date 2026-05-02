@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import type { SiteImageKey } from "@/types/site-images";
-import { useSiteImage } from "@/hooks/useSiteImage";
+import { useSiteImage } from "@/contexts/SiteImageContext";
 import { SITE_IMAGE_DEFAULTS } from "@/lib/site-image-defaults";
 
 interface SiteImageClientProps {
@@ -28,7 +28,7 @@ export default function SiteImageClient({
   width,
   height,
 }: SiteImageClientProps): JSX.Element {
-  const { src } = useSiteImage(imageKey);
+  const src = useSiteImage(imageKey);
   const defaultSrc = SITE_IMAGE_DEFAULTS[imageKey]?.path ?? "";
   const finalSrc = src || defaultSrc;
 
