@@ -77,7 +77,7 @@ export default function AdminLoginPage(): JSX.Element {
               <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl mb-6 shadow-2xl">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={logoSrc ?? '/logo.png'}
+                  src={logoSrc}
                   alt="Viva Resource Logo"
                   className="w-14 h-14 object-contain"
                 />

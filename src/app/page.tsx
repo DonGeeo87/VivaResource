@@ -208,7 +208,7 @@ export default function Home(): JSX.Element {
             {/* Mobile: Single image with rounded corners */}
             <div className="lg:hidden relative w-full h-full rounded-3xl overflow-hidden shadow-2xl">
               <Image
-                src={siteImages['hero-01'] ?? '/photo-bank/hero_01.jpg'}
+                src={siteImages['hero-01']}
                 alt="VIVA volunteers team together"
                 fill
                 sizes="(max-width: 1024px) 100vw, 600px"
@@ -220,7 +220,7 @@ export default function Home(): JSX.Element {
             <div className="hidden lg:block relative w-full h-full">
               <div className="absolute top-0 right-0 w-64 h-64 rounded-full overflow-hidden border-8 border-surface-lowest shadow-2xl z-10">
                 <Image
-                  src={siteImages['hero-01'] ?? '/photo-bank/hero_01.jpg'}
+                  src={siteImages['hero-01']}
                   alt="VIVA volunteers team together"
                   fill
                   sizes="256px"
@@ -230,7 +230,7 @@ export default function Home(): JSX.Element {
               </div>
               <div className="absolute bottom-10 left-0 w-80 h-80 rounded-[100px] overflow-hidden border-8 border-surface-lowest shadow-2xl z-20">
                 <Image
-                src={siteImages['hero-02'] ?? '/photo-bank/hero_02.jpg'}
+                src={siteImages['hero-02']}
                 alt="community meeting outdoors"
                 fill
                 sizes="320px"
@@ -240,7 +240,7 @@ export default function Home(): JSX.Element {
               <div className="absolute top-1/4 left-1/4 w-48 h-48 rounded-full overflow-hidden border-4 border-primary z-0 opacity-20 bg-primary-container"></div>
               <div className="absolute top-10 left-10 w-56 h-72 rounded-full overflow-hidden border-8 border-surface-lowest shadow-2xl rotate-12 z-10">
                 <Image
-                  src={siteImages['hero-03'] ?? '/photo-bank/hero_03.jpg'}
+                  src={siteImages['hero-03']}
                   alt="volunteer helping community member"
                   fill
                   sizes="224px"
@@ -274,7 +274,7 @@ export default function Home(): JSX.Element {
             <div className="relative">
               <div className="rounded-3xl overflow-hidden shadow-2xl rotate-3">
                 <Image
-                  src={siteImages['home-get-help'] ?? '/photo-bank/vivaresource (10).jpg'}
+                  src={siteImages['home-get-help']}
                   alt="social workers helping community members"
                   width={600}
                   height={400}
@@ -424,7 +424,7 @@ export default function Home(): JSX.Element {
           <div ref={parallaxRef1} className="parallax-container relative group">
             <div className="absolute -inset-4 bg-primary-container rounded-3xl opacity-20 group-hover:opacity-30 transition-opacity"></div>
             <Image
-              src={siteImages['about-section'] ?? 'https://lh3.googleusercontent.com/aida-public/AB6AXuAhlNFXpKXPoBIbturq16XhOwCpjyU-T1q50kVxHVp0M9SYVHp7MAfkoZ734QoU4tmWYdOPHoKWhSMpjU3yd764-H4E_RY5vnTAhUgnjVrKV1w5m7ZjAf943B-cPKtUKEoG8Ga8oqHhcvvc9_h1BSYtmhVbP72mDZoemX5rGzaPn6j5g47ozYRzAzSqiasHOjchDqXv9KpYwP0eMH1JuFE2FnuJPtzmOYBo5UjhyAMckBZIMu6DxzzY6wLv-03nmvBQaITHgdazuN0'}
+              src={siteImages['about-section']}
               alt="vibrant photo of students in a community workshop laughing and learning together"
               width={600}
               height={500}
@@ -447,7 +447,7 @@ export default function Home(): JSX.Element {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="order-2 lg:order-1 relative">
               <Image
-                src={siteImages['team-eva'] ?? '/eva.avif'}
+                src={siteImages['team-eva']}
                 alt="portrait of Eva Leon, co-founder of Viva Resource, a warm smile sitting in a brightly lit modern office"
                 width={400}
                 height={600}
@@ -482,7 +482,7 @@ export default function Home(): JSX.Element {
             </div>
             <div ref={parallaxRef2} className="parallax-container relative">
               <Image
-                src={siteImages['team-monserrat'] ?? '/monse.avif'}
+                src={siteImages['team-monserrat']}
                 alt="portrait of Monserrat Mendoza, co-founder of Viva Resource, a confident woman in a casual but professional outfit standing in front of a neutral background"
                 width={400}
                 height={600}
@@ -536,7 +536,7 @@ export default function Home(): JSX.Element {
             <div className="group cursor-pointer stagger-item">
               <div className="relative h-60 md:h-80 rounded-2xl md:rounded-3xl overflow-hidden mb-4 md:mb-6">
                 <Image
-                  src={siteImages['pathway-food'] ?? '/photo-bank/vivaresource (5).jpg'}
+                  src={siteImages['pathway-food']}
                   alt="community workshop training session"
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
@@ -555,7 +555,7 @@ export default function Home(): JSX.Element {
             <div className="group cursor-pointer stagger-item">
               <div className="relative h-60 md:h-80 rounded-2xl md:rounded-3xl overflow-hidden mb-4 md:mb-6">
                 <Image
-                  src={siteImages['pathway-education'] ?? '/photo-bank/vivaresource (6).jpg'}
+                  src={siteImages['pathway-education']}
                   alt="volunteers organizing food donations"
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
@@ -574,7 +574,7 @@ export default function Home(): JSX.Element {
             <div className="group cursor-pointer stagger-item">
               <div className="relative h-60 md:h-80 rounded-2xl md:rounded-3xl overflow-hidden mb-4 md:mb-6">
                 <Image
-                  src={siteImages['pathway-community'] ?? '/photo-bank/vivaresource (8).jpg'}
+                  src={siteImages['pathway-community']}
                   alt="community collaboration meeting"
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"

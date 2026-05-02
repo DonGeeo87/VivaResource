@@ -268,7 +268,7 @@ export default function GetInvolvedPage(): JSX.Element {
             <div className="relative">
               <div className="relative z-10 rounded-xl overflow-hidden shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500">
                 <Image
-                  src={siteImages['get-involved-hero'] ?? 'https://lh3.googleusercontent.com/aida-public/AB6AXuDkHH-eYSUuv5Ascsub3aRhJZ-4Q_WRY0N3sv6qce3afa3TTZE0DXGifxvViubqZPWG066hDP0wQvMT2SgcJwCxPnECENaEiSMvVzmeDCVMDTqkimbEh2hrZOcNQbfkxHkp7feuv6RjiHvWWtACu-si-c2QSpa58R7BliyKZFQ4eTINTWuoxGdGG__S4wVG0swBV15C7gnQuS-MluUafNZg7lcmozm5YNb0QzsMgY3VW7r0jzIBwMBMogLu4VyY3nfJS1a-POR15sg'}
+                  src={siteImages['get-involved-hero']}
                   alt="Volunteers working together at a community food pantry"
                   width={600}
                   height={500}
@@ -304,7 +304,7 @@ export default function GetInvolvedPage(): JSX.Element {
               </div>
               <div className="mt-8 rounded-lg overflow-hidden h-64 shadow-sm">
                 <Image
-                  src={siteImages['get-involved-program'] ?? '/photo-bank/vivaresource (10).jpg'}
+                  src={siteImages['get-involved-program']}
                   alt="Community ambassador leading neighborhood initiative"
                   width={800}
                   height={256}

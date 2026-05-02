@@ -337,7 +337,7 @@ export default function DonatePage(): JSX.Element {
             <div className="relative">
               <div className="absolute -top-12 -left-12 w-64 h-64 bg-secondary-container/30 rounded-full blur-3xl"></div>
               <Image
-                src={siteImages['donate-hero'] ?? 'https://lh3.googleusercontent.com/aida-public/AB6AXuAnZEXadlEb8zoAW2EYMtwdF_swwjJgygOgqgwBFI2WN4zWE1wQvoRGkzyXE-XM4chB6R9oiYyyPmEYWQeGJoLNbWo59tc_N6KnCyWDE6ANfylinJsjYFCp5eyRri5uMeeSOz5JBCGYi6Ya8walmRAxHxFi4H79stqiZsPn6FXMVC1-jJODNI03OfHVhJA9lF50YArIoNAkt0GxoJ94HMs6sjzWquId-t_5wIvqbi1rZh6ZiiapVyMI5Sc_iY8CovxxYPqgETVRU5U'}
+                src={siteImages['donate-hero']}
                 alt="Community Support"
                 width={600}
                 height={400}

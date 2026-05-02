@@ -1,74 +1,88 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getSiteImage } from "@/lib/site-images";
 import type { SiteImageKey } from "@/types/site-images";
 import { SITE_IMAGE_DEFAULTS } from "@/lib/site-image-defaults";
 
 export function useSiteImage(key: SiteImageKey) {
-  const [src, setSrc] = useState<string>(SITE_IMAGE_DEFAULTS[key]?.path ?? "");
-  const [loading, setLoading] = useState(true);
+  const defaultSrc = useMemo(
+    () => SITE_IMAGE_DEFAULTS[key]?.path ?? "",
+    [key]
+  );
+  const [src, setSrc] = useState<string>(defaultSrc);
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     getSiteImage(key)
       .then((img) => {
         if (cancelled) return;
-        if (img?.path) {
+        if (img?.path && img.path !== defaultSrc) {
           setSrc(img.path);
         }
       })
       .catch(() => {
-        // silently fall back to default
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
+        // keep default
       });
-    return () => { cancelled = true; };
-  }, [key]);
+    return () => {
+      cancelled = true;
+    };
+  }, [key, defaultSrc]);
 
-  return { src, loading };
+  // If default changes (e.g. on key swap), sync
+  useEffect(() => {
+    setSrc(defaultSrc);
+  }, [defaultSrc]);
+
+  return { src };
 }
 
 export function useSiteImages(keys: SiteImageKey[]) {
-  const [images, setImages] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(true);
-  const keyString = keys.join(",");
+  const defaultMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    keys.forEach((k) => {
+      map[k] = SITE_IMAGE_DEFAULTS[k]?.path ?? "";
+    });
+    return map;
+  }, []);
+
+  const [images, setImages] = useState<Record<string, string>>(defaultMap);
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
 
     Promise.all(
       keys.map((key) =>
         getSiteImage(key).then((img) => ({
           key,
-          path: img?.path || SITE_IMAGE_DEFAULTS[key]?.path || "",
+          path: img?.path ?? SITE_IMAGE_DEFAULTS[key]?.path ?? "",
         }))
       )
     )
       .then((results) => {
         if (cancelled) return;
-        const map: Record<string, string> = {};
+        const overrides: Record<string, string> = {};
+        let hasOverride = false;
         results.forEach((r) => {
-          map[r.key] = r.path;
+          const def = SITE_IMAGE_DEFAULTS[r.key]?.path ?? "";
+          if (r.path && r.path !== def) {
+            overrides[r.key] = r.path;
+            hasOverride = true;
+          }
         });
-        setImages(map);
+        if (hasOverride) {
+          setImages((prev) => ({ ...prev, ...overrides }));
+        }
       })
       .catch(() => {
-        const map: Record<string, string> = {};
-        keys.forEach((k) => {
-          map[k] = SITE_IMAGE_DEFAULTS[k]?.path || "";
-        });
-        setImages(map);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
+        // keep defaults
       });
 
-    return () => { cancelled = true; };
-  }, [keyString]);
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  return { images, loading };
+  return { images };
 }

@@ -324,7 +324,7 @@ export default function GetHelpPage() {
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: `url('${heroSrc ?? 'https://images.unsplash.com/photo-1559027615-cd4628902d42?w=1920&q=80'}')`
+              backgroundImage: `url('${heroSrc}')`
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/90 to-secondary/80" />
@@ -662,7 +662,7 @@ export default function GetHelpPage() {
                 sizes="(max-width: 768px) 100vw, 30vw"
                 style={{ objectFit: "cover" }}
                 className="w-full h-full"
-                src={accentSrc ?? '/photo-bank/vivaresource (15).jpg'}
+                src={accentSrc}
               />
             </div>
           </div>
