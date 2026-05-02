@@ -7,30 +7,31 @@ import { SITE_IMAGE_DEFAULTS } from "@/lib/site-image-defaults";
 
 type ImageMap = Record<string, string>;
 
-const SiteImageContext = createContext<ImageMap>({});
+function buildDefaults(): ImageMap {
+  const map: ImageMap = {};
+  for (const [k, v] of Object.entries(SITE_IMAGE_DEFAULTS)) {
+    map[k] = v.path;
+  }
+  return map;
+}
+
+const defaultMap = buildDefaults();
+
+const SiteImageContext = createContext<ImageMap>(defaultMap);
 
 export function SiteImageProvider({ children }: { children: ReactNode }): JSX.Element {
-  const [allImages, setAllImages] = useState<ImageMap>(() => {
-    const map: ImageMap = {};
-    for (const [k, v] of Object.entries(SITE_IMAGE_DEFAULTS)) {
-      map[k] = v.path;
-    }
-    return map;
-  });
+  const [allImages] = useState<ImageMap>(defaultMap);
 
   useEffect(() => {
-    let cancelled = false;
     getAllSiteImages().then((overrides) => {
-      if (cancelled) return;
-      setAllImages((prev) => {
-        const hasDiff = Object.entries(overrides).some(
-          ([k, v]) => prev[k] !== v
-        );
-        if (!hasDiff) return prev;
-        return { ...prev, ...overrides };
-      });
-    });
-    return () => { cancelled = true; };
+      const entries = Object.entries(overrides);
+      for (let i = 0; i < entries.length; i++) {
+        const [k, v] = entries[i];
+        if (v && defaultMap[k] !== v) {
+          defaultMap[k] = v;
+        }
+      }
+    }).catch(() => {});
   }, []);
 
   return (
@@ -41,8 +42,7 @@ export function SiteImageProvider({ children }: { children: ReactNode }): JSX.El
 }
 
 export function useSiteImage(key: SiteImageKey): string {
-  const allImages = useContext(SiteImageContext);
-  return allImages[key] ?? "";
+  return useContext(SiteImageContext)[key] ?? "";
 }
 
 export function useSiteImages(): ImageMap {
