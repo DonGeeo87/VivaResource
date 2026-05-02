@@ -1,80 +1,50 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useMemo, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { getAllSiteImages } from "@/lib/site-images";
 import type { SiteImageKey } from "@/types/site-images";
 import { SITE_IMAGE_DEFAULTS } from "@/lib/site-image-defaults";
 
 type ImageMap = Record<string, string>;
 
-interface SiteImageContextValue {
-  overrides: ImageMap;
-  loaded: boolean;
-}
-
-const SiteImageContext = createContext<SiteImageContextValue>({
-  overrides: {},
-  loaded: false,
-});
+const SiteImageContext = createContext<ImageMap>({});
 
 export function SiteImageProvider({ children }: { children: ReactNode }): JSX.Element {
-  const [overrides, setOverrides] = useState<ImageMap>({});
-  const [loaded, setLoaded] = useState(false);
+  const [allImages, setAllImages] = useState<ImageMap>(() => {
+    const map: ImageMap = {};
+    for (const [k, v] of Object.entries(SITE_IMAGE_DEFAULTS)) {
+      map[k] = v.path;
+    }
+    return map;
+  });
 
   useEffect(() => {
     let cancelled = false;
-    getAllSiteImages()
-      .then((all) => {
-        if (cancelled) return;
-        const diffs: ImageMap = {};
-        let hasDiff = false;
-        for (const [key, path] of Object.entries(all)) {
-          const def = SITE_IMAGE_DEFAULTS[key as SiteImageKey]?.path;
-          if (path && def && path !== def) {
-            diffs[key] = path;
-            hasDiff = true;
-          }
-        }
-        if (hasDiff) {
-          setOverrides(diffs);
-        }
-        setLoaded(true);
-      })
-      .catch(() => {
-        if (!cancelled) setLoaded(true);
+    getAllSiteImages().then((overrides) => {
+      if (cancelled) return;
+      setAllImages((prev) => {
+        const hasDiff = Object.entries(overrides).some(
+          ([k, v]) => prev[k] !== v
+        );
+        if (!hasDiff) return prev;
+        return { ...prev, ...overrides };
       });
+    });
     return () => { cancelled = true; };
   }, []);
 
   return (
-    <SiteImageContext.Provider value={{ overrides, loaded }}>
+    <SiteImageContext.Provider value={allImages}>
       {children}
     </SiteImageContext.Provider>
   );
 }
 
 export function useSiteImage(key: SiteImageKey): string {
-  const { overrides } = useContext(SiteImageContext);
-  return useMemo(
-    () => overrides[key] ?? SITE_IMAGE_DEFAULTS[key]?.path ?? "",
-    [key, overrides]
-  );
+  const allImages = useContext(SiteImageContext);
+  return allImages[key] ?? "";
 }
 
 export function useSiteImages(): ImageMap {
-  const { overrides, loaded } = useContext(SiteImageContext);
-  return useMemo(() => {
-    if (!loaded) {
-      // Return defaults immediately — no async waiting
-      return Object.fromEntries(
-        Object.entries(SITE_IMAGE_DEFAULTS).map(([k, v]) => [k, v.path])
-      );
-    }
-    // Merge overrides on top of defaults
-    const all: ImageMap = {};
-    for (const [k, v] of Object.entries(SITE_IMAGE_DEFAULTS)) {
-      all[k] = overrides[k] ?? v.path;
-    }
-    return all;
-  }, [loaded, overrides]);
+  return useContext(SiteImageContext);
 }
