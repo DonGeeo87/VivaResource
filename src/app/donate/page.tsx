@@ -5,6 +5,8 @@ import { Verified, Lock, Package, HeartHandshake, Handshake, Quote, CheckCircle,
 import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSiteImages } from "@/hooks/useSiteImage";
+import type { SiteImageKey } from "@/types/site-images";
 import { PayPalScriptProvider, PayPalButtons, FUNDING } from "@paypal/react-paypal-js";
 
 const donationAmounts = [
@@ -298,6 +300,7 @@ export default function DonatePage(): JSX.Element {
   const { translations } = useLanguage();
   const { donate: t } = translations;
   const [paypalReady, setPaypalReady] = useState(false);
+  const { images: siteImages } = useSiteImages(['donate-hero', 'donate-card'] as SiteImageKey[]);
 
   useEffect(() => {
     setPaypalReady(true);
@@ -334,7 +337,7 @@ export default function DonatePage(): JSX.Element {
             <div className="relative">
               <div className="absolute -top-12 -left-12 w-64 h-64 bg-secondary-container/30 rounded-full blur-3xl"></div>
               <Image
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnZEXadlEb8zoAW2EYMtwdF_swwjJgygOgqgwBFI2WN4zWE1wQvoRGkzyXE-XM4chB6R9oiYyyPmEYWQeGJoLNbWo59tc_N6KnCyWDE6ANfylinJsjYFCp5eyRri5uMeeSOz5JBCGYi6Ya8walmRAxHxFi4H79stqiZsPn6FXMVC1-jJODNI03OfHVhJA9lF50YArIoNAkt0GxoJ94HMs6sjzWquId-t_5wIvqbi1rZh6ZiiapVyMI5Sc_iY8CovxxYPqgETVRU5U"
+                src={siteImages['donate-hero'] ?? 'https://lh3.googleusercontent.com/aida-public/AB6AXuAnZEXadlEb8zoAW2EYMtwdF_swwjJgygOgqgwBFI2WN4zWE1wQvoRGkzyXE-XM4chB6R9oiYyyPmEYWQeGJoLNbWo59tc_N6KnCyWDE6ANfylinJsjYFCp5eyRri5uMeeSOz5JBCGYi6Ya8walmRAxHxFi4H79stqiZsPn6FXMVC1-jJODNI03OfHVhJA9lF50YArIoNAkt0GxoJ94HMs6sjzWquId-t_5wIvqbi1rZh6ZiiapVyMI5Sc_iY8CovxxYPqgETVRU5U'}
                 alt="Community Support"
                 width={600}
                 height={400}
@@ -402,7 +405,7 @@ export default function DonatePage(): JSX.Element {
                   <Quote className="w-16 h-16 text-primary/10 absolute -top-2 -left-4 fill-primary/10" />
                   <div className="relative z-10">
                     <p className="text-xl italic text-on-surface-variant mb-6 leading-relaxed">
-                      &ldquo;Viva Resource Foundation didn&apos;t just give us food; they gave us hope when our car broke down and we couldn&apos;t get to
+                      &ldquo;Viva Resource didn&apos;t just give us food; they gave us hope when our car broke down and we couldn&apos;t get to
                       work. They are family.&rdquo;
                       <span className="block mt-2 font-body text-sm not-italic opacity-70">&mdash; Maria & Family, Alamosa CO</span>
                     </p>
@@ -420,11 +423,11 @@ export default function DonatePage(): JSX.Element {
                 <div className="p-6 bg-surface-high rounded-xl border-l-4 border-primary">
                   <h4 className="font-bold text-primary mb-2">Tax-Deductibility / Deductibilidad de Impuestos</h4>
                   <p className="text-sm text-on-surface-variant leading-relaxed">
-                    Viva Resource Foundation is a registered 501(c)(3) non-profit organization. All donations are tax-deductible to the extent allowed by
+                    Viva Resource is a registered 501(c)(3) non-profit organization. All donations are tax-deductible to the extent allowed by
                     law.
                     <br />
                     <br />
-                    Viva Resource Foundation es una organización sin fines de lucro 501(c)(3) registrada. Todas las donaciones son deducibles de impuestos
+                    Viva Resource es una organización sin fines de lucro 501(c)(3) registrada. Todas las donaciones son deducibles de impuestos
                     en la medida permitida por la ley.
                   </p>
                 </div>

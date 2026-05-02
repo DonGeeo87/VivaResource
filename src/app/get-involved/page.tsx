@@ -5,6 +5,8 @@ import { Star, HeartHandshake, AlertCircle, GraduationCap, Package, Users, Arrow
 import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSiteImages } from "@/hooks/useSiteImage";
+import type { SiteImageKey } from "@/types/site-images";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { verifyRecaptcha } from "@/lib/recaptcha";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
@@ -103,6 +105,8 @@ export default function GetInvolvedPage(): JSX.Element {
   const { translations, language } = useLanguage();
   const t = translations.getInvolved;
   const { executeRecaptcha } = useGoogleReCaptcha();
+
+  const { images: siteImages } = useSiteImages(['get-involved-hero', 'get-involved-program'] as SiteImageKey[]);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -208,7 +212,7 @@ export default function GetInvolvedPage(): JSX.Element {
           data: {
             firstName: formData.firstName,
             lastName: formData.lastName,
-            email: formData.email,
+        email: formData.email.trim().toLowerCase(),
             phone: formData.phone || "",
             program: formData.program,
             skills: formData.skills,
@@ -264,7 +268,7 @@ export default function GetInvolvedPage(): JSX.Element {
             <div className="relative">
               <div className="relative z-10 rounded-xl overflow-hidden shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500">
                 <Image
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkHH-eYSUuv5Ascsub3aRhJZ-4Q_WRY0N3sv6qce3afa3TTZE0DXGifxvViubqZPWG066hDP0wQvMT2SgcJwCxPnECENaEiSMvVzmeDCVMDTqkimbEh2hrZOcNQbfkxHkp7feuv6RjiHvWWtACu-si-c2QSpa58R7BliyKZFQ4eTINTWuoxGdGG__S4wVG0swBV15C7gnQuS-MluUafNZg7lcmozm5YNb0QzsMgY3VW7r0jzIBwMBMogLu4VyY3nfJS1a-POR15sg"
+                  src={siteImages['get-involved-hero'] ?? 'https://lh3.googleusercontent.com/aida-public/AB6AXuDkHH-eYSUuv5Ascsub3aRhJZ-4Q_WRY0N3sv6qce3afa3TTZE0DXGifxvViubqZPWG066hDP0wQvMT2SgcJwCxPnECENaEiSMvVzmeDCVMDTqkimbEh2hrZOcNQbfkxHkp7feuv6RjiHvWWtACu-si-c2QSpa58R7BliyKZFQ4eTINTWuoxGdGG__S4wVG0swBV15C7gnQuS-MluUafNZg7lcmozm5YNb0QzsMgY3VW7r0jzIBwMBMogLu4VyY3nfJS1a-POR15sg'}
                   alt="Volunteers working together at a community food pantry"
                   width={600}
                   height={500}
@@ -300,7 +304,7 @@ export default function GetInvolvedPage(): JSX.Element {
               </div>
               <div className="mt-8 rounded-lg overflow-hidden h-64 shadow-sm">
                 <Image
-                  src="/photo-bank/vivaresource (10).jpg"
+                  src={siteImages['get-involved-program'] ?? '/photo-bank/vivaresource (10).jpg'}
                   alt="Community ambassador leading neighborhood initiative"
                   width={800}
                   height={256}

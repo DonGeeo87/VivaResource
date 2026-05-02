@@ -11,6 +11,8 @@ import {
   Loader2,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSiteImages } from "@/hooks/useSiteImage";
+import type { SiteImageKey } from "@/types/site-images";
 import { useToast } from "@/components/Toast";
 
 const faqs = [
@@ -40,6 +42,12 @@ export default function ContactPage(): JSX.Element {
   const { translations, language } = useLanguage();
   const { contact: t } = translations;
   const { showToast, Toast: ToastComponent } = useToast();
+
+  const { images: siteImages } = useSiteImages([
+    'contact-hero',
+    'contact-office',
+    'contact-team',
+  ] as SiteImageKey[]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -147,7 +155,7 @@ export default function ContactPage(): JSX.Element {
       <section className="relative min-h-[400px] flex items-center overflow-hidden bg-gradient-to-br from-primary to-primary-container py-24 px-6">
         <div className="absolute inset-0 opacity-20 mix-blend-overlay">
           <Image
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxCNb4SWpP96lkuuFhuEnA9E7dVEzO6wPHzX_ie08ZbcdIjk8XcZai-h8kqInbsdaYsduMlsw3sTXvCvyhK-et0S3TEyeqTxTQBOlGFAz5As1NSW4jws_gbZyg27wtId-hh8bPnNaue00TP1KTRJRwmaR-kNcicCQZFPJlBZ3OdehCGsTFX78uRBmMsyRMPPzW332yrXCmC5z0KQiEK4RBVqVzDeRDbsCbMQb-juD9ZKW1gDKCAhYqcZAB86yrEtpv0s8SK3nHCbk"
+            src={siteImages['contact-hero'] ?? 'https://lh3.googleusercontent.com/aida-public/AB6AXuDxCNb4SWpP96lkuuFhuEnA9E7dVEzO6wPHzX_ie08ZbcdIjk8XcZai-h8kqInbsdaYsduMlsw3sTXvCvyhK-et0S3TEyeqTxTQBOlGFAz5As1NSW4jws_gbZyg27wtId-hh8bPnNaue00TP1KTRJRwmaR-kNcicCQZFPJlBZ3OdehCGsTFX78uRBmMsyRMPPzW332yrXCmC5z0KQiEK4RBVqVzDeRDbsCbMQb-juD9ZKW1gDKCAhYqcZAB86yrEtpv0s8SK3nHCbk'}
             alt="Soft focused background of hands holding soil with a small plant growing"
             fill
             className="object-cover"
@@ -370,7 +378,7 @@ export default function ContactPage(): JSX.Element {
             </div>
             <div className="relative overflow-hidden rounded-3xl h-64 shadow-lg group">
               <Image
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAzCOBQuv1yhE66tIdXYzNFzNuFVhlm_fAMRt4ip7ucMiaDLG_YBaWJ59khL13TtGMmZHntG6N9FJgPei6M9uN8YR1qQceRljQKc-ImiJiklorVIwS_dtkj6rmFaDT28GAhpxVno2VbLrdNWc4LO8-rNA7VchKhGXUd8-2Hh_k2EAtVKyPfJIvFxeL51OTjawXMt3gETYQ73EDJ--43e1fdCV9m1GHSsXH1w4_b8m7C-6iNXHpM69SAGuTXrQw_b_zpdwZLyGMd6Q"
+                src={siteImages['contact-office'] ?? 'https://lh3.googleusercontent.com/aida-public/AB6AXuAAzCOBQuv1yhE66tIdXYzNFzNuFVhlm_fAMRt4ip7ucMiaDLG_YBaWJ59khL13TtGMmZHntG6N9FJgPei6M9uN8YR1qQceRljQKc-ImiJiklorVIwS_dtkj6rmFaDT28GAhpxVno2VbLrdNWc4LO8-rNA7VchKhGXUd8-2Hh_k2EAtVKyPfJIvFxeL51OTjawXMt3gETYQ73EDJ--43e1fdCV9m1GHSsXH1w4_b8m7C-6iNXHpM69SAGuTXrQw_b_zpdwZLyGMd6Q'}
                 alt="Peaceful rural landscape in Colorado with plains and mountains"
                 width={600}
                 height={256}
@@ -416,7 +424,7 @@ export default function ContactPage(): JSX.Element {
             </div>
           </div>
           <Image
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVyIZ_NfMf9B1clV2U9YwyMtecK12_5MvyCiKBLmVrQhHtP-W2WUqeap3xF9VBGvthdZ_9lRsGzpuSLz0U8_EYao05UoeIVyjfUzO-xj2Qtg9xXM-SyL5hfIP6tVZL3EyVUnF8KC86q2f73DeUvFiRX1u7p_6AhZ9eSeLfJ2baoMFsJeSejoQAACVx-p5xU2KDBnEhDSQnhvMxHX-aFNfBo_HfFjud-QVXrSkFS76wG7z8fFJjcVHz1yOa5LUIZRKjTvyodWoqLvk"
+            src={siteImages['contact-team'] ?? 'https://lh3.googleusercontent.com/aida-public/AB6AXuCVyIZ_NfMf9B1clV2U9YwyMtecK12_5MvyCiKBLmVrQhHtP-W2WUqeap3xF9VBGvthdZ_9lRsGzpuSLz0U8_EYao05UoeIVyjfUzO-xj2Qtg9xXM-SyL5hfIP6tVZL3EyVUnF8KC86q2f73DeUvFiRX1u7p_6AhZ9eSeLfJ2baoMFsJeSejoQAACVx-p5xU2KDBnEhDSQnhvMxHX-aFNfBo_HfFjud-QVXrSkFS76wG7z8fFJjcVHz1yOa5LUIZRKjTvyodWoqLvk'}
             alt="Map showing location of Peyton, Colorado"
             width={1920}
             height={500}

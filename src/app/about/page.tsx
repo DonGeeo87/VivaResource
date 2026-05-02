@@ -10,6 +10,8 @@ import {
   Eye,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSiteImages } from "@/hooks/useSiteImage";
+import type { SiteImageKey } from "@/types/site-images";
 
 interface TimelineItemProps {
   year: string;
@@ -65,6 +67,13 @@ function TeamMember({ name, role, imageSrc }: TeamMemberProps) {
 
 export default function AboutPage(): JSX.Element {
   const { translations } = useLanguage();
+
+  const aboutKeys: SiteImageKey[] = [
+    'about-hero', 'about-gallery-1', 'about-gallery-2', 'about-gallery-3', 'about-gallery-4',
+    'team-eva', 'team-monserrat',
+  ];
+  const { images: siteImages } = useSiteImages(aboutKeys);
+
   const stats = [
     { value: "45k+", label: translations.about.livesTouched, color: "text-primary" },
     { value: "12", label: translations.about.activePrograms, color: "text-secondary" },
@@ -99,12 +108,12 @@ export default function AboutPage(): JSX.Element {
     {
       name: "Eva Leon",
       role: "Co-Founder & Executive Director",
-      imageSrc: "/eva.avif",
+      imageSrc: siteImages['team-eva'] ?? '/eva.avif',
     },
     {
       name: "Monserrat Mendoza",
       role: "Co-Founder & Director of Operations",
-      imageSrc: "/monse.avif",
+      imageSrc: siteImages['team-monserrat'] ?? '/monse.avif',
     },
   ];
 
@@ -124,7 +133,7 @@ export default function AboutPage(): JSX.Element {
           <div className="relative">
             <div className="rounded-xl overflow-hidden shadow-2xl transform rotate-3 h-[400px] w-full">
               <Image
-                src="/photo-bank/hero_01.jpg"
+                src={siteImages['about-hero'] ?? '/photo-bank/hero_01.jpg'}
                 alt="Collaborative group of diverse professionals"
                 width={600}
                 height={400}
@@ -231,7 +240,7 @@ export default function AboutPage(): JSX.Element {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px]">
             <div className="col-span-2 row-span-2 rounded-xl overflow-hidden shadow-sm relative">
               <Image
-                src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80"
+                src={siteImages['about-gallery-1'] ?? 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80'}
                 alt="Children laughing in classroom"
                 fill
                 sizes="(max-width: 1024px) 50vw, 800px"
@@ -240,7 +249,7 @@ export default function AboutPage(): JSX.Element {
             </div>
             <div className="col-span-1 rounded-xl overflow-hidden shadow-sm relative">
               <Image
-                src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=400&q=80"
+                src={siteImages['about-gallery-2'] ?? 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=400&q=80'}
                 alt="Volunteers planting trees"
                 fill
                 sizes="(max-width: 1024px) 25vw, 400px"
@@ -249,7 +258,7 @@ export default function AboutPage(): JSX.Element {
             </div>
             <div className="col-span-1 row-span-2 rounded-xl overflow-hidden shadow-sm relative">
               <Image
-                src="https://images.unsplash.com/photo-1581056771107-24ca5f033842?w=400&q=80"
+                src={siteImages['about-gallery-3'] ?? 'https://images.unsplash.com/photo-1581056771107-24ca5f033842?w=400&q=80'}
                 alt="Mobile clinic consultation"
                 fill
                 sizes="(max-width: 1024px) 25vw, 400px"
@@ -258,7 +267,7 @@ export default function AboutPage(): JSX.Element {
             </div>
             <div className="col-span-1 rounded-xl overflow-hidden shadow-sm relative">
               <Image
-                src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=400&q=80"
+                src={siteImages['about-gallery-4'] ?? 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=400&q=80'}
                 alt="Workplace training session"
                 fill
                 sizes="(max-width: 1024px) 25vw, 400px"

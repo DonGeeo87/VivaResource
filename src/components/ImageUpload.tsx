@@ -23,6 +23,11 @@ export default function ImageUpload({
   const [preview, setPreview] = useState<string | null>(value || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Sync preview with external value changes
+  useEffect(() => {
+    setPreview(value || null);
+  }, [value]);
+
   const handleFileSelect = async (file: File) => {
     setError(null);
     setUploading(true);

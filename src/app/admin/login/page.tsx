@@ -8,6 +8,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/i18n/translations";
+import { useSiteImage } from "@/hooks/useSiteImage";
 
 export default function AdminLoginPage(): JSX.Element {
   const [email, setEmail] = useState("");
@@ -18,6 +19,7 @@ export default function AdminLoginPage(): JSX.Element {
   const [isHydrated, setIsHydrated] = useState(false);
   const router = useRouter();
   const { language } = useLanguage();
+  const { src: logoSrc } = useSiteImage('login-logo');
 
   useEffect(() => {
     setIsHydrated(true);
@@ -75,13 +77,13 @@ export default function AdminLoginPage(): JSX.Element {
               <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl mb-6 shadow-2xl">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/logo.png"
+                  src={logoSrc ?? '/logo.png'}
                   alt="Viva Resource Logo"
                   className="w-14 h-14 object-contain"
                 />
               </div>
               <h1 className="text-4xl font-bold text-white mb-2">
-                Viva Resource Foundation
+                Viva Resource
               </h1>
               <p className="text-white/80 text-lg">{t?.title}</p>
             </div>

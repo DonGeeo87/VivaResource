@@ -23,9 +23,10 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSiteImage } from "@/hooks/useSiteImage";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { verifyRecaptcha } from "@/lib/recaptcha";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, doc, getDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 
 import { FormField, Input, Textarea } from '@/components/ui/FormField';
@@ -202,6 +203,8 @@ export default function GetHelpPage() {
   const { translations, language } = useLanguage();
   const t = translations.getHelp;
   const isES = language === 'es';
+  const { src: heroSrc } = useSiteImage('get-help-hero');
+  const { src: accentSrc } = useSiteImage('get-help-accent');
   const { executeRecaptcha } = useGoogleReCaptcha();
 
   // Crisis modal state
@@ -261,13 +264,37 @@ export default function GetHelpPage() {
     try {
       await addDoc(collection(db, "help_requests"), {
         fullName: formData.fullName,
-        email: formData.email,
+        email: formData.email.trim().toLowerCase(),
         assistanceTypes: formData.assistanceTypes,
         contactMethod: formData.contactMethod,
         description: formData.description,
         status: "pending",
         createdAt: serverTimestamp(),
       });
+
+      // Check and send immediate notification
+      try {
+        const settingDoc = await getDoc(doc(db, "site_settings", "notify_on_help_request"));
+        if (settingDoc.exists() && settingDoc.data().value === "true") {
+          await fetch("/api/email/notify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: "help-request",
+              data: {
+                fullName: formData.fullName,
+                email: formData.email,
+                assistanceTypes: formData.assistanceTypes,
+                contactMethod: formData.contactMethod,
+                description: formData.description,
+              },
+            }),
+          });
+        }
+      } catch (notifyError: unknown) {
+        console.error("Error sending help request notification:", notifyError);
+        // Do not block success
+      }
 
       setFormSuccess(true);
       setFormData({
@@ -280,9 +307,9 @@ export default function GetHelpPage() {
 
       // Reset success message after 5 seconds
       setTimeout(() => setFormSuccess(false), 5000);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error submitting help request:", error);
-      setFormError("Error submitting request. Please try again.");
+      setFormError(isES ? "Error al enviar la solicitud. Intente nuevamente." : "Error submitting request. Please try again.");
     } finally {
       setFormSubmitting(false);
     }
@@ -297,7 +324,7 @@ export default function GetHelpPage() {
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: "url('https://images.unsplash.com/photo-1559027615-cd4628902d42?w=1920&q=80')"
+              backgroundImage: `url('${heroSrc ?? 'https://images.unsplash.com/photo-1559027615-cd4628902d42?w=1920&q=80'}')`
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/90 to-secondary/80" />
@@ -635,7 +662,7 @@ export default function GetHelpPage() {
                 sizes="(max-width: 768px) 100vw, 30vw"
                 style={{ objectFit: "cover" }}
                 className="w-full h-full"
-                src="/photo-bank/vivaresource (15).jpg"
+                src={accentSrc ?? '/photo-bank/vivaresource (15).jpg'}
               />
             </div>
           </div>
