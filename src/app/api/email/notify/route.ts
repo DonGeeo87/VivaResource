@@ -7,12 +7,20 @@ import {
   sendVolunteerMessageNotification,
   sendVolunteerStatusChangeNotification,
   sendVolunteerActivationNotification,
+  sendHelpRequestNotification,
+  sendVolunteerCertificateRequestNotification,
+  sendVolunteerCertificateApprovedNotification,
+  sendVolunteerCertificateRejectedNotification,
+  sendEventAdminNotification,
   EventRegistrationData,
+  EventAdminNotificationData,
   VolunteerRegistrationData,
   FormSubmissionData,
   VolunteerMessageData,
   VolunteerStatusChangeData,
   VolunteerActivationData,
+  HelpRequestData,
+  VolunteerCertificateRequestData,
 } from "@/lib/email/notifications";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
@@ -51,6 +59,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     } else if (type === "form-submission") {
       const setting = await getDoc(doc(db, "site_settings", "notify_on_form_submission"));
       shouldNotify = setting.exists() ? setting.data().value === "true" : true;
+    } else if (type === "help-request") {
+      const setting = await getDoc(doc(db, "site_settings", "notify_on_help_request"));
+      shouldNotify = setting.exists() ? setting.data().value === "true" : false;
     }
 
     if (!shouldNotify) {
@@ -89,6 +100,26 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         result = await sendVolunteerActivationNotification(data as VolunteerActivationData);
         break;
 
+      case "help-request":
+        result = await sendHelpRequestNotification(data as HelpRequestData);
+        break;
+
+      case "volunteer-certificate-request":
+        result = await sendVolunteerCertificateRequestNotification(data as VolunteerCertificateRequestData);
+        break;
+
+      case "volunteer-certificate-approved":
+        result = await sendVolunteerCertificateApprovedNotification(data.email, data.name, data.purpose);
+        break;
+
+      case "volunteer-certificate-rejected":
+        result = await sendVolunteerCertificateRejectedNotification(data.email, data.name, data.adminNote);
+        break;
+
+      case "event-admin-notification":
+        result = await sendEventAdminNotification(data as EventAdminNotificationData);
+        break;
+
       default:
         return NextResponse.json(
           { error: `Unknown notification type: ${type}` },
@@ -109,7 +140,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { success: true },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error in notification API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
