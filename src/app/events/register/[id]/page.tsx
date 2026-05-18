@@ -188,12 +188,17 @@ export default function EventRegisterPage(): JSX.Element {
 
     setIsSubmitting(true);
     try {
-      await addDoc(collection(db, "event_registrations"), {
+      const registrationData: Record<string, unknown> = {
         event_id: eventId,
         ...formValues,
         status: "registered",
         created_at: serverTimestamp(),
-      });
+      };
+      if (registrationData.email && typeof registrationData.email === "string") {
+        registrationData.email = registrationData.email.trim().toLowerCase();
+      }
+
+      await addDoc(collection(db, "event_registrations"), registrationData);
 
       try {
         fetch("/api/email/notify", {
@@ -201,6 +206,27 @@ export default function EventRegisterPage(): JSX.Element {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             type: "event-registration",
+            data: {
+              eventName: eventTitle,
+              attendeeName: formValues.full_name || formValues.name || "",
+              attendeeEmail: formValues.email || "",
+              eventDate: event?.date,
+              eventTime: event?.time,
+              eventLocation: event?.location,
+            },
+          }),
+        }).catch(() => {});
+      } catch {
+        // silently fail
+      }
+
+      // Notify admins about new registration (fire and forget)
+      try {
+        fetch("/api/email/notify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "event-admin-notification",
             data: {
               eventName: eventTitle,
               attendeeName: formValues.full_name || formValues.name || "",
