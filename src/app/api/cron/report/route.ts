@@ -125,7 +125,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             };
           }),
         };
-      } catch {
+      } catch (err) {
+        console.error("[Cron Report] Error querying form_submissions:", err);
         results.forms = { count: 0, items: [] };
       }
     }
@@ -150,7 +151,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             };
           }),
         };
-      } catch {
+      } catch (err) {
+        console.error("[Cron Report] Error querying event_registrations:", err);
         results.events = { count: 0, items: [] };
       }
     }
@@ -177,7 +179,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             };
           }),
         };
-      } catch {
+      } catch (err) {
+        console.error("[Cron Report] Error querying help_requests:", err);
         results.help = { count: 0, items: [] };
       }
     }
@@ -202,7 +205,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             };
           }),
         };
-      } catch {
+      } catch (err) {
+        console.error("[Cron Report] Error querying volunteer_registrations:", err);
         results.volunteers = { count: 0, items: [] };
       }
     }
