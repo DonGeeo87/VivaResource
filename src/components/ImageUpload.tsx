@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Image as ImageIcon, Trash2 } from "lucide-react";
 import { uploadFile, deleteFile, type UploadProgress } from "@/lib/cloudinary";
 
