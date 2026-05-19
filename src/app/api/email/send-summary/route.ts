@@ -73,17 +73,63 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       subject = `Resumen de Registros: ${eventName} - ${registrations.length} inscritos`;
 
-      const rows = registrations.map((reg: Record<string, unknown>, i: number) => `
-        <tr style="${i % 2 === 0 ? 'background-color: #f9f9f9;' : ''}">
-          <td style="padding: 12px 16px; border: 1px solid #e0e0e0;">${i + 1}</td>
-          <td style="padding: 12px 16px; border: 1px solid #e0e0e0; font-weight: 600;">${(reg.full_name || reg.name || '-') as string}</td>
-          <td style="padding: 12px 16px; border: 1px solid #e0e0e0;"><a href="mailto:${reg.email || ''}" style="color: #025689;">${reg.email || '-'}</a></td>
-          <td style="padding: 12px 16px; border: 1px solid #e0e0e0; text-align: center;">${(reg.attendees || 1) as number}</td>
-          <td style="padding: 12px 16px; border: 1px solid #e0e0e0;">${reg.created_at ? new Date((reg.created_at as { toDate: () => Date }).toDate ? (reg.created_at as { toDate: () => Date }).toDate() : reg.created_at as string).toLocaleDateString() : '-'}</td>
-        </tr>
-      `).join("");
+      // Compute dynamic columns from registration data (exclude metadata)
+      const metadataFields = ['id', 'event_id', 'status', 'created_at', 'createdAt', 'updated_at'];
+      const dynamicColumns = registrations.length > 0
+        ? Array.from(new Set(registrations.flatMap(reg => Object.keys(reg)))).filter(k => !metadataFields.includes(k))
+        : ['full_name', 'email'];
 
-      const totalAttendees = registrations.reduce((sum: number, reg: Record<string, unknown>) => sum + ((reg.attendees as number) || 1), 0);
+      // Field label mapping
+      const fieldLabels: Record<string, [string, string]> = {
+        full_name: ['Full Name', 'Nombre completo'],
+        email: ['Email', 'Email'],
+        phone: ['Phone', 'Teléfono'],
+        attendees: ['Attendees', 'Asistentes'],
+        guests: ['Guests', 'Invitados'],
+        attendance: ['Attendance', 'Asistencia'],
+        dietary_restrictions: ['Dietary Restrictions', 'Restricciones alimentarias'],
+        how_hear: ['How did you hear?', '¿Cómo nos conociste?'],
+        accommodations: ['Accommodations', 'Adaptaciones'],
+        comments: ['Comments', 'Comentarios'],
+        message: ['Message', 'Mensaje'],
+      };
+      const getLabel = (key: string): string => {
+        const labels = fieldLabels[key];
+        if (labels) return data?.language === "es" ? labels[1] : labels[0];
+        return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      };
+
+      // Render a field value to string
+      const renderVal = (value: unknown): string => {
+        if (value === null || value === undefined) return '-';
+        if (Array.isArray(value)) return value.join(', ');
+        if (typeof value === 'object' && value !== null && 'toDate' in value) {
+          try {
+            return (value as { toDate: () => Date }).toDate().toLocaleDateString();
+          } catch { return '-'; }
+        }
+        return String(value);
+      };
+
+      const headerCells = dynamicColumns.map(col =>
+        `<th style="padding: 10px 8px; border: 1px solid #e0e0e0; text-align: left; white-space: nowrap;">${getLabel(col)}</th>`
+      ).join("");
+
+      const rows = registrations.map((reg: Record<string, unknown>, i: number) => {
+        const cells = dynamicColumns.map(col =>
+          `<td style="padding: 10px 8px; border: 1px solid #e0e0e0;">${renderVal(reg[col])}</td>`
+        ).join("");
+        return `
+          <tr style="${i % 2 === 0 ? 'background-color: #f9f9f9;' : ''}">
+            <td style="padding: 10px 8px; border: 1px solid #e0e0e0; text-align: center;">${i + 1}</td>
+            ${cells}
+          </tr>
+        `;
+      }).join("");
+
+      const totalAttendees = dynamicColumns.includes('attendees')
+        ? registrations.reduce((sum: number, reg: Record<string, unknown>) => sum + ((reg.attendees as number) || 1), 0)
+        : registrations.length;
 
       html = `
         <!DOCTYPE html>
@@ -96,7 +142,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9f9f9; padding: 40px 0;">
             <tr>
               <td align="center">
-                <table role="presentation" width="800" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <table role="presentation" width="900" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                   <!-- Header -->
                   <tr>
                     <td style="background-color: #025689; padding: 24px 32px; text-align: center;">
@@ -114,20 +160,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                           <td style="padding: 16px;">
                             <p style="margin: 0 0 4px 0; color: #666; font-size: 14px;">Total de registros:</p>
                             <p style="margin: 0; color: #025689; font-size: 28px; font-weight: 800;">${registrations.length}</p>
+                            ${dynamicColumns.includes('attendees') ? `
                             <p style="margin: 8px 0 0 0; color: #666; font-size: 14px;">Total de asistentes (incluyendo acompañantes):</p>
                             <p style="margin: 0; color: #025689; font-size: 20px; font-weight: 600;">${totalAttendees}</p>
+                            ` : ''}
                           </td>
                         </tr>
                       </table>
 
-                      <table style="width: 100%; border-collapse: collapse; margin: 24px 0;">
+                      <table style="width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 12px;">
                         <thead>
                           <tr style="background-color: #025689; color: white;">
-                            <th style="padding: 12px 16px; border: 1px solid #e0e0e0; text-align: left;">#</th>
-                            <th style="padding: 12px 16px; border: 1px solid #e0e0e0; text-align: left;">Nombre</th>
-                            <th style="padding: 12px 16px; border: 1px solid #e0e0e0; text-align: left;">Email</th>
-                            <th style="padding: 12px 16px; border: 1px solid #e0e0e0; text-align: center;">Asistentes</th>
-                            <th style="padding: 12px 16px; border: 1px solid #e0e0e0; text-align: left;">Fecha de registro</th>
+                            <th style="padding: 10px 8px; border: 1px solid #e0e0e0; text-align: center;">#</th>
+                            ${headerCells}
                           </tr>
                         </thead>
                         <tbody>
@@ -139,7 +184,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                   <!-- Footer -->
                   <tr>
                     <td style="background-color: #f3f3f3; padding: 24px 32px; text-align: center; border-top: 1px solid #e0e0e0;">
-                      <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">Viva Resource Foundation</p>
+                      <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">Viva Resource</p>
                       <p style="margin: 0; color: #999; font-size: 12px;">Construyendo una comunidad más resiliente juntos.</p>
                     </td>
                   </tr>
@@ -238,7 +283,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                   <!-- Footer -->
                   <tr>
                     <td style="background-color: #f3f3f3; padding: 24px 32px; text-align: center; border-top: 1px solid #e0e0e0;">
-                      <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">Viva Resource Foundation</p>
+                      <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">Viva Resource</p>
                       <p style="margin: 0; color: #999; font-size: 12px;">Construyendo una comunidad más resiliente juntos.</p>
                     </td>
                   </tr>
@@ -254,7 +299,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     const sendResult = await transporter.sendMail({
-      from: `"Viva Resource Foundation" <${process.env.EMAIL_USER}>`,
+      from: `"Viva Resource" <${process.env.EMAIL_USER}>`,
       to: notificationEmails.join(", "),
       subject,
       html,
