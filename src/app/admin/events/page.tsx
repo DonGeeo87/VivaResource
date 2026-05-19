@@ -27,13 +27,7 @@ interface Event {
 
 interface Registration {
   id: string;
-  full_name: string;
-  email: string;
-  phone?: string;
-  attendees: number;
-  comments?: string;
-  status: string;
-  created_at: Timestamp | Date;
+  [key: string]: unknown;
 }
 
 // Helper function to format dates in Mountain Time (Peyton, CO)
@@ -57,6 +51,48 @@ export default function AdminEventsPage(): JSX.Element {
 
   // Toggle action state
   const [toggling, setToggling] = useState<string | null>(null);
+
+  const metadataFields = ['id', 'event_id', 'status', 'created_at', 'createdAt', 'updated_at'];
+
+  const getDynamicColumns = (regs: Record<string, unknown>[]): string[] => {
+    if (regs.length === 0) return [];
+    const keys = new Set<string>();
+    regs.forEach(reg => {
+      Object.keys(reg).forEach(key => {
+        if (!metadataFields.includes(key)) keys.add(key);
+      });
+    });
+    return Array.from(keys);
+  };
+
+  const getFieldLabel = (key: string): string => {
+    const labels: Record<string, [string, string]> = {
+      full_name: ['Full Name', 'Nombre completo'],
+      email: ['Email', 'Email'],
+      phone: ['Phone', 'Teléfono'],
+      attendees: ['Attendees', 'Asistentes'],
+      guests: ['Guests', 'Invitados'],
+      attendance: ['Attendance', 'Asistencia'],
+      dietary_restrictions: ['Dietary Restrictions', 'Restricciones alimentarias'],
+      how_hear: ['How did you hear?', '¿Cómo nos conociste?'],
+      accommodations: ['Accommodations', 'Adaptaciones'],
+      comments: ['Comments', 'Comentarios'],
+      message: ['Message', 'Mensaje'],
+    };
+    if (labels[key]) return labels[key][language === 'es' ? 1 : 0];
+    return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  };
+
+  const renderFieldValue = (value: unknown): string => {
+    if (value === null || value === undefined) return '-';
+    if (Array.isArray(value)) return value.join(', ');
+    if (typeof value === 'object' && value !== null && 'toDate' in value) {
+      try {
+        return (value as { toDate: () => Date }).toDate().toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US');
+      } catch { return '-'; }
+    }
+    return String(value);
+  };
 
   useEffect(() => {
     fetchEvents();
@@ -235,16 +271,11 @@ export default function AdminEventsPage(): JSX.Element {
   const exportToCSV = () => {
     if (!selectedEvent || registrations.length === 0) return;
 
-    const headers = ["Name", "Email", "Phone", "Attendees", "Comments", "Status", "Date"];
-    const rows = registrations.map(reg => [
-      reg.full_name,
-      reg.email,
-      reg.phone || "",
-      reg.attendees,
-      reg.comments || "",
-      reg.status,
-      formatDate(reg.created_at as Timestamp | Date | undefined, language)
-    ]);
+    const cols = getDynamicColumns(registrations as Record<string, unknown>[]);
+    const headers = cols.map(col => getFieldLabel(col));
+    const rows = registrations.map(reg =>
+      cols.map(col => renderFieldValue(reg[col]))
+    );
 
     const csvContent = [
       headers.join(","),
@@ -544,37 +575,21 @@ export default function AdminEventsPage(): JSX.Element {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">
-                          {language === "es" ? "Nombre" : "Name"}
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Email</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">
-                          {language === "es" ? "Teléfono" : "Phone"}
-                        </th>
-                        <th className="text-center py-3 px-4 text-sm font-semibold text-gray-600">
-                          {language === "es" ? "Asistentes" : "Attendees"}
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">
-                          {language === "es" ? "Comentarios" : "Comments"}
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">
-                          {language === "es" ? "Fecha" : "Date"}
-                        </th>
+                        {getDynamicColumns(registrations).map(col => (
+                          <th key={col} className="text-left py-3 px-4 text-sm font-semibold text-gray-600 whitespace-nowrap">
+                            {getFieldLabel(col)}
+                          </th>
+                        ))}
                       </tr>
                     </thead>
                     <tbody>
                       {registrations.map((reg) => (
                         <tr key={reg.id} className="border-b border-gray-100 hover:bg-gray-50">
-                          <td className="py-3 px-4 text-sm font-medium text-gray-900">{reg.full_name}</td>
-                          <td className="py-3 px-4 text-sm text-gray-600">{reg.email}</td>
-                          <td className="py-3 px-4 text-sm text-gray-600">{reg.phone || "-"}</td>
-                          <td className="py-3 px-4 text-sm text-center text-gray-600">{reg.attendees}</td>
-                          <td className="py-3 px-4 text-sm text-gray-600 max-w-xs truncate">
-                            {reg.comments || "-"}
-                          </td>
-                          <td className="py-3 px-4 text-sm text-gray-600">
-                            {formatDate(reg.created_at as Timestamp | Date | undefined, language)}
-                          </td>
+                          {getDynamicColumns(registrations).map(col => (
+                            <td key={col} className="py-3 px-4 text-sm text-gray-600 whitespace-nowrap">
+                              {renderFieldValue(reg[col])}
+                            </td>
+                          ))}
                         </tr>
                       ))}
                     </tbody>

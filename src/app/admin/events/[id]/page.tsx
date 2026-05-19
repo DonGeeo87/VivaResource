@@ -13,7 +13,6 @@ import {
   where,
   getDocs,
   deleteDoc,
-  Timestamp,
 } from "firebase/firestore";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatMountainDate } from "@/lib/timezone";
@@ -26,7 +25,6 @@ import {
   Edit,
   Eye,
   CheckCircle,
-  User,
   Send,
   Archive,
   ArchiveRestore,
@@ -62,11 +60,7 @@ interface EventData {
 
 interface Registration {
   id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  responses?: Record<string, string | string[]>;
-  createdAt: Timestamp | Date;
+  [key: string]: unknown;
 }
 
 interface LinkedForm {
@@ -320,6 +314,48 @@ export default function EventDetailsPage(): JSX.Element {
 
   const formatDate = (date: unknown): string => {
     return formatMountainDate(date, language);
+  };
+
+  const metadataFields = ['id', 'event_id', 'status', 'created_at', 'createdAt', 'updated_at'];
+
+  const getDynamicColumns = (regs: Record<string, unknown>[]): string[] => {
+    if (regs.length === 0) return [];
+    const keys = new Set<string>();
+    regs.forEach(reg => {
+      Object.keys(reg).forEach(key => {
+        if (!metadataFields.includes(key)) keys.add(key);
+      });
+    });
+    return Array.from(keys);
+  };
+
+  const getFieldLabel = (key: string): string => {
+    const labels: Record<string, [string, string]> = {
+      full_name: ['Full Name', 'Nombre completo'],
+      email: ['Email', 'Email'],
+      phone: ['Phone', 'Teléfono'],
+      attendees: ['Attendees', 'Asistentes'],
+      guests: ['Guests', 'Invitados'],
+      attendance: ['Attendance', 'Asistencia'],
+      dietary_restrictions: ['Dietary Restrictions', 'Restricciones alimentarias'],
+      how_hear: ['How did you hear?', '¿Cómo nos conociste?'],
+      accommodations: ['Accommodations', 'Adaptaciones'],
+      comments: ['Comments', 'Comentarios'],
+      message: ['Message', 'Mensaje'],
+    };
+    if (labels[key]) return labels[key][language === 'es' ? 1 : 0];
+    return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  };
+
+  const renderFieldValue = (value: unknown): string => {
+    if (value === null || value === undefined) return '-';
+    if (Array.isArray(value)) return value.join(', ');
+    if (typeof value === 'object' && value !== null && 'toDate' in value) {
+      try {
+        return (value as { toDate: () => Date }).toDate().toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US');
+      } catch { return '-'; }
+    }
+    return String(value);
   };
 
   const title = event
@@ -806,70 +842,49 @@ export default function EventDetailsPage(): JSX.Element {
               </p>
             </div>
           ) : (
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    {language === "es" ? "Nombre" : "Name"}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    {language === "es" ? "Fecha" : "Date"}
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                    {language === "es" ? "Acciones" : "Actions"}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {registrations.map((reg) => (
-                  <tr key={reg.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                          <User className="w-4 h-4 text-primary" />
-                        </div>
-                        <span className="font-medium text-gray-900">{reg.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">{reg.email}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {(() => {
-                        const regRecord = reg as unknown as Record<string, unknown>;
-                        const rawDate = regRecord.createdAt || regRecord.created_at;
-                        if (!rawDate) return "-";
-                        try {
-                          if (typeof (rawDate as { toDate: () => Date }).toDate === "function") {
-                            return (rawDate as { toDate: () => Date }).toDate().toLocaleDateString(language === "es" ? "es-ES" : "en-US");
-                          }
-                          return new Date(rawDate as string).toLocaleDateString(language === "es" ? "es-ES" : "en-US");
-                        } catch {
-                          return "-";
-                        }
-                      })()}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          onClick={() => setSelectedReg(reg)}
-                          className="p-2 text-gray-400 hover:text-primary rounded-lg hover:bg-gray-100"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteRegistration(reg.id)}
-                          className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-gray-100"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    {getDynamicColumns(registrations).map(col => (
+                      <th key={col} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">
+                        {getFieldLabel(col)}
+                      </th>
+                    ))}
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase whitespace-nowrap">
+                      {language === "es" ? "Acciones" : "Actions"}
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {registrations.map((reg) => (
+                    <tr key={reg.id} className="hover:bg-gray-50">
+                      {getDynamicColumns(registrations).map(col => (
+                        <td key={col} className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
+                          {renderFieldValue(reg[col])}
+                        </td>
+                      ))}
+                      <td className="px-6 py-4 text-right whitespace-nowrap">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => setSelectedReg(reg)}
+                            className="p-2 text-gray-400 hover:text-primary rounded-lg hover:bg-gray-100"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteRegistration(reg.id)}
+                            className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-gray-100"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}
@@ -890,28 +905,10 @@ export default function EventDetailsPage(): JSX.Element {
               </button>
             </div>
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-              <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                <p className="text-sm text-gray-500 mb-1">
-                  {language === "es" ? "Nombre" : "Name"}
-                </p>
-                <p className="font-medium">{selectedReg.name}</p>
-                <p className="text-sm text-gray-500 mt-2 mb-1">Email</p>
-                <p className="font-medium">{selectedReg.email}</p>
-                {selectedReg.phone && (
-                  <>
-                    <p className="text-sm text-gray-500 mt-2 mb-1">
-                      {language === "es" ? "Teléfono" : "Phone"}
-                    </p>
-                    <p className="font-medium">{selectedReg.phone}</p>
-                  </>
-                )}
-              </div>
-              {Object.entries(selectedReg.responses || {}).map(([key, value]) => (
-                <div key={key} className="border-b border-gray-100 pb-3 mb-3 last:border-0">
-                  <p className="text-sm font-medium text-gray-700">{key}</p>
-                  <p className="text-gray-900">
-                    {Array.isArray(value) ? value.join(", ") : String(value)}
-                  </p>
+              {getDynamicColumns(registrations).map(col => (
+                <div key={col} className="border-b border-gray-100 pb-3 mb-3 last:border-0">
+                  <p className="text-sm text-gray-500 mb-1">{getFieldLabel(col)}</p>
+                  <p className="font-medium">{renderFieldValue(selectedReg[col])}</p>
                 </div>
               ))}
             </div>
