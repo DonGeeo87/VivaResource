@@ -1,8 +1,8 @@
 # 📊 ESTADO DE AVANCE - Viva Resource Foundation
 
-**Fecha**: 1 de abril de 2026
+**Fecha**: 19 de mayo de 2026
 **Hora**: Sesión en curso
-**Último Deploy**: ✅ Exitoso (21 min atrás)
+**Último Deploy**: ✅ Exitoso
 
 ---
 
@@ -12,11 +12,14 @@
 |---------|--------|----------|
 | **Build** | ✅ Exitoso | 100% |
 | **Deploy** | ✅ Ready | 100% |
-| **Páginas Generadas** | 42 | 100% |
-| **Rutas Públicas** | ✅ 12/12 | 100% |
-| **Rutas Admin** | ✅ 8/8 | 100% |
+| **Páginas Generadas** | 57 | 100% |
+| **Rutas Públicas** | ✅ 16/16 | 100% |
+| **Rutas Admin** | ✅ 16/16 | 100% |
+| **Rutas API** | ✅ 16/16 | 100% |
 | **Blog Posts** | ✅ 12 posts | Con imágenes |
 | **Imágenes Fundadoras** | ✅ Actualizadas | Eva & Monse |
+| **TypeScript Errors** | ✅ 0 errores | Build con `ignoreBuildErrors: false` viable |
+| **Email Reports** | ✅ Con campos dinámicos | Todos los campos del form incluidos |
 
 ---
 
@@ -67,6 +70,19 @@
 - [x] **Responsive** mobile-first
 - [x] **Bilingüe** EN/ES en todo el sitio
 
+### 6. Event Registrations — Reportes Completos (Mayo 2026)
+- [x] **Columnas dinámicas en admin** — Tablas de registrados muestran TODOS los campos del formulario
+- [x] **Modal de detalle dinámico** — Muestra todas las respuestas, no solo nombre/email/teléfono
+- [x] **CSV export dinámico** — Incluye todos los campos en lugar de 7 hardcodeados
+- [x] **Reporte por correo dinámico** — El resumen enviado por email ahora incluye todas las respuestas
+- [x] **Nombres de campo corregidos** — `full_name` vs `name` ya no causa datos vacíos
+
+### 7. TypeScript — Limpieza de errores (Mayo 2026)
+- [x] **`admin/images/page.tsx`** — `SiteImage` importado del módulo correcto (`@/types/site-images`)
+- [x] **`SiteImage.tsx`** — `updatedAt.seconds` reemplazado por `getTime() / 1000` (era `Date`, no Timestamp)
+- [x] **`types.test.ts`** — `VolunteerRegistration` → `VolunteerUser` (tipo real)
+- [x] **Build con `tsc --noEmit`** — ✅ 0 errores de TypeScript
+
 ---
 
 ## 📁 ESTRUCTURA DE ARCHIVOS
@@ -113,7 +129,7 @@ vivaresource/
 - [ ] Performance audit (Lighthouse > 90)
 
 ### Deployment
-- [ ] Dominio personalizado (vivaresource.org)
+- [ ] Dominio personalizado (vivaresource.com)
 - [ ] SSL/HTTPS automático
 - [ ] CI/CD pipeline desde GitHub
 - [ ] Monitoring (Sentry, LogRocket)
@@ -130,11 +146,12 @@ vivaresource/
 
 ### Build
 ```
-✅ 42 páginas generadas
-✅ 30 estáticas
-✅ 12 dinámicas
-✅ Build time: ~45 segundos
-✅ Tamaño promedio: 180 kB First Load JS
+✅ 57 páginas generadas
+✅ 41 estáticas
+✅ 16 dinámicas
+✅ Build time: ~60 segundos
+✅ Tamaño promedio: ~227 kB First Load JS (shared)
+✅ TypeScript: 0 errores
 ```
 
 ### Rutas Públicas (12)
@@ -153,17 +170,25 @@ vivaresource/
 | `/privacy` | ✅ 200 | 947 B |
 | `/volunteer-portal` | ✅ 200 | 3.27 kB |
 
-### Rutas Admin (8)
+### Rutas Admin (16)
 | Ruta | Estado |
 |------|--------|
 | `/admin` | ✅ Dashboard |
-| `/admin/blog` | ✅ CRUD |
-| `/admin/events` | ✅ CRUD |
+| `/admin/blog` | ✅ Listing |
+| `/admin/blog/new` | ✅ Crear |
+| `/admin/blog/[id]` | ✅ Editar (dinámica) |
+| `/admin/events` | ✅ CRUD con modal inscritos |
+| `/admin/events/[id]` | ✅ Detalle con tabla dinámica |
+| `/admin/events/[id]/edit` | ✅ Editar (dinámica) |
+| `/admin/events/new` | ✅ Crear |
 | `/admin/forms` | ✅ Forms builder |
+| `/admin/forms/[id]` | ✅ Editar |
+| `/admin/forms/[id]/responses` | ✅ Respuestas dinámicas |
 | `/admin/volunteers` | ✅ Gestión |
 | `/admin/newsletter` | ✅ Subscribers |
 | `/admin/settings` | ✅ Configuración |
 | `/admin/donations` | ✅ PayPal config |
+| `/admin/images` | ✅ Site images manager |
 
 ---
 
@@ -306,6 +331,6 @@ vercel --prod --yes
 
 ---
 
-**Última Actualización**: 1 de abril de 2026
+**Última Actualización**: 19 de mayo de 2026
 **Estado**: ✅ **100% FUNCIONAL - LISTO PARA PRODUCCIÓN**
 **Próxima Revisión**: Pendiente de feedback de fundadoras
