@@ -109,24 +109,24 @@ const CHILDCARE = {
 
 // Pre-defined color values for each theme (no dynamic Tailwind classes)
 const THEME_COLORS = [
-  { badge: "#6366f1", heading: "#4338ca", ring: "#c7d2fe", chipBorder: "#c7d2fe", chipBg: "#eef2ff", chipBorderChecked: "#6366f1", label: "rgba(99,102,241,0.15)", gradient: "linear-gradient(180deg, rgba(99,102,241,0.08) 0%, rgba(168,85,247,0.04) 50%, transparent 100%)" },
-  { badge: "#f59e0b", heading: "#b45309", ring: "#fde68a", chipBorder: "#fde68a", chipBg: "#fffbeb", chipBorderChecked: "#f59e0b", label: "rgba(245,158,11,0.15)", gradient: "linear-gradient(180deg, rgba(245,158,11,0.08) 0%, rgba(249,115,22,0.04) 50%, transparent 100%)" },
-  { badge: "#8b5cf6", heading: "#7c3aed", ring: "#ddd6fe", chipBorder: "#ddd6fe", chipBg: "#f5f3ff", chipBorderChecked: "#8b5cf6", label: "rgba(139,92,246,0.15)", gradient: "linear-gradient(180deg, rgba(139,92,246,0.08) 0%, rgba(232,121,249,0.04) 50%, transparent 100%)" },
-  { badge: "#10b981", heading: "#047857", ring: "#a7f3d0", chipBorder: "#a7f3d0", chipBg: "#ecfdf5", chipBorderChecked: "#10b981", label: "rgba(16,185,129,0.15)", gradient: "linear-gradient(180deg, rgba(16,185,129,0.08) 0%, rgba(20,184,166,0.04) 50%, transparent 100%)" },
-  { badge: "#f43f5e", heading: "#be123c", ring: "#fecdd3", chipBorder: "#fecdd3", chipBg: "#fff1f2", chipBorderChecked: "#f43f5e", label: "rgba(244,63,94,0.15)", gradient: "linear-gradient(180deg, rgba(244,63,94,0.08) 0%, rgba(236,72,153,0.04) 50%, transparent 100%)" },
-  { badge: "#0ea5e9", heading: "#0369a1", ring: "#bae6fd", chipBorder: "#bae6fd", chipBg: "#f0f9ff", chipBorderChecked: "#0ea5e9", label: "rgba(14,165,233,0.15)", gradient: "linear-gradient(180deg, rgba(14,165,233,0.08) 0%, rgba(59,130,246,0.04) 50%, transparent 100%)" },
-  { badge: "#64748b", heading: "#475569", ring: "#e2e8f0", chipBorder: "#e2e8f0", chipBg: "#f8fafc", chipBorderChecked: "#64748b", label: "rgba(100,116,139,0.15)", gradient: "linear-gradient(180deg, rgba(100,116,139,0.08) 0%, rgba(148,163,184,0.04) 50%, transparent 100%)" },
+  { badge: "#6366f1", heading: "#4338ca", ring: "#c7d2fe", chipBorder: "#c7d2fe", chipBg: "#eef2ff", chipBorderChecked: "#6366f1", label: "rgba(99,102,241,0.15)", gradient: "linear-gradient(180deg, rgba(99,102,241,0.12) 0%, rgba(168,85,247,0.06) 50%, transparent 100%)" },
+  { badge: "#f59e0b", heading: "#b45309", ring: "#fde68a", chipBorder: "#fde68a", chipBg: "#fffbeb", chipBorderChecked: "#f59e0b", label: "rgba(245,158,11,0.15)", gradient: "linear-gradient(180deg, rgba(245,158,11,0.12) 0%, rgba(249,115,22,0.06) 50%, transparent 100%)" },
+  { badge: "#8b5cf6", heading: "#7c3aed", ring: "#ddd6fe", chipBorder: "#ddd6fe", chipBg: "#f5f3ff", chipBorderChecked: "#8b5cf6", label: "rgba(139,92,246,0.15)", gradient: "linear-gradient(180deg, rgba(139,92,246,0.12) 0%, rgba(232,121,249,0.06) 50%, transparent 100%)" },
+  { badge: "#10b981", heading: "#047857", ring: "#a7f3d0", chipBorder: "#a7f3d0", chipBg: "#ecfdf5", chipBorderChecked: "#10b981", label: "rgba(16,185,129,0.15)", gradient: "linear-gradient(180deg, rgba(16,185,129,0.12) 0%, rgba(20,184,166,0.06) 50%, transparent 100%)" },
+  { badge: "#f43f5e", heading: "#be123c", ring: "#fecdd3", chipBorder: "#fecdd3", chipBg: "#fff1f2", chipBorderChecked: "#f43f5e", label: "rgba(244,63,94,0.15)", gradient: "linear-gradient(180deg, rgba(244,63,94,0.12) 0%, rgba(236,72,153,0.06) 50%, transparent 100%)" },
+  { badge: "#0ea5e9", heading: "#0369a1", ring: "#bae6fd", chipBorder: "#bae6fd", chipBg: "#f0f9ff", chipBorderChecked: "#0ea5e9", label: "rgba(14,165,233,0.15)", gradient: "linear-gradient(180deg, rgba(14,165,233,0.12) 0%, rgba(59,130,246,0.06) 50%, transparent 100%)" },
+  { badge: "#64748b", heading: "#475569", ring: "#e2e8f0", chipBorder: "#e2e8f0", chipBg: "#f8fafc", chipBorderChecked: "#64748b", label: "rgba(100,116,139,0.15)", gradient: "linear-gradient(180deg, rgba(100,116,139,0.12) 0%, rgba(148,163,184,0.06) 50%, transparent 100%)" },
 ];
 
 // Scroll-gradient backgrounds (pre-mapped, no dynamic Tailwind)
 const SCROLL_GRADIENTS: Record<string, string> = {
-  indigo: "linear-gradient(180deg, #eef2ff 0%, #f5f3ff 50%, #eff6ff 100%)",
-  amber: "linear-gradient(180deg, #fffbeb 0%, #fff7ed 50%, #fef2f2 100%)",
-  violet: "linear-gradient(180deg, #f5f3ff 0%, #fdf4ff 50%, #faf5ff 100%)",
-  emerald: "linear-gradient(180deg, #ecfdf5 0%, #f0fdfa 50%, #f0fdf4 100%)",
-  rose: "linear-gradient(180deg, #fff1f2 0%, #fdf2f8 50%, #fff1f2 100%)",
-  sky: "linear-gradient(180deg, #f0f9ff 0%, #faf5ff 50%, #eff6ff 100%)",
-  slate: "linear-gradient(180deg, #f8fafc 0%, #f1f5f9 50%, #f8fafc 100%)",
+  indigo: "linear-gradient(180deg, #c7d2fe 0%, #ddd6fe 40%, #bfdbfe 100%)",
+  amber: "linear-gradient(180deg, #fde68a 0%, #fed7aa 40%, #fecaca 100%)",
+  violet: "linear-gradient(180deg, #ddd6fe 0%, #f5d0fe 40%, #e9d5ff 100%)",
+  emerald: "linear-gradient(180deg, #a7f3d0 0%, #99f6e4 40%, #a7f3d0 100%)",
+  rose: "linear-gradient(180deg, #fecdd3 0%, #fbcfe8 40%, #fecdd3 100%)",
+  sky: "linear-gradient(180deg, #bae6fd 0%, #e9d5ff 40%, #bfdbfe 100%)",
+  slate: "linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 40%, #e2e8f0 100%)",
 };
 
 interface FormData {
@@ -275,8 +275,8 @@ export default function SurveyPage() {
         className="relative rounded-3xl p-6 md:p-8 shadow-sm transition-all duration-500 hover:shadow-md"
         style={{
           background: c.gradient,
-          backdropFilter: "blur(8px)",
-          WebkitBackdropFilter: "blur(8px)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
           boxShadow: `0 0 0 1px ${c.ring}`,
         }}
       >
@@ -368,8 +368,8 @@ export default function SurveyPage() {
   // ---------- MAIN RENDER ----------
   return (
     <div
-      className="min-h-screen transition-all duration-700 ease-in-out"
-      style={{ background: scrollBg }}
+      className="min-h-screen"
+      style={{ background: scrollBg, transition: "background 700ms ease-in-out" }}
     >
       {/* Header */}
       <header className="sticky top-0 z-20 bg-white/70 backdrop-blur-xl border-b border-gray-200/50">
