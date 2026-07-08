@@ -118,17 +118,6 @@ const THEME_COLORS = [
   { badge: "#64748b", heading: "#475569", ring: "#e2e8f0", chipBorder: "#e2e8f0", chipBg: "#f8fafc", chipBorderChecked: "#64748b", label: "rgba(100,116,139,0.15)", gradient: "linear-gradient(180deg, rgba(100,116,139,0.12) 0%, rgba(148,163,184,0.06) 50%, transparent 100%)" },
 ];
 
-// Scroll-gradient backgrounds (pre-mapped, no dynamic Tailwind)
-const SCROLL_GRADIENTS: Record<string, string> = {
-  indigo: "linear-gradient(180deg, #c7d2fe 0%, #ddd6fe 40%, #bfdbfe 100%)",
-  amber: "linear-gradient(180deg, #fde68a 0%, #fed7aa 40%, #fecaca 100%)",
-  violet: "linear-gradient(180deg, #ddd6fe 0%, #f5d0fe 40%, #e9d5ff 100%)",
-  emerald: "linear-gradient(180deg, #a7f3d0 0%, #99f6e4 40%, #a7f3d0 100%)",
-  rose: "linear-gradient(180deg, #fecdd3 0%, #fbcfe8 40%, #fecdd3 100%)",
-  sky: "linear-gradient(180deg, #bae6fd 0%, #e9d5ff 40%, #bfdbfe 100%)",
-  slate: "linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 40%, #e2e8f0 100%)",
-};
-
 interface FormData {
   interests: string[];
   interests_other: string;
@@ -143,41 +132,29 @@ interface FormData {
   comments: string;
 }
 
-// ---------- SCROLL WATCH BACKGROUND (inline styles) ----------
-function useScrollGradient() {
-  const [bg, setBg] = useState(SCROLL_GRADIENTS.indigo);
+// ---------- ANIMATED BACKGROUND ----------
+function useAnimatedBackground() {
+  const [bgIndex, setBgIndex] = useState(0);
+  const colors = ["#eef2ff","#fffbeb","#f5f3ff","#ecfdf5","#fff1f2","#f0f9ff","#f8fafc"];
 
   useEffect(() => {
-    const sections = document.querySelectorAll("[data-section]");
-    if (!sections.length) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            const theme = entry.target.getAttribute("data-theme");
-            if (theme && SCROLL_GRADIENTS[theme]) {
-              setBg(SCROLL_GRADIENTS[theme]);
-            }
-            break;
-          }
-        }
-      },
-      { threshold: 0.3 }
-    );
-
-    sections.forEach((s) => observer.observe(s));
-    return () => observer.disconnect();
+    const interval = setInterval(() => {
+      setBgIndex((prev) => (prev + 1) % colors.length);
+    }, 8000);
+    return () => clearInterval(interval);
   }, []);
 
-  return bg;
+  return {
+    background: `linear-gradient(135deg, ${colors[bgIndex]} 0%, ${colors[(bgIndex + 1) % colors.length]} 50%, ${colors[(bgIndex + 2) % colors.length]} 100%)`,
+    transition: "background 2s ease-in-out",
+  };
 }
 
 export default function SurveyPage() {
   const { language } = useLanguage();
   const t = (en: string, es: string) => (language === "es" ? es : en);
   const isES = language === "es";
-  const scrollBg = useScrollGradient();
+  const animatedBg = useAnimatedBackground();
 
   const [form, setForm] = useState<FormData>({
     interests: [],
@@ -369,7 +346,7 @@ export default function SurveyPage() {
   return (
     <div
       className="min-h-screen"
-      style={{ background: scrollBg, transition: "background 700ms ease-in-out" }}
+      style={{ background: animatedBg.background, transition: animatedBg.transition }}
     >
       {/* Header */}
       <header className="sticky top-0 z-20 bg-white/70 backdrop-blur-xl border-b border-gray-200/50">
