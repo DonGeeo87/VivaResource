@@ -135,13 +135,29 @@ interface FormData {
 // ---------- ANIMATED BACKGROUND ----------
 function useAnimatedBackground() {
   const [bgIndex, setBgIndex] = useState(0);
-  const colors = ["#eef2ff","#fffbeb","#f5f3ff","#ecfdf5","#fff1f2","#f0f9ff","#f8fafc"];
+  // Colores pastel más visibles — saturación media, se nota el cambio
+  const colors = [
+    "#c7d2fe", // indigo
+    "#fde68a", // amber  
+    "#ddd6fe", // violet
+    "#a7f3d0", // emerald
+    "#fecdd3", // rose
+    "#bae6fd", // sky
+    "#e2e8f0", // slate
+  ];
 
   useEffect(() => {
+    // Primer cambio rápido a los 2s, luego cada 6s
+    const timeout = setTimeout(() => {
+      setBgIndex(1);
+    }, 2000);
     const interval = setInterval(() => {
       setBgIndex((prev) => (prev + 1) % colors.length);
-    }, 8000);
-    return () => clearInterval(interval);
+    }, 6000);
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
   }, []);
 
   return {
