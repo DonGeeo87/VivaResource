@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Link from "next/link";
-import { ArrowLeft, Send, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Send, CheckCircle2, Sparkles } from "lucide-react";
 
 const INTERESTS = {
   en: [
@@ -46,6 +46,7 @@ const BARRIERS = {
   es: [
     { value: "time", label: "No tengo tiempo / Conflictos de horario" },
     { value: "location", label: "La ubicación queda muy lejos" },
+    { value: "health", label: "Problemas de salud / Discapacidad" },
     { value: "transport", label: "No tengo transporte" },
     { value: "language", label: "Barrera del idioma / No está en mi idioma" },
     { value: "childcare", label: "No hay cuidado de niños disponible" },
@@ -106,6 +107,17 @@ const CHILDCARE = {
   ],
 };
 
+// ---------- COLOR THEMES FOR EACH SECTION ----------
+const SECTION_THEMES = [
+  { bg: "from-indigo-500/10 via-purple-500/5 to-transparent", accent: "indigo", border: "border-indigo-200", card: "bg-white/90 backdrop-blur-sm ring-1 ring-indigo-100", bullet: "text-indigo-500", chip: "border-indigo-200 hover:border-indigo-400 data-[checked]:bg-indigo-50 data-[checked]:border-indigo-500", label: "text-indigo-700" },
+  { bg: "from-amber-500/10 via-orange-500/5 to-transparent", accent: "amber", border: "border-amber-200", card: "bg-white/90 backdrop-blur-sm ring-1 ring-amber-100", bullet: "text-amber-500", chip: "border-amber-200 hover:border-amber-400 data-[checked]:bg-amber-50 data-[checked]:border-amber-500", label: "text-amber-700" },
+  { bg: "from-violet-500/10 via-fuchsia-500/5 to-transparent", accent: "violet", border: "border-violet-200", card: "bg-white/90 backdrop-blur-sm ring-1 ring-violet-100", bullet: "text-violet-500", chip: "border-violet-200 hover:border-violet-400 data-[checked]:bg-violet-50 data-[checked]:border-violet-500", label: "text-violet-700" },
+  { bg: "from-emerald-500/10 via-teal-500/5 to-transparent", accent: "emerald", border: "border-emerald-200", card: "bg-white/90 backdrop-blur-sm ring-1 ring-emerald-100", bullet: "text-emerald-500", chip: "border-emerald-200 hover:border-emerald-400 data-[checked]:bg-emerald-50 data-[checked]:border-emerald-500", label: "text-emerald-700" },
+  { bg: "from-rose-500/10 via-pink-500/5 to-transparent", accent: "rose", border: "border-rose-200", card: "bg-white/90 backdrop-blur-sm ring-1 ring-rose-100", bullet: "text-rose-500", chip: "border-rose-200 hover:border-rose-400 data-[checked]:bg-rose-50 data-[checked]:border-rose-500", label: "text-rose-700" },
+  { bg: "from-sky-500/10 via-blue-500/5 to-transparent", accent: "sky", border: "border-sky-200", card: "bg-white/90 backdrop-blur-sm ring-1 ring-sky-100", bullet: "text-sky-500", chip: "border-sky-200 hover:border-sky-400 data-[checked]:bg-sky-50 data-[checked]:border-sky-500", label: "text-sky-700" },
+  { bg: "from-slate-400/10 via-gray-400/5 to-transparent", accent: "slate", border: "border-slate-200", card: "bg-white/90 backdrop-blur-sm ring-1 ring-slate-100", bullet: "text-slate-500", chip: "border-slate-200 hover:border-slate-400 data-[checked]:bg-slate-50 data-[checked]:border-slate-500", label: "text-slate-700" },
+];
+
 interface FormData {
   interests: string[];
   interests_other: string;
@@ -120,10 +132,43 @@ interface FormData {
   comments: string;
 }
 
+// ---------- SCROLL WATCH BACKGROUND ----------
+function useScrollGradient() {
+  const [gradient, setGradient] = useState("from-indigo-50 via-purple-50 to-blue-50");
+
+  useEffect(() => {
+    const sections = document.querySelectorAll("[data-section]");
+    if (!sections.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const theme = entry.target.getAttribute("data-theme");
+            if (theme) {
+              setGradient(
+                `from-${theme}-50 via-${theme}-50/70 to-${theme}-100`
+              );
+            }
+            break;
+          }
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    sections.forEach((s) => observer.observe(s));
+    return () => observer.disconnect();
+  }, []);
+
+  return gradient;
+}
+
 export default function SurveyPage() {
   const { language } = useLanguage();
-  const t = (en: string, es: string) => language === "es" ? es : en;
+  const t = (en: string, es: string) => (language === "es" ? es : en);
   const isES = language === "es";
+  const scrollGradient = useScrollGradient();
 
   const [form, setForm] = useState<FormData>({
     interests: [],
@@ -159,24 +204,29 @@ export default function SurveyPage() {
       if (!res.ok) throw new Error("Error al enviar");
       setSubmitted(true);
     } catch {
-      setError(t(
-        "There was an error. Please try again.",
-        "Hubo un error. Por favor intenta de nuevo."
-      ));
+      setError(
+        t(
+          "There was an error. Please try again.",
+          "Hubo un error. Por favor intenta de nuevo."
+        )
+      );
     } finally {
       setSending(false);
     }
   };
 
+  // ---------- SUBMITTED STATE ----------
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4">
-        <div className="max-w-lg w-full bg-white rounded-3xl shadow-xl p-8 md:p-12 text-center">
-          <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-6" />
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
+        <div className="max-w-lg w-full bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 md:p-12 text-center border border-green-100">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 className="w-12 h-12 text-green-500" />
+          </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
             {t("Thank You!", "¡Gracias!")}
           </h1>
-          <p className="text-lg text-gray-600 mb-6">
+          <p className="text-lg text-gray-600 mb-6 leading-relaxed">
             {t(
               "Your responses help us create better events and services for our community.",
               "Tus respuestas nos ayudan a crear mejores eventos y servicios para nuestra comunidad."
@@ -184,7 +234,7 @@ export default function SurveyPage() {
           </p>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-xl font-medium hover:shadow-lg hover:shadow-green-200 transition-all"
           >
             <ArrowLeft className="w-4 h-4" />
             {t("Back to Home", "Volver al Inicio")}
@@ -194,303 +244,408 @@ export default function SurveyPage() {
     );
   }
 
+  // ---------- SECTION RENDERER ----------
+  function Section({
+    themeIndex,
+    question,
+    subtitle,
+    questionNum,
+    children,
+  }: {
+    themeIndex: number;
+    question: string;
+    subtitle?: string;
+    questionNum: number;
+    children: React.ReactNode;
+  }) {
+    const theme = SECTION_THEMES[themeIndex];
+    return (
+      <section
+        data-section
+        data-theme={theme.accent}
+        className={`relative rounded-3xl ${theme.card} p-6 md:p-8 shadow-sm transition-all duration-500 hover:shadow-md`}
+      >
+        {/* Question number badge */}
+        <div className="flex items-center gap-3 mb-1">
+          <span
+            className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold text-white bg-${theme.accent}-500`}
+          >
+            {questionNum}
+          </span>
+          <h2 className={`text-xl font-bold ${theme.label}`}>{question}</h2>
+        </div>
+        {subtitle && (
+          <p className="text-sm text-gray-500 ml-10 mb-4">{subtitle}</p>
+        )}
+        <div className="mt-4">{children}</div>
+      </section>
+    );
+  }
+
+  // ---------- CHIP CHECKBOX ----------
+  function ChipCheckbox({
+    checked,
+    onChange,
+    label,
+    themeIndex,
+    type = "checkbox",
+    name,
+  }: {
+    checked: boolean;
+    onChange: () => void;
+    label: string;
+    themeIndex: number;
+    type?: "checkbox" | "radio";
+    name?: string;
+  }) {
+    const theme = SECTION_THEMES[themeIndex];
+    return (
+      <label
+        data-checked={checked || undefined}
+        className={`flex items-center gap-3 px-4 py-3 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${theme.chip} ${
+          checked
+            ? `shadow-sm scale-[1.02]`
+            : "bg-white/60"
+        }`}
+      >
+        <input
+          type={type}
+          name={name}
+          checked={checked}
+          onChange={onChange}
+          className={`sr-only`}
+        />
+        <div
+          className={`w-5 h-5 rounded-${type === "radio" ? "full" : "md"} border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+            checked
+              ? `bg-${theme.accent}-500 border-${theme.accent}-500`
+              : "border-gray-300 bg-white"
+          }`}
+        >
+          {checked && (
+            <svg
+              className="w-3 h-3 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={3}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          )}
+        </div>
+        <span className="text-sm md:text-base font-medium text-gray-800">
+          {label}
+        </span>
+      </label>
+    );
+  }
+
+  // ---------- MAIN RENDER ----------
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div
+      className={`min-h-screen bg-gradient-to-br ${scrollGradient} transition-all duration-700 ease-in-out`}
+    >
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
+      <header className="sticky top-0 z-20 bg-white/70 backdrop-blur-xl border-b border-gray-200/50">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-3">
-          <Link href="/" className="text-gray-500 hover:text-gray-700">
-            <ArrowLeft className="w-5 h-5" />
+          <Link
+            href="/"
+            className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
           </Link>
-          <div>
-            <h1 className="text-lg font-bold text-gray-900">
+          <div className="flex-1">
+            <h1 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-primary" />
               {t("Community Voice Survey", "Encuesta Voz Comunitaria")}
             </h1>
-            <p className="text-sm text-gray-500">
-              {t("Help us serve you better", "Ayúdanos a servirte mejor")}
+            <p className="text-xs text-gray-500">
+              {t("~2 min • Help us serve you better", "~2 min • Ayúdanos a servirte mejor")}
             </p>
+          </div>
+          {/* Progress dots */}
+          <div className="hidden sm:flex gap-1.5">
+            {[1, 2, 3, 4, 5, 6, 7].map((n) => {
+              const filled =
+                (n === 1 && form.interests.length > 0) ||
+                (n === 2 && form.barriers.length > 0) ||
+                (n === 3 && form.channels.length > 0) ||
+                (n === 4 && form.preferred_time !== "") ||
+                (n === 5 && form.needs_childcare !== "") ||
+                (n === 6 && form.wants_contact) ||
+                (n === 7 && form.comments.length > 0);
+              return (
+                <div
+                  key={n}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    filled
+                      ? "bg-primary scale-100"
+                      : "bg-gray-200 scale-75"
+                  }`}
+                />
+              );
+            })}
           </div>
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-8">
-        <form onSubmit={handleSubmit} className="space-y-8">
+      <main className="max-w-3xl mx-auto px-4 py-6 pb-24">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* 1. Interests */}
-          <section className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">
-              {t("What topics interest you most?", "¿Qué temas te interesan más?")}
-            </h2>
-            <p className="text-sm text-gray-500 mb-4">
-              {t("Choose all that apply", "Elige todos los que apliquen")}
-            </p>
+          <Section
+            themeIndex={0}
+            questionNum={1}
+            question={t(
+              "What topics interest you most?",
+              "¿Qué temas te interesan más?"
+            )}
+            subtitle={t("Choose all that apply", "Elige todos los que apliquen")}
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {(isES ? INTERESTS.es : INTERESTS.en).map((opt) => (
-                <label
+                <ChipCheckbox
                   key={opt.value}
-                  className={`flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
-                    form.interests.includes(opt.value)
-                      ? "border-primary bg-primary/5"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={form.interests.includes(opt.value)}
-                    onChange={() =>
-                      setForm({ ...form, interests: toggleArray(form.interests, opt.value) })
-                    }
-                    className="mt-1 rounded text-primary focus:ring-primary"
-                  />
-                  <span className="text-sm md:text-base">{opt.label}</span>
-                </label>
+                  themeIndex={0}
+                  checked={form.interests.includes(opt.value)}
+                  onChange={() =>
+                    setForm({
+                      ...form,
+                      interests: toggleArray(form.interests, opt.value),
+                    })
+                  }
+                  label={opt.label}
+                />
               ))}
             </div>
-            <div className="mt-4">
-              <label className="flex items-start gap-3 p-3 rounded-xl border-2 border-gray-200 hover:border-gray-300 cursor-pointer">
+            <div className="mt-3">
+              <ChipCheckbox
+                themeIndex={0}
+                checked={form.interests.includes("other")}
+                onChange={() =>
+                  setForm({
+                    ...form,
+                    interests: toggleArray(form.interests, "other"),
+                  })
+                }
+                label={t("Other:", "Otro:")}
+              />
+              {form.interests.includes("other") && (
                 <input
-                  type="checkbox"
-                  checked={form.interests.includes("other")}
-                  onChange={() =>
-                    setForm({ ...form, interests: toggleArray(form.interests, "other") })
+                  type="text"
+                  value={form.interests_other}
+                  onChange={(e) =>
+                    setForm({ ...form, interests_other: e.target.value })
                   }
-                  className="mt-1 rounded text-primary focus:ring-primary"
+                  placeholder={t("Tell us more...", "Cuéntanos más...")}
+                  className="mt-2 w-full bg-white/80 border border-indigo-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none"
                 />
-                <div className="flex-1">
-                  <span className="text-sm md:text-base font-medium">
-                    {t("Other:", "Otro:")}
-                  </span>
-                  <input
-                    type="text"
-                    value={form.interests_other}
-                    onChange={(e) => setForm({ ...form, interests_other: e.target.value })}
-                    placeholder={t("Tell us more...", "Cuéntanos más...")}
-                    className="mt-1 w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
-                  />
-                </div>
-              </label>
+              )}
             </div>
-          </section>
+          </Section>
 
           {/* 2. Barriers */}
-          <section className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">
-              {t("What prevents you from attending our events?", "¿Qué te impide asistir a nuestros eventos?")}
-            </h2>
-            <p className="text-sm text-gray-500 mb-4">
-              {t("Choose all that apply", "Elige todos los que apliquen")}
-            </p>
+          <Section
+            themeIndex={1}
+            questionNum={2}
+            question={t(
+              "What prevents you from attending our events?",
+              "¿Qué te impide asistir a nuestros eventos?"
+            )}
+            subtitle={t("Choose all that apply", "Elige todos los que apliquen")}
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {(isES ? BARRIERS.es : BARRIERS.en).map((opt) => (
-                <label
+                <ChipCheckbox
                   key={opt.value}
-                  className={`flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
-                    form.barriers.includes(opt.value)
-                      ? "border-amber-500 bg-amber-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={form.barriers.includes(opt.value)}
-                    onChange={() =>
-                      setForm({ ...form, barriers: toggleArray(form.barriers, opt.value) })
-                    }
-                    className="mt-1 rounded text-amber-500 focus:ring-amber-500"
-                  />
-                  <span className="text-sm md:text-base">{opt.label}</span>
-                </label>
+                  themeIndex={1}
+                  checked={form.barriers.includes(opt.value)}
+                  onChange={() =>
+                    setForm({
+                      ...form,
+                      barriers: toggleArray(form.barriers, opt.value),
+                    })
+                  }
+                  label={opt.label}
+                />
               ))}
             </div>
-            <div className="mt-4">
-              <label className="flex items-start gap-3 p-3 rounded-xl border-2 border-gray-200 hover:border-gray-300 cursor-pointer">
+            <div className="mt-3">
+              <ChipCheckbox
+                themeIndex={1}
+                checked={form.barriers.includes("other")}
+                onChange={() =>
+                  setForm({
+                    ...form,
+                    barriers: toggleArray(form.barriers, "other"),
+                  })
+                }
+                label={t("Other:", "Otro:")}
+              />
+              {form.barriers.includes("other") && (
                 <input
-                  type="checkbox"
-                  checked={form.barriers.includes("other")}
-                  onChange={() =>
-                    setForm({ ...form, barriers: toggleArray(form.barriers, "other") })
+                  type="text"
+                  value={form.barriers_other}
+                  onChange={(e) =>
+                    setForm({ ...form, barriers_other: e.target.value })
                   }
-                  className="mt-1 rounded text-amber-500 focus:ring-amber-500"
+                  placeholder={t("Tell us more...", "Cuéntanos más...")}
+                  className="mt-2 w-full bg-white/80 border border-amber-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-amber-400 focus:outline-none"
                 />
-                <div className="flex-1">
-                  <span className="text-sm md:text-base font-medium">
-                    {t("Other:", "Otro:")}
-                  </span>
-                  <input
-                    type="text"
-                    value={form.barriers_other}
-                    onChange={(e) => setForm({ ...form, barriers_other: e.target.value })}
-                    placeholder={t("Tell us more...", "Cuéntanos más...")}
-                    className="mt-1 w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
-                  />
-                </div>
-              </label>
+              )}
             </div>
-          </section>
+          </Section>
 
           {/* 3. Channels */}
-          <section className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">
-              {t("How do you prefer to receive information?", "¿Cómo prefieres recibir información?")}
-            </h2>
-            <p className="text-sm text-gray-500 mb-4">
-              {t("Choose all that apply", "Elige todos los que apliquen")}
-            </p>
+          <Section
+            themeIndex={2}
+            questionNum={3}
+            question={t(
+              "How do you prefer to receive information?",
+              "¿Cómo prefieres recibir información?"
+            )}
+            subtitle={t("Choose all that apply", "Elige todos los que apliquen")}
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {(isES ? CHANNELS.es : CHANNELS.en).map((opt) => (
-                <label
+                <ChipCheckbox
                   key={opt.value}
-                  className={`flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
-                    form.channels.includes(opt.value)
-                      ? "border-violet-500 bg-violet-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={form.channels.includes(opt.value)}
-                    onChange={() =>
-                      setForm({ ...form, channels: toggleArray(form.channels, opt.value) })
-                    }
-                    className="mt-1 rounded text-violet-500 focus:ring-violet-500"
-                  />
-                  <span className="text-sm md:text-base">{opt.label}</span>
-                </label>
+                  themeIndex={2}
+                  checked={form.channels.includes(opt.value)}
+                  onChange={() =>
+                    setForm({
+                      ...form,
+                      channels: toggleArray(form.channels, opt.value),
+                    })
+                  }
+                  label={opt.label}
+                />
               ))}
             </div>
-          </section>
+          </Section>
 
           {/* 4. Preferred Time */}
-          <section className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">
-              {t("What time works best for you?", "¿Qué horario te funciona mejor?")}
-            </h2>
-            <p className="text-sm text-gray-500 mb-4">
-              {t("Choose one", "Elige uno")}
-            </p>
+          <Section
+            themeIndex={3}
+            questionNum={4}
+            question={t(
+              "What time works best for you?",
+              "¿Qué horario te funciona mejor?"
+            )}
+            subtitle={t("Choose one", "Elige uno")}
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {(isES ? TIMES.es : TIMES.en).map((opt) => (
-                <label
+                <ChipCheckbox
                   key={opt.value}
-                  className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
-                    form.preferred_time === opt.value
-                      ? "border-primary bg-primary/5"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="preferred_time"
-                    checked={form.preferred_time === opt.value}
-                    onChange={() => setForm({ ...form, preferred_time: opt.value })}
-                    className="text-primary focus:ring-primary"
-                  />
-                  <span className="text-sm md:text-base">{opt.label}</span>
-                </label>
+                  themeIndex={3}
+                  type="radio"
+                  name="preferred_time"
+                  checked={form.preferred_time === opt.value}
+                  onChange={() =>
+                    setForm({ ...form, preferred_time: opt.value })
+                  }
+                  label={opt.label}
+                />
               ))}
             </div>
-          </section>
+          </Section>
 
           {/* 5. Childcare */}
-          <section className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">
-              {t("Do you need childcare to attend?", "¿Necesitas cuidado de niños para asistir?")}
-            </h2>
-            <div className="grid grid-cols-1 gap-3 mt-4">
+          <Section
+            themeIndex={4}
+            questionNum={5}
+            question={t(
+              "Do you need childcare to attend?",
+              "¿Necesitas cuidado de niños para asistir?"
+            )}
+          >
+            <div className="grid grid-cols-1 gap-3">
               {(isES ? CHILDCARE.es : CHILDCARE.en).map((opt) => (
-                <label
+                <ChipCheckbox
                   key={opt.value}
-                  className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
-                    form.needs_childcare === opt.value
-                      ? "border-primary bg-primary/5"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="childcare"
-                    checked={form.needs_childcare === opt.value}
-                    onChange={() => setForm({ ...form, needs_childcare: opt.value })}
-                    className="text-primary focus:ring-primary"
-                  />
-                  <span className="text-sm md:text-base">{opt.label}</span>
-                </label>
+                  themeIndex={4}
+                  type="radio"
+                  name="childcare"
+                  checked={form.needs_childcare === opt.value}
+                  onChange={() =>
+                    setForm({ ...form, needs_childcare: opt.value })
+                  }
+                  label={opt.label}
+                />
               ))}
             </div>
-          </section>
+          </Section>
 
           {/* 6. Contact */}
-          <section className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">
-              {t("Would you like to be contacted?", "¿Te gustaría que te contactemos?")}
-            </h2>
-            <p className="text-sm text-gray-500 mb-4">
-              {t("We'll reach out with personalized event recommendations.", "Te contactaremos con recomendaciones de eventos personalizados.")}
-            </p>
-            <label className="flex items-center gap-3 p-3 rounded-xl border-2 border-gray-200 hover:border-gray-300 cursor-pointer mb-4">
-              <input
-                type="checkbox"
-                checked={form.wants_contact}
-                onChange={(e) => setForm({ ...form, wants_contact: e.target.checked })}
-                className="rounded text-primary focus:ring-primary"
-              />
-              <span className="text-sm md:text-base font-medium">
-                {t("Yes, contact me!", "¡Sí, contáctame!")}
-              </span>
-            </label>
-
+          <Section
+            themeIndex={5}
+            questionNum={6}
+            question={t(
+              "Would you like to be contacted?",
+              "¿Te gustaría que te contactemos?"
+            )}
+            subtitle={t(
+              "We'll reach out with personalized event recommendations.",
+              "Te contactaremos con recomendaciones de eventos personalizados."
+            )}
+          >
+            <ChipCheckbox
+              themeIndex={5}
+              checked={form.wants_contact}
+              onChange={() =>
+                setForm({ ...form, wants_contact: !form.wants_contact })
+              }
+              label={t("Yes, contact me!", "¡Sí, contáctame!")}
+            />
             {form.wants_contact && (
-              <div className="space-y-4 pl-2 border-l-4 border-primary/30">
+              <div className="mt-4 space-y-4 pl-4 border-l-4 border-sky-300">
                 <div className="flex gap-3">
-                  <label className={`flex items-center gap-2 p-3 rounded-xl border-2 cursor-pointer flex-1 ${
-                    form.contact_method === "email" ? "border-primary bg-primary/5" : "border-gray-200"
-                  }`}>
-                    <input
-                      type="radio"
-                      name="contact_method"
-                      value="email"
-                      checked={form.contact_method === "email"}
-                      onChange={() => setForm({ ...form, contact_method: "email" })}
-                      className="text-primary focus:ring-primary"
-                    />
-                    <span className="font-medium">{t("Email", "Correo")}</span>
-                  </label>
-                  <label className={`flex items-center gap-2 p-3 rounded-xl border-2 cursor-pointer flex-1 ${
-                    form.contact_method === "phone" ? "border-primary bg-primary/5" : "border-gray-200"
-                  }`}>
-                    <input
-                      type="radio"
-                      name="contact_method"
-                      value="phone"
-                      checked={form.contact_method === "phone"}
-                      onChange={() => setForm({ ...form, contact_method: "phone" })}
-                      className="text-primary focus:ring-primary"
-                    />
-                    <span className="font-medium">{t("Phone", "Teléfono")}</span>
-                  </label>
+                  <ChipCheckbox
+                    themeIndex={5}
+                    type="radio"
+                    name="contact_method"
+                    checked={form.contact_method === "email"}
+                    onChange={() => setForm({ ...form, contact_method: "email" })}
+                    label={t("Email", "Correo")}
+                  />
+                  <ChipCheckbox
+                    themeIndex={5}
+                    type="radio"
+                    name="contact_method"
+                    checked={form.contact_method === "phone"}
+                    onChange={() => setForm({ ...form, contact_method: "phone" })}
+                    label={t("Phone", "Teléfono")}
+                  />
                 </div>
                 <input
                   type={form.contact_method === "email" ? "email" : "tel"}
                   value={form.contact_value}
-                  onChange={(e) => setForm({ ...form, contact_value: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, contact_value: e.target.value })
+                  }
                   placeholder={
                     form.contact_method === "email"
                       ? t("your@email.com", "tu@correo.com")
                       : t("(555) 123-4567", "(555) 123-4567")
                   }
-                  className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                  className="w-full bg-white/80 border border-sky-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-sky-400 focus:outline-none"
                 />
               </div>
             )}
-          </section>
+          </Section>
 
           {/* 7. Comments */}
-          <section className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">
-              {t("Any other comments?", "¿Otros comentarios?")}
-            </h2>
-            <p className="text-sm text-gray-500 mb-4">
-              {t("Optional", "Opcional")}
-            </p>
+          <Section
+            themeIndex={6}
+            questionNum={7}
+            question={t("Any other comments?", "¿Otros comentarios?")}
+            subtitle={t("Optional", "Opcional")}
+          >
             <textarea
               value={form.comments}
               onChange={(e) => setForm({ ...form, comments: e.target.value })}
@@ -499,33 +654,32 @@ export default function SurveyPage() {
                 "Share your thoughts, ideas, or concerns...",
                 "Comparte tus pensamientos, ideas o inquietudes..."
               )}
-              className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:outline-none resize-none"
+              className="w-full bg-white/80 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-slate-400 focus:outline-none resize-none"
             />
-          </section>
+          </Section>
 
+          {/* Error */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-sm">
+            <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm text-center">
               {error}
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={sending}
-            className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-4 px-6 rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-lg shadow-lg hover:shadow-xl"
-          >
-            {sending ? (
-              <span className="flex items-center gap-2">
-                <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                {t("Sending...", "Enviando...")}
-              </span>
-            ) : (
-              <>
+          {/* Submit Button */}
+          <div className="flex justify-center pt-2">
+            <button
+              type="submit"
+              disabled={sending}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-indigo-600 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {sending ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
                 <Send className="w-5 h-5" />
-                {t("Submit Survey", "Enviar Encuesta")}
-              </>
-            )}
-          </button>
+              )}
+              {t("Submit Survey", "Enviar Encuesta")}
+            </button>
+          </div>
         </form>
       </main>
     </div>
