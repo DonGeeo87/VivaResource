@@ -76,9 +76,8 @@ export default function Home(): JSX.Element {
   const { translations } = useLanguage();
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
-  const [heroAnimationsComplete, setHeroAnimationsComplete] = useState(false);
-  const [showSurveyPopup, setShowSurveyPopup] = useState(false);
-  const prefersReducedMotion = useReducedMotion();
+    const [heroAnimationsComplete, setHeroAnimationsComplete] = useState(false);
+    const prefersReducedMotion = useReducedMotion();
 
   // Intersection Observer hooks for each section
   const heroRef = useRef<HTMLDivElement | null>(null);

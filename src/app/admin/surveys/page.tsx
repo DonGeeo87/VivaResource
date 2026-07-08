@@ -12,7 +12,7 @@ import {
   limit,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
-import { ArrowLeft, BarChart3, Users, PieChart, MessageSquare } from "lucide-react";
+import { BarChart3, Users, PieChart, MessageSquare } from "lucide-react";
 
 interface SurveyResponse {
   id: string;
@@ -89,7 +89,7 @@ function countBy(arr: string[]): Record<string, number> {
   return counts;
 }
 
-function BarChart({ data, label, lang }: { data: Record<string, number>; label: (k: string) => string; lang: string }) {
+function BarChart({ data, label }: { data: Record<string, number>; label: (k: string) => string }) {
   const entries = Object.entries(data).sort((a, b) => b[1] - a[1]);
   const maxVal = Math.max(...entries.map(([, v]) => v), 1);
 
@@ -263,7 +263,7 @@ export default function AdminSurveysPage() {
             <PieChart className="w-4 h-4 text-primary" />
             {isES ? "Intereses Principales" : "Top Interests"}
           </h3>
-          <BarChart data={stats.interestCounts} label={label} lang={language} />
+          <BarChart data={stats.interestCounts} label={label} />
         </div>
 
         {/* Barriers */}
@@ -272,7 +272,7 @@ export default function AdminSurveysPage() {
             <PieChart className="w-4 h-4 text-amber-500" />
             {isES ? "Barreras Principales" : "Top Barriers"}
           </h3>
-          <BarChart data={stats.barrierCounts} label={label} lang={language} />
+          <BarChart data={stats.barrierCounts} label={label} />
         </div>
 
         {/* Channels */}
@@ -281,7 +281,7 @@ export default function AdminSurveysPage() {
             <PieChart className="w-4 h-4 text-violet-500" />
             {isES ? "Canales Preferidos" : "Preferred Channels"}
           </h3>
-          <BarChart data={stats.channelCounts} label={label} lang={language} />
+          <BarChart data={stats.channelCounts} label={label} />
         </div>
 
         {/* Preferred Time */}
@@ -289,7 +289,7 @@ export default function AdminSurveysPage() {
           <h3 className="font-bold text-gray-900 mb-4">
             {isES ? "Horarios Preferidos" : "Preferred Times"}
           </h3>
-          <BarChart data={stats.timeCounts} label={label} lang={language} />
+          <BarChart data={stats.timeCounts} label={label} />
         </div>
 
         {/* Childcare */}
@@ -297,7 +297,7 @@ export default function AdminSurveysPage() {
           <h3 className="font-bold text-gray-900 mb-4">
             {isES ? "Necesidad de Cuidado Infantil" : "Childcare Needs"}
           </h3>
-          <BarChart data={stats.childcareCounts} label={label} lang={language} />
+          <BarChart data={stats.childcareCounts} label={label} />
         </div>
       </div>
 
