@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Link from "next/link";
 import { ArrowLeft, Send, CheckCircle2, Sparkles } from "lucide-react";
