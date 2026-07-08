@@ -80,53 +80,8 @@ const nextConfig = {
     // Remover console en producción
     removeConsole: isDev ? false : true,
   },
-  // Optimizar bundles
-  webpack: (config, { dev, isServer }) => {
-    // Solo en producción y del lado del cliente
-    if (!dev && !isServer) {
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        cacheGroups: {
-          default: false,
-          vendors: false,
-          // Separar Firebase en su propio chunk
-          firebase: {
-            name: 'firebase',
-            test: /[\\/]node_modules[\\/](firebase|@firebase)[\\/]/,
-            priority: 20,
-          },
-          // Separar Recaptcha
-          recaptcha: {
-            name: 'recaptcha',
-            test: /[\\/]node_modules[\\/]react-google-recaptcha/,
-            priority: 15,
-          },
-          // Separar PayPal
-          paypal: {
-            name: 'paypal',
-            test: /[\\/]node_modules[\\/]@paypal/,
-            priority: 15,
-          },
-          // Librerías UI comunes
-          common: {
-            name: 'common',
-            minChunks: 2,
-            priority: 10,
-            reuseExistingChunk: true,
-          },
-          // Vendor principal
-          vendor: {
-            name: 'vendor',
-            test: /[\\/]node_modules[\\/]/,
-            priority: 5,
-          },
-        },
-        maxInitialRequests: 25,
-        minSize: 20000,
-      };
-    }
-    return config;
-  },
+  // Webpack minimal config - removing custom splitChunks to fix CSS MIME type bug
+    // (Next.js 14 bug: custom splitChunks + maxInitialRequests causes CSS to be loaded as scripts)
 };
 
 export default nextConfig;
