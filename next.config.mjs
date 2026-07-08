@@ -40,49 +40,30 @@ const nextConfig = {
   },
   images: {
     remotePatterns,
-    // Formatos permitidos
     formats: ['image/webp', 'image/avif'],
-    // Dispositivos comunes para optimización
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
-  // Headers de seguridad para HSTS preload y mejor SEO
   async headers() {
     return [
       {
         source: '/(.*)',
         headers: [
-          // HSTS con preload para mejorar seguridad
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains; preload',
-          },
-          // Prevenir clickjacking
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          // Prevenir MIME sniffing
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          // Política dereferrer estricta
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains; preload' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
         ],
       },
     ];
   },
-  // Optimización de compilación para navegadores modernos
   compiler: {
-    // Remover console en producción
     removeConsole: isDev ? false : true,
   },
-  // Webpack minimal config - removing custom splitChunks to fix CSS MIME type bug
-    // (Next.js 14 bug: custom splitChunks + maxInitialRequests causes CSS to be loaded as scripts)
+  // Keep firebase-admin as a real require() — don't bundle it
+  experimental: {
+    serverComponentsExternalPackages: ['firebase-admin'],
+  },
 };
 
 export default nextConfig;

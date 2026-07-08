@@ -1,22 +1,20 @@
 // Firebase Admin SDK - Reads credentials from environment variable (FIREBASE_ADMIN_KEY)
-// Using require() to avoid Next.js standalone transforming it into a dynamic import
-/* eslint-disable @typescript-eslint/no-require-imports */
-const { initializeApp, getApps, getApp, cert } = require("firebase-admin/app");
-const { getAuth } = require("firebase-admin/auth");
-const { getFirestore } = require("firebase-admin/firestore");
-/* eslint-enable @typescript-eslint/no-require-imports */
+// Uses dynamic import() because Next.js standalone externalizes firebase-admin
+import type { App } from "firebase-admin/app";
+import type { Auth } from "firebase-admin/auth";
+import type { Firestore } from "firebase-admin/firestore";
 
-let adminApp = null;
-let adminAuthInstance = null;
-let adminDbInstance = null;
+let adminApp: App | null = null;
+let adminAuthInstance: Auth | null = null;
+let adminDbInstance: Firestore | null = null;
 
-function initAdmin() {
+async function initAdmin() {
   if (adminApp) return { adminApp, adminAuthInstance, adminDbInstance };
 
   console.log("[Admin SDK] Initializing...");
 
   try {
-    let serviceAccount = null;
+    let serviceAccount: { project_id: string; client_email: string; private_key: string } | null = null;
 
     if (process.env.FIREBASE_ADMIN_KEY) {
       console.log("[Admin SDK] Found FIREBASE_ADMIN_KEY env variable");
@@ -36,6 +34,10 @@ function initAdmin() {
       console.error("[Admin SDK] No credentials found");
       return { adminApp: null, adminAuthInstance: null, adminDbInstance: null };
     }
+
+    const { initializeApp, getApps, getApp, cert } = await import("firebase-admin/app");
+    const { getAuth } = await import("firebase-admin/auth");
+    const { getFirestore } = await import("firebase-admin/firestore");
 
     if (getApps().length > 0) {
       console.log("[Admin SDK] Using existing app");
@@ -63,8 +65,8 @@ function initAdmin() {
   return { adminApp, adminAuthInstance, adminDbInstance };
 }
 
-export async function verifyIdToken(token) {
-  const { adminAuthInstance } = initAdmin();
+export async function verifyIdToken(token: string) {
+  const { adminAuthInstance } = await initAdmin();
   if (!adminAuthInstance) {
     throw new Error("Firebase Admin SDK not configured");
   }
@@ -72,6 +74,6 @@ export async function verifyIdToken(token) {
 }
 
 export async function adminDb() {
-  const { adminDbInstance } = initAdmin();
+  const { adminDbInstance } = await initAdmin();
   return adminDbInstance;
 }
