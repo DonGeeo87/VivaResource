@@ -132,28 +132,45 @@ interface FormData {
   comments: string;
 }
 
-// ---------- ANIMATED BACKGROUND ----------
+// ---------- ANIMATED BACKGROUND (cross-fade) ----------
 function useAnimatedBackground() {
-  const [bgIndex, setBgIndex] = useState(0);
-  // Colores pastel más visibles — saturación media, se nota el cambio
+  const [current, setCurrent] = useState(0);
+  const [next, setNext] = useState<number | null>(null);
+  const [fade, setFade] = useState(0); // 0 = current visible, 1 = next visible
   const colors = [
-    "#c7d2fe", // indigo
-    "#fde68a", // amber  
-    "#ddd6fe", // violet
-    "#a7f3d0", // emerald
-    "#fecdd3", // rose
-    "#bae6fd", // sky
-    "#e2e8f0", // slate
+    "#c7d2fe", "#fde68a", "#ddd6fe",
+    "#a7f3d0", "#fecdd3", "#bae6fd", "#e2e8f0",
   ];
 
+  const gradient = (i: number) =>
+    `linear-gradient(135deg, ${colors[i]} 0%, ${colors[(i + 1) % colors.length]} 50%, ${colors[(i + 2) % colors.length]} 100%)`;
+
   useEffect(() => {
-    // Primer cambio rápido a los 2s, luego cada 6s
+    // Primer cambio a los 2s, luego cada 5s
     const timeout = setTimeout(() => {
-      setBgIndex(1);
+      setNext(1);
+      setFade(1); // fade → next
+      setTimeout(() => {
+        setCurrent(1);
+        setNext(null);
+        setFade(0);
+      }, 2000);
     }, 2000);
+
     const interval = setInterval(() => {
-      setBgIndex((prev) => (prev + 1) % colors.length);
-    }, 6000);
+      setCurrent((prev) => {
+        const nextIdx = (prev + 1) % colors.length;
+        setNext(nextIdx);
+        setFade(1); // start fade
+        setTimeout(() => {
+          setCurrent(nextIdx);
+          setNext(null);
+          setFade(0);
+        }, 2000);
+        return prev; // keep old until timeout updates it
+      });
+    }, 5000);
+
     return () => {
       clearTimeout(timeout);
       clearInterval(interval);
@@ -161,8 +178,9 @@ function useAnimatedBackground() {
   }, []);
 
   return {
-    background: `linear-gradient(135deg, ${colors[bgIndex]} 0%, ${colors[(bgIndex + 1) % colors.length]} 50%, ${colors[(bgIndex + 2) % colors.length]} 100%)`,
-    transition: "background 2s ease-in-out",
+    currentGradient: gradient(current),
+    nextGradient: next !== null ? gradient(next) : gradient(current),
+    fadeOpacity: fade, // 0→1 over 2s
   };
 }
 
@@ -360,11 +378,26 @@ export default function SurveyPage() {
 
   // ---------- MAIN RENDER ----------
   return (
-    <div
-      className="min-h-screen"
-      style={{ background: animatedBg.background, transition: animatedBg.transition }}
-    >
-      {/* Header */}
+    <div className="min-h-screen relative">
+      {/* Current background */}
+      <div
+        className="absolute inset-0 transition-opacity duration-[2000ms] ease-in-out"
+        style={{
+          background: animatedBg.currentGradient,
+          opacity: 1 - animatedBg.fadeOpacity,
+        }}
+      />
+      {/* Next background (cross-fade) */}
+      <div
+        className="absolute inset-0 transition-opacity duration-[2000ms] ease-in-out"
+        style={{
+          background: animatedBg.nextGradient,
+          opacity: animatedBg.fadeOpacity,
+        }}
+      />
+      {/* Content */}
+      <div className="relative z-10">
+        {/* Header */}
       <header className="sticky top-0 z-20 bg-white/70 backdrop-blur-xl border-b border-gray-200/50">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-3">
           <Link
@@ -697,6 +730,7 @@ export default function SurveyPage() {
           </div>
         </form>
       </main>
+      </div>{/* end content wrapper */}
     </div>
   );
 }
