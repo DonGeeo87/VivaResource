@@ -42,7 +42,7 @@ async function getAccessToken(): Promise<string | null> {
   const signature = crypto
     .createSign("RSA-SHA256")
     .update(`${b64(header)}.${b64(claim)}`)
-    .sign(sa.private_key.replace(/\\n/g, "\n"), "base64url");
+    .sign(sa.private_key, "base64url");
 
   const jwt = `${b64(header)}.${b64(claim)}.${signature}`;
 
