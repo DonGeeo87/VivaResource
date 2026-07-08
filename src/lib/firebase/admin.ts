@@ -1,112 +1,53 @@
-// Firebase Admin via REST API - no firebase-admin dependency needed
-// Uses service account to generate access tokens, then calls Firestore REST API
-
-let cachedToken: { token: string; expires: number } | null = null;
-
-interface ServiceAccount {
-  project_id: string;
-  private_key: string;
-  client_email: string;
-}
-
-function getServiceAccount(): ServiceAccount | null {
+// Firebase Admin via REST API - native crypto, no external deps
+let cachedToken = null;
+function getSA() {
   if (!process.env.FIREBASE_ADMIN_KEY) return null;
-  try {
-    const decoded = Buffer.from(process.env.FIREBASE_ADMIN_KEY, "base64").toString("utf8");
-    return JSON.parse(decoded);
-  } catch {
-    return null;
-  }
+  try { return JSON.parse(Buffer.from(process.env.FIREBASE_ADMIN_KEY, "base64").toString()); }
+  catch { return null; }
 }
-
-async function getAccessToken(): Promise<string | null> {
+async function getAccessToken() {
   if (cachedToken && cachedToken.expires > Date.now() + 300000) return cachedToken.token;
-
-  const sa = getServiceAccount();
-  if (!sa) return null;
-
-  const { SignJWT } = await import("jose");
-  const { createPrivateKey } = await import("crypto");
-
+  const sa = getSA(); if (!sa) return null;
+  const crypto = await import("crypto");
   const now = Math.floor(Date.now() / 1000);
-  const privateKey = createPrivateKey(sa.private_key);
-
-  const jwt = await new SignJWT({
-    iss: sa.client_email,
-    scope: "https://www.googleapis.com/auth/datastore",
-    aud: "https://oauth2.googleapis.com/token",
-    exp: now + 3600,
-    iat: now,
-  })
-    .setProtectedHeader({ alg: "RS256", typ: "JWT" })
-    .sign(privateKey);
-
-  const res = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-      assertion: jwt,
-    }),
-  });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    console.error("[Admin] Token request failed:", errText);
-    return null;
-  }
-
-  const data = (await res.json()) as { access_token: string; expires_in: number };
+  const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
+  const header = b64({ alg: "RS256", typ: "JWT" });
+  const claim = b64({ iss: sa.client_email, scope: "https://www.googleapis.com/auth/datastore", aud: "https://oauth2.googleapis.com/token", exp: now + 3600, iat: now });
+  const payload = header + "." + claim;
+  const key = crypto.createPrivateKey(sa.private_key);
+  const sig = crypto.sign("RSA-SHA256", Buffer.from(payload), key).toString("base64url");
+  const jwt = payload + "." + sig;
+  const res = await fetch("https://oauth2.googleapis.com/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer", assertion: jwt }) });
+  if (!res.ok) { return null; }
+  const data = await res.json();
   cachedToken = { token: data.access_token, expires: Date.now() + data.expires_in * 1000 };
   return data.access_token;
 }
-
 export async function adminDb() {
-  const sa = getServiceAccount();
-  if (!sa) return null;
-
-  const projectId = sa.project_id;
-  const token = await getAccessToken();
-  if (!token) return null;
-
-  const baseUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents`;
+  const sa = getSA(); if (!sa) return null;
+  const token = await getAccessToken(); if (!token) return null;
+  const base = `https://firestore.googleapis.com/v1/projects/${sa.project_id}/databases/(default)/documents`;
+const b = "Bearer ";
 
   return {
-    collection: (name: string) => ({
-      add: async (data: Record<string, unknown>) => {
-        const fields: Record<string, unknown> = {};
-        for (const [key, value] of Object.entries(data)) {
-          if (value === null || value === undefined) {
-            fields[key] = { nullValue: null };
-          } else if (typeof value === "boolean") {
-            fields[key] = { booleanValue: value };
-          } else if (Array.isArray(value)) {
-            fields[key] = { arrayValue: { values: value.map((v: unknown) => ({ stringValue: String(v) })) } };
-          } else if (value instanceof Date) {
-            fields[key] = { timestampValue: value.toISOString() };
-          } else {
-            fields[key] = { stringValue: String(value) };
-          }
+    collection: (name) => ({
+      add: async (data) => {
+        const fields = {};
+        for (const [k, v] of Object.entries(data)) {
+          if (v === null || v === undefined) fields[k] = { nullValue: null };
+          else if (typeof v === "boolean") fields[k] = { booleanValue: v };
+          else if (Array.isArray(v)) fields[k] = { arrayValue: { values: v.map(x => ({ stringValue: String(x) })) } };
+          else if (v instanceof Date) fields[k] = { timestampValue: v.toISOString() };
+          else fields[k] = { stringValue: String(v) };
         }
-
-        const res = await fetch(`${baseUrl}/${name}`, {
+        const res = await fetch(base + "/" + name, {
           method: "POST",
-          headers: {
-            Authorization: "Bearer " + token,
-            "Content-Type": "application/json",
-          },
+          headers: { Authorization: b + token, "Content-Type": "application/json" },
           body: JSON.stringify({ fields }),
         });
-
-        if (!res.ok) {
-          const err = await res.text();
-          console.error("[Admin] Firestore write error:", err);
-          throw new Error("Firestore write failed: " + res.status);
-        }
-
-        const json = (await res.json()) as { name: string };
-        const id = json.name.split("/").pop() || "";
-        return { id };
+        if (!res.ok) { const err = await res.text(); console.error("[Admin] Firestore error:", err); throw new Error("Write failed: " + res.status); }
+        const json = await res.json();
+        return { id: json.name.split("/").pop() || "" };
       },
     }),
   };
