@@ -19,6 +19,7 @@ services:
       - '3000'
     environment:
       - NODE_ENV=production
+      - NODE_OPTIONS=--openssl-legacy-provider
       - NEXT_TELEMETRY_DISABLED=1
       - NEXT_PUBLIC_FIREBASE_PROJECT_ID=vivaresource
       - NEXT_PUBLIC_FIREBASE_APP_ID=${NEXT_PUBLIC_FIREBASE_APP_ID}
