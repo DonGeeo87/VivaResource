@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTransporter, getAdminEmails, FROM_NAME, FROM_EMAIL } from "@/lib/email/nodemailer";
+import { adminDb } from "@/lib/firebase/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -145,7 +146,6 @@ async function sendSurveyNotification(body: Record<string, unknown>): Promise<vo
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json();
-    const { adminDb } = await import("@/lib/firebase/admin");
     const db = await adminDb();
 
     if (!db) {

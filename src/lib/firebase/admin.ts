@@ -1,9 +1,11 @@
-// Firebase Admin SDK - Reads credentials from JSON file or environment variable
-import type { App } from "firebase-admin/app";
+// Firebase Admin SDK - Reads credentials from environment variable (FIREBASE_ADMIN_KEY)
+import { initializeApp, getApps, getApp, cert } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
 import type { Auth } from "firebase-admin/auth";
 import type { Firestore } from "firebase-admin/firestore";
 
-let adminApp: App | null = null;
+let adminApp: ReturnType<typeof initializeApp> | null = null;
 let adminAuthInstance: Auth | null = null;
 let adminDbInstance: Firestore | null = null;
 
@@ -20,66 +22,44 @@ interface ServiceAccount {
   client_x509_cert_url?: string;
 }
 
-async function initAdmin() {
+function initAdmin() {
   if (adminApp) return { adminApp, adminAuthInstance, adminDbInstance };
 
-  console.log('[Admin SDK] Initializing...');
+  console.log("[Admin SDK] Initializing...");
 
   try {
     let serviceAccount: ServiceAccount | null = null;
-    
+
     // 1. Try FIREBASE_ADMIN_KEY environment variable (base64 encoded JSON)
     if (process.env.FIREBASE_ADMIN_KEY) {
-      console.log('[Admin SDK] Found FIREBASE_ADMIN_KEY env variable');
+      console.log("[Admin SDK] Found FIREBASE_ADMIN_KEY env variable");
       try {
-        const decoded = Buffer.from(process.env.FIREBASE_ADMIN_KEY, 'base64').toString('utf8');
+        const decoded = Buffer.from(
+          process.env.FIREBASE_ADMIN_KEY,
+          "base64"
+        ).toString("utf8");
         serviceAccount = JSON.parse(decoded);
-        console.log('[Admin SDK] Decoded FIREBASE_ADMIN_KEY successfully');
+        console.log("[Admin SDK] Decoded FIREBASE_ADMIN_KEY successfully");
       } catch (e) {
-        console.error('[Admin SDK] Failed to decode FIREBASE_ADMIN_KEY:', e);
+        console.error("[Admin SDK] Failed to decode FIREBASE_ADMIN_KEY:", e);
       }
     }
-    
-    // 2. Try JSON file fallback
+
     if (!serviceAccount) {
-      const fs = await import('fs');
-      const path = await import('path');
-      
-      const possiblePaths = [
-        path.join(process.cwd(), 'vivaresource-firebase-adminsdk-fbsvc-7f4fe61009.json'),
-        path.join(process.cwd(), 'vivaresource-firebase-adminsdk-fbsvc-2291c133a9.json'),
-        path.join(process.cwd(), 'firebase-admin-key.json'),
-      ];
-      
-      for (const filePath of possiblePaths) {
-        if (fs.existsSync(filePath)) {
-          console.log('[Admin SDK] Found credentials file:', filePath);
-          const fileContent = fs.readFileSync(filePath, 'utf8');
-          serviceAccount = JSON.parse(fileContent);
-          break;
-        }
-      }
-    }
-    
-    if (!serviceAccount) {
-      console.error('[Admin SDK] No credentials found');
+      console.error("[Admin SDK] No credentials found");
       return { adminApp: null, adminAuthInstance: null, adminDbInstance: null };
     }
 
-    const { initializeApp, getApps, getApp, cert } = await import('firebase-admin/app');
-    const { getAuth } = await import('firebase-admin/auth');
-    const { getFirestore } = await import('firebase-admin/firestore');
-
     if (getApps().length > 0) {
-      console.log('[Admin SDK] Using existing app');
+      console.log("[Admin SDK] Using existing app");
       adminApp = getApp();
     } else {
-      console.log('[Admin SDK] Creating new app');
+      console.log("[Admin SDK] Creating new app");
       adminApp = initializeApp({
         credential: cert({
           projectId: serviceAccount.project_id,
           clientEmail: serviceAccount.client_email,
-          privateKey: serviceAccount.private_key.replace(/\n/g, '\n'),
+          privateKey: serviceAccount.private_key.replace(/\\n/g, "\n"),
         }),
         projectId: serviceAccount.project_id,
       });
@@ -87,18 +67,17 @@ async function initAdmin() {
 
     adminAuthInstance = getAuth(adminApp);
     adminDbInstance = getFirestore(adminApp);
-    
-    console.log('[Admin SDK] Initialized successfully');
 
+    console.log("[Admin SDK] Initialized successfully");
   } catch (error) {
-    console.error('[Admin SDK] Initialization error:', error);
+    console.error("[Admin SDK] Initialization error:", error);
   }
 
   return { adminApp, adminAuthInstance, adminDbInstance };
 }
 
 export async function verifyIdToken(token: string) {
-  const { adminAuthInstance } = await initAdmin();
+  const { adminAuthInstance } = initAdmin();
   if (!adminAuthInstance) {
     throw new Error("Firebase Admin SDK not configured");
   }
@@ -106,6 +85,6 @@ export async function verifyIdToken(token: string) {
 }
 
 export async function adminDb() {
-  const { adminDbInstance } = await initAdmin();
+  const { adminDbInstance } = initAdmin();
   return adminDbInstance;
 }
