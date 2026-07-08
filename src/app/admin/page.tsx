@@ -36,7 +36,8 @@ interface Stats {
   volunteers: number;
   donations: number;
   newsletterSubscribers: number;
-}
+    surveyResponses: number;
+  }
 
 interface RecentEventRegistration {
   id: string;
@@ -92,8 +93,9 @@ export default function AdminDashboard(): JSX.Element {
     formSubmissions: 0,
     volunteers: 0,
     donations: 0,
-    newsletterSubscribers: 0
-  });
+    newsletterSubscribers: 0,
+        surveyResponses: 0,
+      });
   const [loading, setLoading] = useState(true);
 
   const [recentRegistrations, setRecentRegistrations] = useState<RecentEventRegistration[]>([]);
@@ -129,7 +131,10 @@ export default function AdminDashboard(): JSX.Element {
 
         const donationsSnap = await getDocs(collection(db, "donations"));
 
-        setStats({
+                const surveyQuery = query(collection(db, "survey_responses"));
+                const surveySnap = await getCountFromServer(surveyQuery);
+
+                setStats({
           blogPosts: blogSnap.data().count,
           events: eventsSnap.data().count,
           eventAttendees: registrationsSnap.data().count,
@@ -137,8 +142,9 @@ export default function AdminDashboard(): JSX.Element {
           formSubmissions: submissionsSnap.data().count,
           volunteers: volunteersSnap.data().count,
           donations: donationsSnap.size,
-          newsletterSubscribers: newsletterSnap.data().count
-        });
+          newsletterSubscribers: newsletterSnap.data().count,
+                    surveyResponses: surveySnap.data().count
+                  });
       } catch (error) {
         console.error("Error fetching stats:", error);
       } finally {
@@ -453,27 +459,34 @@ export default function AdminDashboard(): JSX.Element {
       color: "bg-orange-500"
     },
     {
-      title: language === "es" ? "Donaciones" : "Donations",
-      value: stats.donations,
-      icon: Heart,
-      href: "/admin/donations",
-      color: "bg-rose-500"
-    },
-    {
-      title: language === "es" ? "Suscriptores Newsletter" : "Newsletter Subscribers",
-      value: stats.newsletterSubscribers,
-      icon: Mail,
-      href: "/admin/newsletter",
-      color: "bg-purple-500"
-    },
-    {
-      title: "Blog Posts",
-      value: stats.blogPosts,
-      icon: FileText,
-      href: "/admin/blog",
-      color: "bg-cyan-500"
-    }
-  ];
+          title: language === "es" ? "Donaciones" : "Donations",
+          value: stats.donations,
+          icon: Heart,
+          href: "/admin/donations",
+          color: "bg-rose-500"
+        },
+        {
+          title: "Blog Posts",
+          value: stats.blogPosts,
+          icon: FileText,
+          href: "/admin/blog",
+          color: "bg-cyan-500"
+        },
+        {
+          title: language === "es" ? "Encuestas" : "Surveys",
+          value: stats.surveyResponses,
+          icon: ClipboardList,
+          href: "/admin/surveys",
+          color: "bg-teal-500"
+        },
+        {
+              title: language === "es" ? "Suscriptores Newsletter" : "Newsletter Subscribers",
+              value: stats.newsletterSubscribers,
+              icon: Mail,
+              href: "/admin/newsletter",
+              color: "bg-purple-500"
+            },
+          ];
 
   function formatDate(date: Date): string {
     return date.toLocaleDateString("es-CL", {

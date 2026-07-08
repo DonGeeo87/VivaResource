@@ -23,6 +23,7 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useInView } from "@/hooks/useInView";
 import { useSiteImages } from "@/contexts/SiteImageContext";
+import SurveyPopup from "@/components/SurveyPopup";
 
 function useReducedMotion(): boolean {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -76,6 +77,7 @@ export default function Home(): JSX.Element {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
   const [heroAnimationsComplete, setHeroAnimationsComplete] = useState(false);
+  const [showSurveyPopup, setShowSurveyPopup] = useState(false);
   const prefersReducedMotion = useReducedMotion();
 
   // Intersection Observer hooks for each section
@@ -764,5 +766,6 @@ export default function Home(): JSX.Element {
       </section>
 
     </main>
-  );
+        <SurveyPopup />
+      );
 }
