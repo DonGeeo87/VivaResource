@@ -107,16 +107,27 @@ const CHILDCARE = {
   ],
 };
 
-// ---------- COLOR THEMES FOR EACH SECTION ----------
-const SECTION_THEMES = [
-  { bg: "from-indigo-500/10 via-purple-500/5 to-transparent", accent: "indigo", border: "border-indigo-200", card: "bg-white/90 backdrop-blur-sm ring-1 ring-indigo-100", bullet: "text-indigo-500", chip: "border-indigo-200 hover:border-indigo-400 data-[checked]:bg-indigo-50 data-[checked]:border-indigo-500", label: "text-indigo-700" },
-  { bg: "from-amber-500/10 via-orange-500/5 to-transparent", accent: "amber", border: "border-amber-200", card: "bg-white/90 backdrop-blur-sm ring-1 ring-amber-100", bullet: "text-amber-500", chip: "border-amber-200 hover:border-amber-400 data-[checked]:bg-amber-50 data-[checked]:border-amber-500", label: "text-amber-700" },
-  { bg: "from-violet-500/10 via-fuchsia-500/5 to-transparent", accent: "violet", border: "border-violet-200", card: "bg-white/90 backdrop-blur-sm ring-1 ring-violet-100", bullet: "text-violet-500", chip: "border-violet-200 hover:border-violet-400 data-[checked]:bg-violet-50 data-[checked]:border-violet-500", label: "text-violet-700" },
-  { bg: "from-emerald-500/10 via-teal-500/5 to-transparent", accent: "emerald", border: "border-emerald-200", card: "bg-white/90 backdrop-blur-sm ring-1 ring-emerald-100", bullet: "text-emerald-500", chip: "border-emerald-200 hover:border-emerald-400 data-[checked]:bg-emerald-50 data-[checked]:border-emerald-500", label: "text-emerald-700" },
-  { bg: "from-rose-500/10 via-pink-500/5 to-transparent", accent: "rose", border: "border-rose-200", card: "bg-white/90 backdrop-blur-sm ring-1 ring-rose-100", bullet: "text-rose-500", chip: "border-rose-200 hover:border-rose-400 data-[checked]:bg-rose-50 data-[checked]:border-rose-500", label: "text-rose-700" },
-  { bg: "from-sky-500/10 via-blue-500/5 to-transparent", accent: "sky", border: "border-sky-200", card: "bg-white/90 backdrop-blur-sm ring-1 ring-sky-100", bullet: "text-sky-500", chip: "border-sky-200 hover:border-sky-400 data-[checked]:bg-sky-50 data-[checked]:border-sky-500", label: "text-sky-700" },
-  { bg: "from-slate-400/10 via-gray-400/5 to-transparent", accent: "slate", border: "border-slate-200", card: "bg-white/90 backdrop-blur-sm ring-1 ring-slate-100", bullet: "text-slate-500", chip: "border-slate-200 hover:border-slate-400 data-[checked]:bg-slate-50 data-[checked]:border-slate-500", label: "text-slate-700" },
+// Pre-defined color values for each theme (no dynamic Tailwind classes)
+const THEME_COLORS = [
+  { badge: "#6366f1", heading: "#4338ca", ring: "#c7d2fe", chipBorder: "#c7d2fe", chipBg: "#eef2ff", chipBorderChecked: "#6366f1", label: "rgba(99,102,241,0.15)", gradient: "linear-gradient(180deg, rgba(99,102,241,0.08) 0%, rgba(168,85,247,0.04) 50%, transparent 100%)" },
+  { badge: "#f59e0b", heading: "#b45309", ring: "#fde68a", chipBorder: "#fde68a", chipBg: "#fffbeb", chipBorderChecked: "#f59e0b", label: "rgba(245,158,11,0.15)", gradient: "linear-gradient(180deg, rgba(245,158,11,0.08) 0%, rgba(249,115,22,0.04) 50%, transparent 100%)" },
+  { badge: "#8b5cf6", heading: "#7c3aed", ring: "#ddd6fe", chipBorder: "#ddd6fe", chipBg: "#f5f3ff", chipBorderChecked: "#8b5cf6", label: "rgba(139,92,246,0.15)", gradient: "linear-gradient(180deg, rgba(139,92,246,0.08) 0%, rgba(232,121,249,0.04) 50%, transparent 100%)" },
+  { badge: "#10b981", heading: "#047857", ring: "#a7f3d0", chipBorder: "#a7f3d0", chipBg: "#ecfdf5", chipBorderChecked: "#10b981", label: "rgba(16,185,129,0.15)", gradient: "linear-gradient(180deg, rgba(16,185,129,0.08) 0%, rgba(20,184,166,0.04) 50%, transparent 100%)" },
+  { badge: "#f43f5e", heading: "#be123c", ring: "#fecdd3", chipBorder: "#fecdd3", chipBg: "#fff1f2", chipBorderChecked: "#f43f5e", label: "rgba(244,63,94,0.15)", gradient: "linear-gradient(180deg, rgba(244,63,94,0.08) 0%, rgba(236,72,153,0.04) 50%, transparent 100%)" },
+  { badge: "#0ea5e9", heading: "#0369a1", ring: "#bae6fd", chipBorder: "#bae6fd", chipBg: "#f0f9ff", chipBorderChecked: "#0ea5e9", label: "rgba(14,165,233,0.15)", gradient: "linear-gradient(180deg, rgba(14,165,233,0.08) 0%, rgba(59,130,246,0.04) 50%, transparent 100%)" },
+  { badge: "#64748b", heading: "#475569", ring: "#e2e8f0", chipBorder: "#e2e8f0", chipBg: "#f8fafc", chipBorderChecked: "#64748b", label: "rgba(100,116,139,0.15)", gradient: "linear-gradient(180deg, rgba(100,116,139,0.08) 0%, rgba(148,163,184,0.04) 50%, transparent 100%)" },
 ];
+
+// Scroll-gradient backgrounds (pre-mapped, no dynamic Tailwind)
+const SCROLL_GRADIENTS: Record<string, string> = {
+  indigo: "linear-gradient(180deg, #eef2ff 0%, #f5f3ff 50%, #eff6ff 100%)",
+  amber: "linear-gradient(180deg, #fffbeb 0%, #fff7ed 50%, #fef2f2 100%)",
+  violet: "linear-gradient(180deg, #f5f3ff 0%, #fdf4ff 50%, #faf5ff 100%)",
+  emerald: "linear-gradient(180deg, #ecfdf5 0%, #f0fdfa 50%, #f0fdf4 100%)",
+  rose: "linear-gradient(180deg, #fff1f2 0%, #fdf2f8 50%, #fff1f2 100%)",
+  sky: "linear-gradient(180deg, #f0f9ff 0%, #faf5ff 50%, #eff6ff 100%)",
+  slate: "linear-gradient(180deg, #f8fafc 0%, #f1f5f9 50%, #f8fafc 100%)",
+};
 
 interface FormData {
   interests: string[];
@@ -132,9 +143,9 @@ interface FormData {
   comments: string;
 }
 
-// ---------- SCROLL WATCH BACKGROUND ----------
+// ---------- SCROLL WATCH BACKGROUND (inline styles) ----------
 function useScrollGradient() {
-  const [gradient, setGradient] = useState("from-indigo-50 via-purple-50 to-blue-50");
+  const [bg, setBg] = useState(SCROLL_GRADIENTS.indigo);
 
   useEffect(() => {
     const sections = document.querySelectorAll("[data-section]");
@@ -145,10 +156,8 @@ function useScrollGradient() {
         for (const entry of entries) {
           if (entry.isIntersecting) {
             const theme = entry.target.getAttribute("data-theme");
-            if (theme) {
-              setGradient(
-                `from-${theme}-50 via-${theme}-50/70 to-${theme}-100`
-              );
+            if (theme && SCROLL_GRADIENTS[theme]) {
+              setBg(SCROLL_GRADIENTS[theme]);
             }
             break;
           }
@@ -161,14 +170,14 @@ function useScrollGradient() {
     return () => observer.disconnect();
   }, []);
 
-  return gradient;
+  return bg;
 }
 
 export default function SurveyPage() {
   const { language } = useLanguage();
   const t = (en: string, es: string) => (language === "es" ? es : en);
   const isES = language === "es";
-  const scrollGradient = useScrollGradient();
+  const scrollBg = useScrollGradient();
 
   const [form, setForm] = useState<FormData>({
     interests: [],
@@ -258,21 +267,30 @@ export default function SurveyPage() {
     questionNum: number;
     children: React.ReactNode;
   }) {
-    const theme = SECTION_THEMES[themeIndex];
+    const c = THEME_COLORS[themeIndex];
     return (
       <section
         data-section
-        data-theme={theme.accent}
-        className={`relative rounded-3xl ${theme.card} p-6 md:p-8 shadow-sm transition-all duration-500 hover:shadow-md`}
+        data-theme={["indigo","amber","violet","emerald","rose","sky","slate"][themeIndex]}
+        className="relative rounded-3xl p-6 md:p-8 shadow-sm transition-all duration-500 hover:shadow-md"
+        style={{
+          background: c.gradient,
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+          boxShadow: `0 0 0 1px ${c.ring}`,
+        }}
       >
         {/* Question number badge */}
         <div className="flex items-center gap-3 mb-1">
           <span
-            className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold text-white bg-${theme.accent}-500`}
+            className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold text-white"
+            style={{ backgroundColor: c.badge }}
           >
             {questionNum}
           </span>
-          <h2 className={`text-xl font-bold ${theme.label}`}>{question}</h2>
+          <h2 className="text-xl font-bold" style={{ color: c.heading }}>
+            {question}
+          </h2>
         </div>
         {subtitle && (
           <p className="text-sm text-gray-500 ml-10 mb-4">{subtitle}</p>
@@ -298,29 +316,31 @@ export default function SurveyPage() {
     type?: "checkbox" | "radio";
     name?: string;
   }) {
-    const theme = SECTION_THEMES[themeIndex];
+    const c = THEME_COLORS[themeIndex];
     return (
       <label
-        data-checked={checked || undefined}
-        className={`flex items-center gap-3 px-4 py-3 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${theme.chip} ${
-          checked
-            ? `shadow-sm scale-[1.02]`
-            : "bg-white/60"
-        }`}
+        className="flex items-center gap-3 px-4 py-3 rounded-2xl border-2 cursor-pointer transition-all duration-200"
+        style={{
+          borderColor: checked ? c.chipBorderChecked : c.chipBorder,
+          backgroundColor: checked ? c.chipBg : "rgba(255,255,255,0.6)",
+          transform: checked ? "scale(1.02)" : "scale(1)",
+          boxShadow: checked ? `0 1px 3px ${c.label}` : "none",
+        }}
       >
         <input
           type={type}
           name={name}
           checked={checked}
           onChange={onChange}
-          className={`sr-only`}
+          className="sr-only"
         />
         <div
-          className={`w-5 h-5 rounded-${type === "radio" ? "full" : "md"} border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-            checked
-              ? `bg-${theme.accent}-500 border-${theme.accent}-500`
-              : "border-gray-300 bg-white"
-          }`}
+          className="w-5 h-5 border-2 flex items-center justify-center flex-shrink-0 transition-all"
+          style={{
+            borderRadius: type === "radio" ? "9999px" : "6px",
+            backgroundColor: checked ? c.badge : "white",
+            borderColor: checked ? c.badge : "#d1d5db",
+          }}
         >
           {checked && (
             <svg
@@ -348,7 +368,8 @@ export default function SurveyPage() {
   // ---------- MAIN RENDER ----------
   return (
     <div
-      className={`min-h-screen bg-gradient-to-br ${scrollGradient} transition-all duration-700 ease-in-out`}
+      className="min-h-screen transition-all duration-700 ease-in-out"
+      style={{ background: scrollBg }}
     >
       {/* Header */}
       <header className="sticky top-0 z-20 bg-white/70 backdrop-blur-xl border-b border-gray-200/50">
@@ -382,11 +403,12 @@ export default function SurveyPage() {
               return (
                 <div
                   key={n}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    filled
-                      ? "bg-primary scale-100"
-                      : "bg-gray-200 scale-75"
-                  }`}
+                  className="rounded-full transition-all duration-300"
+                  style={{
+                    width: filled ? "8px" : "6px",
+                    height: filled ? "8px" : "6px",
+                    backgroundColor: filled ? "#6366f1" : "#e5e7eb",
+                  }}
                 />
               );
             })}
@@ -603,7 +625,7 @@ export default function SurveyPage() {
               label={t("Yes, contact me!", "¡Sí, contáctame!")}
             />
             {form.wants_contact && (
-              <div className="mt-4 space-y-4 pl-4 border-l-4 border-sky-300">
+              <div className="mt-4 space-y-4 pl-4" style={{ borderLeft: "4px solid #7dd3fc" }}>
                 <div className="flex gap-3">
                   <ChipCheckbox
                     themeIndex={5}
