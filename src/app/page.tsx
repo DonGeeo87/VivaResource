@@ -173,7 +173,8 @@ export default function Home(): JSX.Element {
   }
 
   return (
-    <main className="bg-surface text-on-surface font-body">
+      <>
+      <main className="bg-surface text-on-surface font-body">
       {/* 1. HERO SECTION */}
       <section ref={heroRef} className="relative min-h-[700px] md:min-h-[870px] flex items-center overflow-hidden bg-surface py-12 md:py-20 px-6">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -766,6 +767,6 @@ export default function Home(): JSX.Element {
       </section>
 
     </main>
-        <SurveyPopup />
-      );
+            <SurveyPopup />
+        </>);
 }
