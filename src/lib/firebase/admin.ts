@@ -25,26 +25,21 @@ async function getAccessToken(): Promise<string | null> {
   const sa = getServiceAccount();
   if (!sa) return null;
 
-  const crypto = await import("crypto");
-  const header = { alg: "RS256", typ: "JWT" };
+  const { SignJWT } = await import("jose");
+  const { createPrivateKey } = await import("crypto");
+
   const now = Math.floor(Date.now() / 1000);
-  const claim = {
+  const privateKey = createPrivateKey(sa.private_key);
+
+  const jwt = await new SignJWT({
     iss: sa.client_email,
     scope: "https://www.googleapis.com/auth/datastore",
     aud: "https://oauth2.googleapis.com/token",
     exp: now + 3600,
     iat: now,
-  };
-
-  const b64 = (obj: Record<string, unknown>) =>
-    Buffer.from(JSON.stringify(obj)).toString("base64url");
-
-  const signature = crypto
-    .createSign("RSA-SHA256")
-    .update(`${b64(header)}.${b64(claim)}`)
-    .sign(sa.private_key, "base64url");
-
-  const jwt = `${b64(header)}.${b64(claim)}.${signature}`;
+  })
+    .setProtectedHeader({ alg: "RS256", typ: "JWT" })
+    .sign(privateKey);
 
   const res = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
@@ -56,7 +51,8 @@ async function getAccessToken(): Promise<string | null> {
   });
 
   if (!res.ok) {
-    console.error("[Admin] Token request failed:", await res.text());
+    const errText = await res.text();
+    console.error("[Admin] Token request failed:", errText);
     return null;
   }
 
