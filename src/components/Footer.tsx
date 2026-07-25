@@ -83,6 +83,7 @@ export default function Footer(): JSX.Element {
       "About Us": { en: "About Us", es: "Nosotros" },
       "Impact Areas": { en: "Impact Areas", es: "Áreas de Impacto" },
       "Resources Hub": { en: "Resources Hub", es: "Centro de Recursos" },
+      "Locations": { en: "Locations", es: "Ubicaciones" },
       "Volunteer Portal": { en: "Volunteer Portal", es: "Portal de Voluntarios" },
       "Admin Portal": { en: "Admin Portal", es: "Portal de Admin" },
       "Contact Details": { en: "Contact Details", es: "Detalles de Contacto" },
@@ -92,6 +93,7 @@ export default function Footer(): JSX.Element {
 
   const footerLinks = [
     { href: "/about", label: getLabel("About Us") },
+    { href: "/locations", label: getLabel("Locations") },
     { href: "/get-help", label: getLabel("Impact Areas") },
     { href: "/resources", label: getLabel("Resources Hub") },
     { href: "/get-involved", label: getLabel("Volunteer Portal") },

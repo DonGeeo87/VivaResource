@@ -46,6 +46,7 @@ export default function Header(): JSX.Element {
       name: language === "es" ? "Recursos" : "Resources",
       items: [
         { href: "/resources", label: language === "es" ? "Recursos" : "Resources" },
+        { href: "/locations", label: language === "es" ? "Ubicaciones" : "Locations" },
         { href: "/get-help", label: language === "es" ? "Obtener Ayuda" : "Get Help" },
         { href: "/events", label: language === "es" ? "Eventos" : "Events" },
       ]
