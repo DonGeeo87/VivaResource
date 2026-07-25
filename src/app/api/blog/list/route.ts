@@ -41,6 +41,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ posts });
   } catch (error) {
     console.error("Error fetching blog posts:", error);
-    return NextResponse.json({ posts: [] });
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ posts: [], error: message });
   }
 }
