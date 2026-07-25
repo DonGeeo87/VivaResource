@@ -9,8 +9,6 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { BlogHeroSkeleton, BlogFeaturedSkeleton, BlogGridSkeleton } from "@/components/Skeleton";
 import NewsletterForm from "@/components/NewsletterForm";
 
@@ -57,51 +55,10 @@ export default function BlogPage() {
 
   const fetchPosts = async () => {
     try {
-      let snapshot;
-
-      // Try ordering by published_at first, filtered by language
-      try {
-        const q = query(
-          collection(db, "blog_posts"),
-          where("status", "==", "published"),
-          where("language", "==", language),
-          orderBy("published_at", "desc")
-        );
-        snapshot = await getDocs(q);
-      } catch {
-        // Fallback to created_at if published_at doesn't exist or fails
-        try {
-          const q = query(
-            collection(db, "blog_posts"),
-            where("status", "==", "published"),
-            where("language", "==", language),
-            orderBy("created_at", "desc")
-          );
-          snapshot = await getDocs(q);
-        } catch {
-          // Final fallback: fetch with language filter only
-          console.log("Blog: Fetching with language filter only (date fields may not exist)");
-          const q = query(
-            collection(db, "blog_posts"),
-            where("status", "==", "published"),
-            where("language", "==", language)
-          );
-          snapshot = await getDocs(q);
-        }
-      }
-
-      const postsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as BlogPost[];
-
-      // Posts already filtered by language and status in Firestore query
-      const publishedPosts = postsData;
-
-      if (publishedPosts.length > 0) {
-        setPosts(publishedPosts);
-      } else {
-        console.log(`Blog: Found ${postsData.length} total posts, ${publishedPosts.length} published`);
+      const res = await fetch(`/api/blog/list?lang=${language}`);
+      const data = await res.json();
+      if (data.posts) {
+        setPosts(data.posts);
       }
     } catch (error) {
       console.error("Error fetching blog posts:", error);
