@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+.gitignore
+*.md
+*.log
+.env*.local
+.env
+__tests__
+e2e
+coverage
+docs
+logos
+.gitkeep

@@ -180,7 +180,7 @@ export default function Footer(): JSX.Element {
       {/* Copyright Bar */}
       <div className="border-t border-on-primary/10 py-8 px-6">
         <div className="max-w-7xl mx-auto text-center text-on-primary/80 text-sm font-body">
-          © {new Date().getFullYear()} Viva Resource Foundation. {footer.footerCopyright}
+          © {new Date().getFullYear()} Viva Resource. All rights reserved. Registered 501(c)(3).
         </div>
       </div>
 

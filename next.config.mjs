@@ -60,10 +60,8 @@ const nextConfig = {
   compiler: {
     removeConsole: isDev ? false : true,
   },
-  // Keep firebase-admin as a real require() — don't bundle it
-  experimental: {
-    serverComponentsExternalPackages: ['firebase-admin'],
-  },
+  // Keep firebase-admin as external (not bundled)
+    serverExternalPackages: ['firebase-admin'],
 };
 
 export default nextConfig;

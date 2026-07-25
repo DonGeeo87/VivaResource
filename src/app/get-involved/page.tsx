@@ -114,6 +114,7 @@ export default function GetInvolvedPage(): JSX.Element {
     phone: "",
     program: "volunteer",
     skills: [] as string[],
+    otherSkill: "",
     interests: [] as string[],
     availability: "",
     experience: "",
@@ -194,6 +195,7 @@ export default function GetInvolvedPage(): JSX.Element {
         phone: formData.phone || "",
         program: formData.program,
         skills: formData.skills,
+        otherSkill: formData.otherSkill || "",
         interests: formData.interests,
         availability: formData.availability,
         experience: formData.experience,
@@ -519,7 +521,19 @@ export default function GetInvolvedPage(): JSX.Element {
                       {isES ? "Habilidades (seleccione todas las aplicables)" : "Skills (select all that apply)"}
                     </label>
                     <div className="grid grid-cols-2 gap-3">
-                      {skillsOptions.map((skill) => (
+                      {formData.skills.includes('other') && (
+                      <div className="col-span-full mt-2">
+                        <input
+                          type="text"
+                          name="otherSkill"
+                          value={formData.otherSkill || ''}
+                          onChange={handleInputChange}
+                          placeholder={isES ? 'Describe tus otras habilidades...' : 'Describe your other skills...'}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all text-sm"
+                        />
+                      </div>
+                    )}
+                    {skillsOptions.map((skill) => (
                         <Checkbox
                           key={skill.id}
                           id={`skill-${skill.id}`}
