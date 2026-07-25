@@ -55,7 +55,7 @@ export default function BlogPage() {
 
   const fetchPosts = async () => {
     try {
-      const res = await fetch(`/api/blog/list?lang=${language}`);
+      const res = await fetch(`/api/v2/blog/list?lang=${language}`);
       const data = await res.json();
       if (data.posts) {
         setPosts(data.posts);
