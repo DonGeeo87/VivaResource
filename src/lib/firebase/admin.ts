@@ -166,6 +166,42 @@ export async function adminDb() {
 
   return {
     collection: (name: string) => ({
+      get: async () => {
+        const token = await getAccessToken();
+        if (!token) return { size: 0, docs: [], forEach: () => {} };
+        const res = await fetch(base + ":runQuery", {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer " + token,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            structuredQuery: {
+              from: [{ collectionId: name }],
+            },
+          }),
+        });
+        if (!res.ok) {
+          console.error("[Admin] Firestore query error:", await res.text());
+          return { size: 0, docs: [], forEach: () => {} };
+        }
+        const results = await res.json();
+        const docs = results
+          .filter((r: Record<string, unknown>) => r.document)
+          .map((r: Record<string, unknown>) => {
+            const doc = r.document as Record<string, unknown>;
+            return {
+              id: (doc.name as string).split("/").pop(),
+              data: () => fromFields((doc.fields as Record<string, unknown>) || {}),
+              exists: true,
+            };
+          });
+        return {
+          size: docs.length,
+          docs,
+          forEach: (fn: (doc: unknown) => void) => docs.forEach(fn),
+        };
+      },
       add: async (data: Record<string, unknown>) => {
         const token = await getAccessToken();
         if (!token) throw new Error("No access token");
@@ -214,7 +250,7 @@ export async function adminDb() {
           get: async () => {
             const token = await getAccessToken();
             if (!token) return { size: 0, docs: [], forEach: () => {} };
-            const res = await fetch(base + "/" + name + ":runQuery", {
+            const res = await fetch(base + ":runQuery", {
               method: "POST",
               headers: {
                 Authorization: "Bearer " + token,

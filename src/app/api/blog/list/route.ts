@@ -12,11 +12,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const lang = searchParams.get("lang") || "all";
     const category = searchParams.get("category") || "all";
 
-    const snapshot = await db.collection("blog_posts").where("status", "==", "published").get();
+    const snapshot = await db.collection("blog_posts").get();
     let posts = snapshot.docs.map((doc: { id: string; data: () => Record<string, unknown> }) => ({
       id: doc.id,
       ...doc.data(),
     }));
+
+    // Filter by status
+    posts = posts.filter((p: Record<string, unknown>) => p.status === "published");
 
     // Filter by language
     if (lang !== "all") {
