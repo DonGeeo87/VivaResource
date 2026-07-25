@@ -63,8 +63,8 @@ const nextConfig = {
   compiler: {
     removeConsole: isDev ? false : true,
   },
-  // Keep these as external (not bundled)
-    serverExternalPackages: ['firebase-admin', 'postgres'],
+  // Keep firebase-admin as external (not bundled)
+    serverExternalPackages: ['firebase-admin'],
 };
 
 export default nextConfig;
