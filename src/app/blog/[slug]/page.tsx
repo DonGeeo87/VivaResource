@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Calendar, User } from "lucide-react";
 import SchemaMarkup from "@/components/SchemaMarkup";
+import { getPostBySlug as getPostFromDb } from "@/lib/db";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vivaresourcefoundation.org";
 
@@ -47,16 +48,11 @@ function getUserLanguage(): "en" | "es" {
  */
 const getPostBySlug = cache(async (slug: string, userLang: "en" | "es"): Promise<BlogPost | null> => {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.vivaresource.com";
-    const res = await fetch(`${baseUrl}/api/v2/blog/get?slug=${slug}`, {
-      next: { revalidate: 60 },
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (!data.post || data.post.language !== userLang || data.post.status !== "published") {
+    const post = await getPostFromDb(slug);
+    if (!post || post.language !== userLang || post.status !== "published") {
       return null;
     }
-    return data.post as BlogPost;
+    return post as BlogPost;
   } catch (error) {
     console.error(`Error fetching blog post "${slug}":`, error);
     return null;
