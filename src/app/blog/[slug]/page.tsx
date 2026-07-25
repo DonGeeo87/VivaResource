@@ -4,14 +4,12 @@ import { cache } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Calendar, User } from "lucide-react";
-import { collection, query, where, getDocs, limit } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import SchemaMarkup from "@/components/SchemaMarkup";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vivaresourcefoundation.org";
 
 interface BlogPost {
-  id: string;
+  id: number;
   title: string;
   slug: string;
   excerpt: string;
@@ -49,25 +47,16 @@ function getUserLanguage(): "en" | "es" {
  */
 const getPostBySlug = cache(async (slug: string, userLang: "en" | "es"): Promise<BlogPost | null> => {
   try {
-    const q = query(
-      collection(db, "blog_posts"),
-      where("slug", "==", slug),
-      where("language", "==", userLang),
-      where("status", "==", "published"),
-      limit(1)
-    );
-
-    const snapshot = await getDocs(q);
-
-    if (snapshot.empty) {
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.vivaresource.com";
+    const res = await fetch(`${baseUrl}/api/v2/blog/get?slug=${slug}`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.post || data.post.language !== userLang || data.post.status !== "published") {
       return null;
     }
-
-    const doc = snapshot.docs[0];
-    return {
-      id: doc.id,
-      ...doc.data(),
-    } as BlogPost;
+    return data.post as BlogPost;
   } catch (error) {
     console.error(`Error fetching blog post "${slug}":`, error);
     return null;
@@ -115,10 +104,7 @@ export async function generateMetadata({
 function formatDate(timestamp: unknown): string {
   if (!timestamp) return "";
   try {
-    const date =
-      typeof timestamp === "object" && "toDate" in timestamp
-        ? (timestamp as { toDate: () => Date }).toDate()
-        : new Date(timestamp as string | number);
+    const date = new Date(timestamp as string | number);
     return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",

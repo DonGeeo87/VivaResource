@@ -13,7 +13,7 @@ import { BlogHeroSkeleton, BlogFeaturedSkeleton, BlogGridSkeleton } from "@/comp
 import NewsletterForm from "@/components/NewsletterForm";
 
 interface BlogPost {
-  id: string;
+  id: number;
   title: string;
   slug: string;
   excerpt: string;
