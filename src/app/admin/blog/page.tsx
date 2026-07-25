@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Search, Edit, Trash2, Eye } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Eye, Sparkles } from "lucide-react";
 import { collection, query, orderBy, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { blogTemplates } from "@/data/blog-templates";
 
 interface BlogPost {
   id: string;
@@ -63,6 +64,28 @@ export default function AdminBlogPage(): JSX.Element {
     return matchesSearch && matchesFilter;
   });
 
+  const [publishing, setPublishing] = useState<string | null>(null);
+  const [publishResult, setPublishResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  const handlePublishTemplate = async (slug: string) => {
+    setPublishing(slug);
+    setPublishResult(null);
+    try {
+      const res = await fetch("/api/blog/publish-template", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug }),
+      });
+      const data = await res.json();
+      setPublishResult({ success: data.success, message: data.message || data.error });
+      if (data.success) fetchPosts();
+    } catch {
+      setPublishResult({ success: false, message: "Error publishing" });
+    } finally {
+      setPublishing(null);
+    }
+  };
+
   const statusColors: Record<string, string> = {
     draft: "bg-gray-100 text-gray-700",
     published: "bg-green-100 text-green-700"
@@ -106,6 +129,34 @@ export default function AdminBlogPage(): JSX.Element {
             <option value="draft">{language === "es" ? "Borrador" : "Draft"}</option>
             <option value="published">{language === "es" ? "Publicados" : "Published"}</option>
           </select>
+        </div>
+      </div>
+
+      {/* Auto-Publish Templates */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <Sparkles className="w-5 h-5 text-primary" />
+          <h2 className="font-semibold text-gray-900">
+            {language === "es" ? "Publicación Automática" : "Auto-Publish"}
+          </h2>
+        </div>
+        {publishResult && (
+          <div className={`mb-3 p-3 rounded-lg text-sm ${publishResult.success ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"}`}>
+            {publishResult.message}
+          </div>
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          {blogTemplates.map((template) => (
+            <button
+              key={template.slug}
+              onClick={() => handlePublishTemplate(template.slug)}
+              disabled={publishing === template.slug}
+              className="flex items-center gap-2 px-3 py-2 text-sm bg-gray-50 hover:bg-primary/5 border border-gray-200 rounded-lg transition-colors disabled:opacity-50 text-left"
+            >
+              <Sparkles className={`w-4 h-4 flex-shrink-0 ${publishing === template.slug ? "animate-pulse text-primary" : "text-gray-400"}`} />
+              <span className="truncate">{language === "es" ? template.titleEs : template.titleEn}</span>
+            </button>
+          ))}
         </div>
       </div>
 
