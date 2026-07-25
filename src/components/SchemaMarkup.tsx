@@ -8,7 +8,7 @@ import { db } from "@/lib/firebase/config";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vivaresourcefoundation.org";
 
 interface SchemaMarkupProps {
-  type?: "organization" | "localBusiness" | "event" | "article" | "breadcrumb";
+  type?: "organization" | "localBusiness" | "event" | "article" | "breadcrumb" | "faq" | "service";
   data?: Record<string, unknown>;
 }
 
@@ -318,6 +318,78 @@ function BreadcrumbSchema({ data }: { data?: { items: { name: string; url: strin
 }
 
 /**
+ * FAQPage Schema - For frequently asked questions
+ */
+function FAQPageSchema({ data }: { data: { questions: { question: string; answer: string }[] } }) {
+  const items = data?.questions || [];
+  if (items.length === 0) return null;
+
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  };
+
+  return (
+    <Script
+      id="schema-faqpage"
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
+/**
+ * Service Schema - For individual services/programs
+ */
+function ServiceSchema({ data }: { data: Record<string, unknown> }) {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${siteUrl}#service-${(data.slug as string) || "default"}`,
+    name: (data.name as string) || "",
+    description: (data.description as string) || "",
+    provider: {
+      "@type": "Organization",
+      "@id": `${siteUrl}#organization`,
+      name: "Viva Resource",
+      url: siteUrl,
+    },
+    areaServed: {
+      "@type": "State",
+      name: "Colorado",
+    },
+    audience: {
+      "@type": "Audience",
+      name: "Immigrants and rural community members in Colorado",
+    },
+    serviceType: (data.serviceType as string) || "Community Service",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+    },
+    availableLanguage: ["English", "Spanish"],
+  };
+
+  return (
+    <Script
+      id={`schema-service-${(data.slug as string) || "default"}`}
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
+/**
  * Main SchemaMarkup Component
  * By default renders organization + localBusiness + website schemas
  * Can be customized with type and data props for specific pages
@@ -342,6 +414,10 @@ export default function SchemaMarkup({ type, data }: SchemaMarkupProps): JSX.Ele
       return <ArticleSchema data={data || {}} />;
     case "breadcrumb":
       return <BreadcrumbSchema data={data as { items: { name: string; url: string }[] } | undefined} />;
+    case "faq":
+      return <FAQPageSchema data={data as { questions: { question: string; answer: string }[] }} />;
+    case "service":
+      return <ServiceSchema data={data || {}} />;
     default:
       return <></>;
   }

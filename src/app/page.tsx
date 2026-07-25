@@ -24,6 +24,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useInView } from "@/hooks/useInView";
 import { useSiteImages } from "@/contexts/SiteImageContext";
 import SurveyPopup from "@/components/SurveyPopup";
+import FAQSection from "@/components/FAQSection";
+import SchemaMarkup from "@/components/SchemaMarkup";
 
 function useReducedMotion(): boolean {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -764,6 +766,24 @@ export default function Home(): JSX.Element {
           </div>
         </div>
       </section>
+
+      {/* FAQ Section */}
+      <FAQSection />
+      <SchemaMarkup type="faq" data={{ questions: [
+        { question: "What services does Viva Resource provide?", answer: "Viva Resource provides food assistance, housing support, legal aid referrals, healthcare navigation, educational workshops, and emergency response services to immigrant and rural communities across El Paso County, Colorado." },
+        { question: "Is Viva Resource a nonprofit organization?", answer: "Yes, Viva Resource is a registered 501(c)(3) nonprofit organization. All donations are tax-deductible to the extent allowed by law." },
+        { question: "Do I need to be a U.S. citizen to receive services?", answer: "No. Viva Resource serves all community members regardless of immigration status. We do not ask about immigration status to provide services." },
+        { question: "What areas do you serve?", answer: "We serve all of El Paso County, Colorado, including Peyton (headquarters), Colorado Springs, Pueblo, Fountain, Monument, and surrounding rural communities." },
+        { question: "How can I get help?", answer: "You can submit a help request through our Get Help page, call 211 for resource referrals, or contact us directly via email." },
+        { question: "How can I volunteer or donate?", answer: "Visit our Get Involved page to sign up as a volunteer, or go to our Donate page to make a tax-deductible contribution." },
+        { question: "Are services available in Spanish?", answer: "Yes, all our services are available in both English and Spanish. Our team is bilingual." },
+        { question: "What is your location and hours?", answer: "Our headquarters is at 13055 Bradshaw Drive #301, Peyton, CO 80831. Open Monday through Friday, 9:00 AM to 5:00 PM." },
+      ] }} />
+      <SchemaMarkup type="service" data={{ slug: "emergency-response", name: "Emergency Response", description: "Immediate crisis intervention and logistical support for families facing sudden hardship, disasters, or unforeseen transitions.", serviceType: "Emergency Response" }} />
+      <SchemaMarkup type="service" data={{ slug: "food-security", name: "Food Security", description: "Sustainable nutritional programs and partnerships with local producers to ensure no rural family goes without healthy meals.", serviceType: "Food Security" }} />
+      <SchemaMarkup type="service" data={{ slug: "health-safety", name: "Health and Safety", description: "Connecting isolated populations to preventive care, mental health resources, and safety education workshops.", serviceType: "Health and Safety" }} />
+      <SchemaMarkup type="service" data={{ slug: "community-engagement", name: "Community Engagement", description: "Building social capital through volunteerism, community events, and leadership development within rural hubs.", serviceType: "Community Engagement" }} />
+      <SchemaMarkup type="service" data={{ slug: "continuous-improvement", name: "Continuous Improvement", description: "Data-driven approaches to refine our impact and scale successful programs to reach more underserved areas effectively.", serviceType: "Continuous Improvement" }} />
 
     </main>
             <SurveyPopup />
