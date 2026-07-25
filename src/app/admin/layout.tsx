@@ -35,6 +35,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }): JSX.Element 
   const navItems = [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/blog", label: "Blog", icon: FileText },
+    { href: "/admin/v2/blog", label: "Blog (PG)", icon: FileText },
     { href: "/admin/events", label: language === "es" ? "Eventos" : "Events", icon: Calendar },
         { href: "/admin/surveys", label: language === "es" ? "Encuestas" : "Surveys", icon: ClipboardList },
         { href: "/admin/forms", label: language === "es" ? "Formularios" : "Forms", icon: ClipboardList },
