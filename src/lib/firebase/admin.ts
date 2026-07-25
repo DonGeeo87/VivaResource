@@ -261,7 +261,6 @@ export async function verifyIdToken(token: string) {
   try {
     const sa = getSA();
     if (!sa) throw new Error("No service account");
-    const projectId = sa.project_id;
     const res = await fetch(
       `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${process.env.NEXT_PUBLIC_FIREBASE_API_KEY}`,
       {
