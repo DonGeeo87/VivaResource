@@ -1,4 +1,22 @@
 services:
+  vivaresource-db:
+    image: postgres:16-alpine
+    container_name: vivaresource-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=vivaresource
+      - POSTGRES_PASSWORD=${PGPASSWORD}
+      - POSTGRES_DB=vivaresource_blog
+    volumes:
+      - vivaresource_pgdata:/var/lib/postgresql/data
+    networks:
+      - proxy-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vivaresource -d vivaresource_blog"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   vivaresource:
     build:
       context: .
@@ -36,9 +54,17 @@ services:
       - NEWSLETTER_ADMIN_EMAILS=${NEWSLETTER_ADMIN_EMAILS}
       - FIREBASE_ADMIN_KEY=${FIREBASE_ADMIN_KEY}
       - REPORT_SECRET=${REPORT_SECRET}
+      - PGHOST=vivaresource-db
+      - PGPORT=5432
+      - PGDATABASE=vivaresource_blog
+      - PGUSER=vivaresource
+      - PGPASSWORD=${PGPASSWORD}
     networks:
       - proxy-network
 
 networks:
   proxy-network:
     external: true
+
+volumes:
+  vivaresource_pgdata:
