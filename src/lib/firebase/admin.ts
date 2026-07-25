@@ -159,55 +159,10 @@ function docRef(name: string) {
   };
 }
 
-function queryRef(name: string) {
-  return {
-    get: async () => {
-      const token = await getAccessToken();
-      if (!token) return { size: 0, docs: [], forEach: () => {} };
-      const res = await fetch(
-        `https://firestore.googleapis.com/v1/${name}:runQuery`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: "Bearer " + token,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            structuredQuery: {
-              from: [{ collectionId: name.split("/").pop() }],
-            },
-          }),
-        }
-      );
-      if (!res.ok) {
-        console.error("[Admin] Firestore query error:", await res.text());
-        return { size: 0, docs: [], forEach: () => {} };
-      }
-      const results = await res.json();
-      const docs = results
-        .filter((r: Record<string, unknown>) => r.document)
-        .map((r: Record<string, unknown>) => {
-          const doc = r.document as Record<string, unknown>;
-          return {
-            id: (doc.name as string).split("/").pop(),
-            data: () => fromFields((doc.fields as Record<string, unknown>) || {}),
-            exists: true,
-          };
-        });
-      return {
-        size: docs.length,
-        docs,
-        forEach: (fn: (doc: unknown) => void) => docs.forEach(fn),
-      };
-    },
-  };
-}
-
 export async function adminDb() {
   const sa = getSA();
   if (!sa) return null;
-  const projectId = sa.project_id;
-  const base = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents`;
+  const base = `https://firestore.googleapis.com/v1/projects/${sa.project_id}/databases/(default)/documents`;
 
   return {
     collection: (name: string) => ({
