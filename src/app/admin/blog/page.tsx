@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Search, Edit, Trash2, Eye, Sparkles } from "lucide-react";
-import { collection, query, orderBy, getDocs, deleteDoc, doc } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { blogTemplates } from "@/data/blog-templates";
+
+import { db, collection, deleteDoc, doc, getDocs, orderBy, query } from "@/lib/db-client";
 
 interface BlogPost {
   id: string;

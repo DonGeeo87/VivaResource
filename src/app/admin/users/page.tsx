@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Trash2, Edit, Shield } from "lucide-react";
-import { collection, getDocs, doc, setDoc, deleteDoc, Timestamp, query, orderBy } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+import { db, Timestamp, collection, deleteDoc, doc, getDocs, orderBy, query, setDoc } from "@/lib/db-client";
 
 interface AdminUser {
   id: string;

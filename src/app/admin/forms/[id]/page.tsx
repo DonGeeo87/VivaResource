@@ -3,13 +3,13 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { Save, ArrowLeft, Eye, Calendar, FileText, Users, MessageSquare, Star, X, Copy, Check, AlertCircle } from "lucide-react";
-import { doc, getDoc, setDoc, addDoc, collection, Timestamp, getDocs, query, orderBy } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
 import FormBuilder from "@/components/forms/FormBuilder";
 import FormSharePanel from "@/components/forms/FormSharePanel";
 import { Form, FormField } from "@/types/forms";
 import { formTemplates } from "@/data/formTemplates";
+
+import { db, Timestamp, addDoc, collection, doc, getDoc, getDocs, orderBy, query, setDoc } from "@/lib/db-client";
 
 interface EventOption {
   id: string;

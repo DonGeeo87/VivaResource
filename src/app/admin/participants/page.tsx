@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { collection, getDocs, query, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Search, Filter, Download, User, Upload, Plus, X, Save, Loader2 } from "lucide-react";
+
+import { db, addDoc, collection, getDocs, orderBy, query, serverTimestamp } from "@/lib/db-client";
 
 interface Participant {
   id?: string;

@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { collection, query, where, getDocs, limit } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { AlertCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+import { db, collection, getDocs, limit, query, where } from "@/lib/db-client";
 
 export default function FormSlugPage(): JSX.Element {
   const params = useParams();

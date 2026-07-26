@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { db, addDoc, collection, doc, getDoc, serverTimestamp } from "@/lib/db-client";
 import {
   Building,
   CheckCircle,
@@ -26,9 +27,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteImage } from "@/contexts/SiteImageContext";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { verifyRecaptcha } from "@/lib/recaptcha";
-import { collection, addDoc, doc, getDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
-
 import { FormField, Input, Textarea } from '@/components/ui/FormField';
 import SuccessMessage from '@/components/ui/SuccessMessage';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';

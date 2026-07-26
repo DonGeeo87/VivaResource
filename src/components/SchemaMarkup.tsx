@@ -2,8 +2,7 @@
 
 import Script from "next/script";
 import { useEffect, useState } from "react";
-import { getDocs, collection } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
+import { db, collection, getDocs } from "@/lib/db-client";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vivaresourcefoundation.org";
 

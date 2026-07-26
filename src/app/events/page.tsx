@@ -3,15 +3,13 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { db, collection, getDocs, query } from "@/lib/db-client";
 import {
-  Calendar,
   MapPin,
   Clock,
   Heart,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { collection, query, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { EventsHeroSkeleton, EventsFilterSkeleton, EventsGridSkeleton } from "@/components/Skeleton";
 import NewsletterForm from "@/components/NewsletterForm";
 

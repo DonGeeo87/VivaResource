@@ -220,6 +220,40 @@ export async function getCountFromServer(
   const snap = await ref.get();
   return { data: () => ({ count: snap.size }) };
 }
+
+// onSnapshot - polling fallback (no real-time, but compatible)
+export function onSnapshot(
+  ref: ColRef | WhereQuery | DocRef,
+  callback: (snap: any) => void
+): () => void {
+  // Immediate first call
+  ref.get().then(callback).catch(() => {});
+  // Poll every 5 seconds
+  const interval = setInterval(() => {
+    ref.get().then(callback).catch(() => {});
+  }, 5000);
+  return () => clearInterval(interval);
+}
+
+// writeBatch - stub compatible
+export function writeBatch() {
+  let ops: any[] = [];
+  return {
+    set: (ref: DocRef, data: any) => { ops.push({ type: "set", ref, data }); },
+    update: (ref: DocRef, data: any) => { ops.push({ type: "update", ref, data }); },
+    delete: (ref: DocRef) => { ops.push({ type: "delete", ref }); },
+    commit: async () => {
+      for (const op of ops) {
+        try {
+          if (op.type === "set") await op.ref.set(op.data);
+          else if (op.type === "update") await op.ref.update(op.data);
+          else if (op.type === "delete") await op.ref.delete();
+        } catch (e) { console.error("Batch op failed:", e); }
+      }
+    }
+  };
+}
+
 export function query(
   ref: ColRef,
   ...filters: any[]

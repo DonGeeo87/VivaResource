@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { Save, CreditCard, AlertCircle, CheckCircle, Download, RefreshCw, DollarSign, Users, TrendingUp } from "lucide-react";
-import { doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+import { db, collection, doc, getDoc, getDocs, limit, orderBy, query, setDoc } from "@/lib/db-client";
 
 interface Donation {
   id: string;

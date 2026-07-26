@@ -6,9 +6,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useVolunteerAuth } from "@/contexts/VolunteerAuthContext";
 import { Mail, Lock, User, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { Suspense } from "react";
+
+import { db, doc, getDoc } from "@/lib/db-client";
 
 function ActivateForm() {
   const { language } = useLanguage();

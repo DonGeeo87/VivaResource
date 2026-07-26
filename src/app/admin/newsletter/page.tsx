@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Download, Mail, Trash2, Search, Send, History, Users, Eye, Clock } from "lucide-react";
-import { collection, getDocs, query, orderBy, deleteDoc, doc, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
 import NewsletterBuilder, { newsletterTemplates, NewsletterBlock, NewsletterTemplate } from "@/components/forms/NewsletterBuilder";
+
+import { db, Timestamp, collection, deleteDoc, doc, getDocs, orderBy, query } from "@/lib/db-client";
 
 interface Subscriber {
   id: string;

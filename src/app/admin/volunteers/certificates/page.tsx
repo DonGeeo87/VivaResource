@@ -3,12 +3,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Search, Check, X, Eye, FileText, Calendar, User, Mail, Building, MessageSquare } from "lucide-react";
-import { collection, query, orderBy, getDocs, updateDoc, doc } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Modal from "@/components/ui/Modal";
 import Badge from "@/components/ui/Badge";
 import type { VolunteerCertificateRequest } from "@/types/volunteer";
+
+import { db, collection, doc, getDocs, orderBy, query, updateDoc } from "@/lib/db-client";
 
 interface VolunteerRegistration {
   id: string;

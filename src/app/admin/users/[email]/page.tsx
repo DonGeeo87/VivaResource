@@ -3,20 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  getDoc,
-  setDoc,
-  Timestamp,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { db, Timestamp, collection, doc, getDoc, getDocs, query, setDoc, where } from "@/lib/db-client";
 import {
-  ArrowLeft,
   Mail,
   Calendar,
   ClipboardList,

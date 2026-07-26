@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import BlogEditor, { type BlogFormData } from "@/components/forms/BlogEditor";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+import { db, doc, getDoc, serverTimestamp, updateDoc } from "@/lib/db-client";
 
 export default function EditBlogPostPage(): JSX.Element {
   const router = useRouter();

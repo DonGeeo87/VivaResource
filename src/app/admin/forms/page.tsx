@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Plus, FileText, Trash2, Edit, Eye, Copy, BarChart3 } from "lucide-react";
-import { collection, query, orderBy, getDocs, deleteDoc, doc, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+import { db, Timestamp, collection, deleteDoc, doc, getDocs, orderBy, query } from "@/lib/db-client";
 
 interface Form {
   id: string;

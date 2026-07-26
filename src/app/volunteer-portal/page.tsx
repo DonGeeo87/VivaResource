@@ -4,10 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useVolunteerAuth } from "@/contexts/VolunteerAuthContext";
-import { collection, query, where, orderBy, onSnapshot, doc, updateDoc, addDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
+import { db, addDoc, collection, doc, onSnapshot, orderBy, query, updateDoc, where } from "@/lib/db-client";
 import {
-  Calendar,
   Mail,
   Clock,
   CheckCircle,

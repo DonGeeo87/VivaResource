@@ -8,12 +8,12 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteImages } from "@/contexts/SiteImageContext";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { verifyRecaptcha } from "@/lib/recaptcha";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useToast } from "@/components/Toast";
 import { FormField, Input, Textarea, Select, Checkbox } from "@/components/ui/FormField";
 import SuccessMessage from "@/components/ui/SuccessMessage";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+
+import { db, addDoc, collection, serverTimestamp } from "@/lib/db-client";
 
 const skillsOptions = [
   { id: "communityOutreach", label: "Community Outreach", labelEs: "Extensión Comunitaria" },

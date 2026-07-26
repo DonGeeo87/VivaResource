@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { db, Timestamp, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, where } from "@/lib/db-client";
 import {
+
   ArrowLeft,
   Download,
   Trash2,
@@ -15,18 +17,6 @@ import {
   BarChart3,
   Send,
 } from "lucide-react";
-import {
-  collection,
-  query,
-  where,
-  orderBy,
-  getDocs,
-  deleteDoc,
-  doc,
-  getDoc,
-  Timestamp,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { FormField } from "@/types/forms";
 import ConfirmModal from "@/components/ConfirmModal";

@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import { ArrowRight, CheckCircle, Calendar, MapPin, Clock, AlertCircle } from "lucide-react";
-import { collection, addDoc, serverTimestamp, doc, getDoc, query, where, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/components/Toast";
 import { formatMountainDate } from "@/lib/timezone";
 import type { Timestamp } from "firebase/firestore";
+
+import { db, addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from "@/lib/db-client";
 
 const safeFormatDate = (date: string | Date | Timestamp | { toDate: () => Date } | undefined, lang: string): string => {
   if (!date) return "-";

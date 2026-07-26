@@ -3,16 +3,9 @@
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Link from "next/link";
-import {
-  collection,
-  query,
-  orderBy,
-  getDocs,
-  getCountFromServer,
-  limit,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { BarChart3, Users, PieChart, MessageSquare } from "lucide-react";
+
+import { db, collection, getCountFromServer, getDocs, limit, orderBy, query } from "@/lib/db-client";
 
 interface SurveyResponse {
   id: string;

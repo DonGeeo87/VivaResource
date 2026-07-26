@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { db, collection, doc, getDocs, setDoc } from "@/lib/db-client";
 import {
+
   Save,
   CheckCircle,
   Globe,
@@ -18,13 +20,6 @@ import {
   Image as ImageIcon,
   Bot,
 } from "lucide-react";
-import {
-  collection,
-  getDocs,
-  doc,
-  setDoc,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SeoSettings {

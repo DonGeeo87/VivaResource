@@ -5,9 +5,9 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CheckCircle, Calendar, FileText, Loader2 } from "lucide-react";
-import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+import { db, addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from "@/lib/db-client";
 
 interface EventData {
   id: string;

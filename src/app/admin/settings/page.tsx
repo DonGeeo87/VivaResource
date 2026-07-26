@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Save, CheckCircle, Globe, Link as LinkIcon, Bell } from "lucide-react";
-import { doc, setDoc, getDocs, collection } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+import { db, collection, doc, getDocs, setDoc } from "@/lib/db-client";
 
 interface SiteSettings {
   [key: string]: string;

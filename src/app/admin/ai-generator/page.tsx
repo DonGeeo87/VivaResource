@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { db, Timestamp, addDoc, collection, deleteDoc, doc, getDocs, orderBy, query, serverTimestamp } from "@/lib/db-client";
 import {
   Sparkles,
   Copy,
@@ -13,18 +14,6 @@ import {
   Trash2,
   Check,
 } from "lucide-react";
-import {
-  collection,
-  addDoc,
-  serverTimestamp,
-  query,
-  orderBy,
-  getDocs,
-  deleteDoc,
-  doc,
-  Timestamp,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 function sanitizeHtml(html: string): string {

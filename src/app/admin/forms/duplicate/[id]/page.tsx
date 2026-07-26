@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { doc, getDoc, addDoc, collection, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Loader2 } from "lucide-react";
+
+import { db, Timestamp, addDoc, collection, doc, getDoc } from "@/lib/db-client";
 
 export default function DuplicateFormPage(): JSX.Element {
   const { id } = useParams();

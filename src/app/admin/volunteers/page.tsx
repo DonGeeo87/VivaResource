@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Search, Check, X, Download, Mail, Phone, Calendar, Eye, CheckCheck, XCircle, Inbox } from "lucide-react";
-import { collection, query, orderBy, getDocs, updateDoc, doc, writeBatch, onSnapshot } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+import { db, collection, doc, getDocs, onSnapshot, orderBy, query, updateDoc, writeBatch } from "@/lib/db-client";
 
 interface Volunteer {
   id: string;

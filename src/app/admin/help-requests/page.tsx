@@ -1,18 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  collection,
-  getDocs,
-  query,
-  orderBy,
-  updateDoc,
-  doc,
-  Timestamp,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { db, Timestamp, collection, doc, getDocs, orderBy, query, updateDoc } from "@/lib/db-client";
 import {
+
   Search,
   Filter,
   Eye,

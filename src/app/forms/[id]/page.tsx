@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { CheckCircle, AlertCircle, Calendar, MapPin, Clock } from "lucide-react";
-import { doc, getDoc, addDoc, collection, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { Form, FormField } from "@/types/forms";
 import { z } from "zod";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+import { db, Timestamp, addDoc, collection, doc, getDoc } from "@/lib/db-client";
 
 interface EventInfo {
   id: string;

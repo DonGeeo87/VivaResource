@@ -3,10 +3,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Search, Inbox, Send, Filter, ChevronDown, ChevronUp, Mail, User, Calendar, Bell } from "lucide-react";
-import { collection, query, orderBy, getDocs, onSnapshot, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { VolunteerMessage } from "@/types/volunteer";
+
+import { db, Timestamp, collection, getDocs, onSnapshot, orderBy, query } from "@/lib/db-client";
 
 interface VolunteerInfo {
   id: string;
