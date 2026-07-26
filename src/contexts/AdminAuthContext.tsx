@@ -1,23 +1,10 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { 
-  User, 
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut as firebaseSignOut
-} from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase/config";
-
-interface AdminUser {
-  uid: string;
-  email: string | null;
-  role: "admin" | "editor" | "viewer";
-}
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
+import { loginWithJwt, getToken, getUser, clearSession, setSession, type StoredUser } from "@/lib/auth/client";
 
 interface AuthContextType {
-  user: AdminUser | null;
+  user: StoredUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -26,50 +13,28 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AdminUser | null>(null);
+  const [user, setUser] = useState<StoredUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: User | null) => {
-      if (firebaseUser) {
-        // Get user role from Firestore
-        const userDoc = await getDoc(doc(db, "admin_users", firebaseUser.uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          setUser({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            role: userData.role || "viewer"
-          });
-        } else {
-          // User not in admin_users - sign them out
-          await firebaseSignOut(auth);
-          setUser(null);
-        }
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    // Restore session from localStorage
+    const storedUser = getUser();
+    const token = getToken();
+    if (storedUser && token) {
+      setUser(storedUser);
+    }
+    setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const result = await signInWithEmailAndPassword(auth, email, password);
-    
-    // Verify user is in admin_users
-    const userDoc = await getDoc(doc(db, "admin_users", result.user.uid));
-    if (!userDoc.exists()) {
-      await firebaseSignOut(auth);
-      throw new Error("No tienes acceso de administrador");
-    }
-  };
+  const login = useCallback(async (email: string, password: string) => {
+    const { user: loggedUser } = await loginWithJwt(email, password);
+    setUser(loggedUser);
+  }, []);
 
-  const logout = async () => {
-    await firebaseSignOut(auth);
+  const logout = useCallback(async () => {
+    clearSession();
     setUser(null);
-  };
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout }}>
@@ -78,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useAuth() {
+export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider");

@@ -3,12 +3,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, LogIn, Shield, ArrowLeft } from "lucide-react";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase/config";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/i18n/translations";
 import { useSiteImage } from "@/contexts/SiteImageContext";
+import { loginWithJwt } from "@/lib/auth/client";
 
 export default function AdminLoginPage(): JSX.Element {
   const [email, setEmail] = useState("");
@@ -35,18 +33,11 @@ export default function AdminLoginPage(): JSX.Element {
     setIsLoading(true);
 
     try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
-
-      const userDoc = await getDoc(doc(db, "admin_users", result.user.uid));
-
-      if (!userDoc.exists()) {
-        throw new Error("No access");
-      }
-
+      await loginWithJwt(email, password);
       router.push("/admin");
     } catch (err: unknown) {
       console.error("Login error:", err);
-      setError(t?.invalidCredentials || "Invalid credentials");
+      setError(err instanceof Error ? err.message : t?.invalidCredentials || "Invalid credentials");
     } finally {
       setIsLoading(false);
     }

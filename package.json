@@ -19,6 +19,7 @@
     "@paypal/react-paypal-js": "^9.1.0",
     "cloudinary": "^2.9.0",
     "firebase": "^12.11.0",
+    "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.7.0",
     "next": "14.2.35",
     "node-forge": "^1.4.0",
@@ -31,6 +32,7 @@
     "react-hook-form": "^7.72.0",
     "react-quill": "^2.0.0",
     "resend": "^6.10.0",
+    "sharp": "^0.35.3",
     "xlsx": "^0.18.5",
     "zod": "^4.3.6"
   },
@@ -39,6 +41,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/nodemailer": "^7.0.11",
     "@types/react": "^18",
