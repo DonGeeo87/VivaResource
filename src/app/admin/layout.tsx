@@ -56,7 +56,11 @@ function AdminLayoutContent({ children }: { children: ReactNode }): JSX.Element 
   useEffect(() => {
     // Solo validar si NO estamos en login
     if (!loading && !user && pathname !== "/admin/login") {
-      router.push("/admin/login");
+      // Check if there's a token in localStorage (hydration in progress)
+      const token = typeof window !== "undefined" ? localStorage.getItem("viva_admin_token") : null;
+      if (!token) {
+        router.push("/admin/login");
+      }
     }
   }, [loading, user, router, pathname]);
 
