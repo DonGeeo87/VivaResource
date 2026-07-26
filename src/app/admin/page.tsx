@@ -22,9 +22,9 @@ import {
   orderBy,
   limit,
   getDocs,
-  getCountFromServer
-} from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
+  getCountFromServer,
+  db
+} from "@/lib/db-client";
 
 // Interfaces
 interface Stats {
