@@ -18,12 +18,12 @@ export default function ClientLayout({ children }: ClientLayoutProps): JSX.Eleme
   const isVolunteerPortal = pathname === "/volunteer-portal" || pathname.startsWith("/volunteer-portal/");
 
   const content = (
-    <>
+    <div className="flex flex-col min-h-screen">
       <Header />
-      <main id="main-content">{children}</main>
+      <main id="main-content" className="flex-1">{children}</main>
       <Footer />
       <CookieBanner />
-    </>
+    </div>
   );
 
   if (isAdminRoute || isVolunteerPortal) {

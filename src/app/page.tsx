@@ -24,8 +24,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useInView } from "@/hooks/useInView";
 import { useSiteImages } from "@/contexts/SiteImageContext";
 import SurveyPopup from "@/components/SurveyPopup";
-import FAQSection from "@/components/FAQSection";
 import SchemaMarkup from "@/components/SchemaMarkup";
+import { HomeSkeleton } from "@/components/HomeSkeleton";
+import FeaturedPosts from "@/components/FeaturedPosts";
 
 function useReducedMotion(): boolean {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -170,7 +171,7 @@ export default function Home(): JSX.Element {
   const heroAnimateDelay3 = prefersReducedMotion || heroAnimationsComplete ? '' : 'hero-animate-delay-3';
 
   if (!isHydrated) {
-    return <main className="bg-surface text-on-surface font-body" />;
+    return <HomeSkeleton />;
   }
 
   return (
@@ -590,7 +591,10 @@ export default function Home(): JSX.Element {
         </div>
       </section>
 
-      {/* 10. FAQ */}
+      {/* 10. FEATURED POSTS */}
+      <FeaturedPosts />
+
+      {/* 11. FAQ */}
       <section ref={faqSection.ref} className={`py-12 md:py-24 px-6 bg-surface-low animate-on-scroll animate-slide-up ${faqSection.isInView ? 'in-view' : ''}`}>
         <div className="max-w-3xl mx-auto space-y-8 md:space-y-12">
           <div className="text-center">
@@ -767,8 +771,6 @@ export default function Home(): JSX.Element {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <FAQSection />
       <SchemaMarkup type="faq" data={{ questions: [
         { question: "What services does Viva Resource provide?", answer: "Viva Resource provides food assistance, housing support, legal aid referrals, healthcare navigation, educational workshops, and emergency response services to immigrant and rural communities across El Paso County, Colorado." },
         { question: "Is Viva Resource a nonprofit organization?", answer: "Yes, Viva Resource is a registered 501(c)(3) nonprofit organization. All donations are tax-deductible to the extent allowed by law." },
