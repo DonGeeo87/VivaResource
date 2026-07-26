@@ -146,14 +146,11 @@ export default function PublicFormPage() {
       if (form.settings?.allowMultipleSubmissions === false) {
         const emailToCheck = form.settings?.requireEmail ? email : undefined;
         if (emailToCheck) {
-          const { query: firestoreQuery, where: firestoreWhere, getDocs: firestoreGetDocs } = await import("firebase/firestore");
-          const dupQuery = firestoreQuery(
-            collection(db, "form_submissions"),
-            firestoreWhere("formId", "==", formId),
-            firestoreWhere("email", "==", emailToCheck)
-          );
-          const dupSnapshot = await firestoreGetDocs(dupQuery);
-          if (!dupSnapshot.empty) {
+          const dupSnapshot = await db.collection("form_submissions")
+            .where("formId", "==", formId)
+            .where("email", "==", emailToCheck)
+            .get();
+          if (dupSnapshot.size > 0) {
             setErrors({ __form: language === "es"
               ? "Ya has enviado una respuesta a este formulario."
               : "You have already submitted a response to this form." });

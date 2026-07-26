@@ -18,9 +18,9 @@ async function getAccessToken(): Promise<string | null> {
     return cachedToken.token;
   const sa = getSA();
   if (!sa) return null;
-  const forge = require("node-forge");
-  const pk = forge.pki.privateKeyFromPem(sa.private_key);
-  const pem8 = forge.pki.privateKeyToPem(pk);
+  const forge = await import("node-forge");
+  const pk = forge.default.pki.privateKeyFromPem(sa.private_key);
+  const pem8 = forge.default.pki.privateKeyToPem(pk);
   const crypto = await import("crypto");
   const key = crypto.createPrivateKey(pem8);
   const now = Math.floor(Date.now() / 1000);

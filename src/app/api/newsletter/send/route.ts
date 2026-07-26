@@ -145,8 +145,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Update history with final results
     if (historyId) {
       try {
-        const { doc, updateDoc } = await import("firebase/firestore");
-        await updateDoc(db.collection("newsletter_history").doc(historyId), {
+        
+        await db.collection("newsletter_history").doc(historyId).update({
           total_sent: results.success,
           total_failed: results.failed,
           status: results.failed === 0 ? "completed" : "completed_with_errors",
