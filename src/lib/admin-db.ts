@@ -1,304 +1,195 @@
-// Firebase Admin via REST API - full Firestore REST wrapper
-/* eslint-disable @typescript-eslint/no-require-imports */
-let cachedToken: { token: string; expires: number } | null = null;
+/**
+ * PostgreSQL-backed admin database.
+ * Replaces Firestore REST API with direct PostgreSQL queries.
+ * Maintains the same API: collection().get(), .doc().get(), .add(), .set(), .where()
+ */
 
-function getSA(): Record<string, string> | null {
-  if (!process.env.FIREBASE_ADMIN_KEY) return null;
-  try {
-    return JSON.parse(
-      Buffer.from(process.env.FIREBASE_ADMIN_KEY, "base64").toString()
-    );
-  } catch {
-    return null;
+import postgres from "postgres";
+
+const sql = postgres({
+  host: process.env.PGHOST || "viva-migracion-db",
+  port: parseInt(process.env.PGPORT || "5432"),
+  database: process.env.PGDATABASE || "vivaresource_blog",
+  username: process.env.PGUSER || "vivaresource",
+  password: process.env.PGPASSWORD,
+});
+
+// Ensure the collections table exists
+async function ensureTable() {
+  await sql`
+    CREATE TABLE IF NOT EXISTS collections (
+      id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      data JSONB NOT NULL DEFAULT '{}',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (name, id)
+    )
+  `;
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_collections_name ON collections(name)
+  `;
+}
+
+// Lazy init
+let tableEnsured = false;
+async function init() {
+  if (!tableEnsured) {
+    await ensureTable();
+    tableEnsured = true;
   }
 }
 
-async function getAccessToken(): Promise<string | null> {
-  if (cachedToken && cachedToken.expires > Date.now() + 300000)
-    return cachedToken.token;
-  const sa = getSA();
-  if (!sa) return null;
-  const forge = await import("node-forge");
-  const pk = forge.default.pki.privateKeyFromPem(sa.private_key);
-  const pem8 = forge.default.pki.privateKeyToPem(pk);
-  const crypto = await import("crypto");
-  const key = crypto.createPrivateKey(pem8);
-  const now = Math.floor(Date.now() / 1000);
-  const b64 = (o: Record<string, unknown>) =>
-    Buffer.from(JSON.stringify(o)).toString("base64url");
-  const header = b64({ alg: "RS256", typ: "JWT" });
-  const claim = b64({
-    iss: sa.client_email,
-    scope: "https://www.googleapis.com/auth/datastore",
-    aud: "https://oauth2.googleapis.com/token",
-    exp: now + 3600,
-    iat: now,
-  });
-  const payload = header + "." + claim;
-  const sig = crypto.sign("RSA-SHA256", Buffer.from(payload), key).toString("base64url");
-  const jwt = payload + "." + sig;
-  const res = await fetch(
-    "https://oauth2.googleapis.com/token",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-        assertion: jwt,
-      }),
-    }
-  );
-  if (!res.ok) return null;
-  const data = await res.json();
-  cachedToken = {
-    token: data.access_token,
-    expires: Date.now() + data.expires_in * 1000,
-  };
-  return data.access_token;
-}
+// --- Document helpers ---
 
-function toFields(data: Record<string, unknown>): Record<string, unknown> {
-  const fields: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(data)) {
-    if (v === null || v === undefined) fields[k] = { nullValue: null };
-    else if (typeof v === "boolean") fields[k] = { booleanValue: v };
-    else if (Array.isArray(v))
-      fields[k] = {
-        arrayValue: { values: v.map((x) => ({ stringValue: String(x) })) },
-      };
-    else if (v instanceof Date)
-      fields[k] = { timestampValue: v.toISOString() };
-    else fields[k] = { stringValue: String(v) };
-  }
-  return fields;
-}
-
-function fromFields(
-  fields: Record<string, unknown>
-): Record<string, unknown> {
-  const obj: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(fields)) {
-    const f = v as Record<string, unknown>;
-    if (f.stringValue !== undefined) obj[k] = f.stringValue;
-    else if (f.integerValue !== undefined) obj[k] = parseInt(f.integerValue as string, 10);
-    else if (f.booleanValue !== undefined) obj[k] = f.booleanValue;
-    else if (f.timestampValue !== undefined) obj[k] = new Date(f.timestampValue as string);
-    else if (f.nullValue !== undefined) obj[k] = null;
-    else if (f.arrayValue !== undefined) {
-      const arr = (f.arrayValue as Record<string, unknown>).values as Record<string, unknown>[] | undefined;
-      obj[k] = arr ? arr.map((x) => x.stringValue || "") : [];
-    } else if (f.mapValue !== undefined) {
-      obj[k] = fromFields(
-        (f.mapValue as Record<string, unknown>).fields as Record<string, unknown> || {}
-      );
-    } else {
-      obj[k] = JSON.stringify(f);
-    }
-  }
-  return obj;
-}
-
-function docRef(name: string) {
+function docToObj(doc: any) {
+  if (!doc) return null;
   return {
-    get: async () => {
-      const token = await getAccessToken();
-      if (!token) return { exists: false, data: () => null };
-      const res = await fetch(
-        `https://firestore.googleapis.com/v1/${name}`,
-        { headers: { Authorization: "Bearer " + token } }
-      );
-      if (!res.ok) {
-        if (res.status === 404) return { exists: false, data: () => null };
-        console.error("[Admin] Firestore get error:", await res.text());
-        return { exists: false, data: () => null };
-      }
-      const data = await res.json();
-      return {
-        exists: true,
-        id: data.name.split("/").pop(),
-        data: () => fromFields(data.fields || {}),
-      };
-    },
-    set: async (
-      data: Record<string, unknown>,
-      options?: { merge?: boolean }
-    ) => {
-      const token = await getAccessToken();
-      if (!token) throw new Error("No access token");
-      const fields = toFields(data);
-      const url =
-        `https://firestore.googleapis.com/v1/${name}` +
-        (options?.merge ? "?updateMask.fieldPaths=value&updateMask.fieldPaths=updated_at" : "");
-      const method = options?.merge ? "PATCH" : "POST";
-      const res = await fetch(url, {
-        method,
-        headers: {
-          Authorization: "Bearer " + token,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ fields }),
-      });
-      if (!res.ok) {
-        console.error("[Admin] Firestore set error:", await res.text());
-        throw new Error("Write failed: " + res.status);
-      }
-      return { id: (await res.json()).name.split("/").pop() || "" };
-    },
-    delete: async () => {
-      const token = await getAccessToken();
-      if (!token) throw new Error("No access token");
-      const res = await fetch(
-        `https://firestore.googleapis.com/v1/${name}`,
-        { method: "DELETE", headers: { Authorization: "Bearer " + token } }
-      );
-      if (!res.ok) {
-        console.error("[Admin] Firestore delete error:", await res.text());
-        throw new Error("Delete failed: " + res.status);
-      }
-    },
+    id: doc.id,
+    exists: true,
+    data: () => ({ id: doc.id, ...doc.data }),
   };
 }
+
+// --- Public API ---
 
 export async function adminDb() {
-  const sa = getSA();
-  if (!sa) return null;
-  const base = `https://firestore.googleapis.com/v1/projects/${sa.project_id}/databases/(default)/documents`;
+  await init();
 
   return {
     collection: (name: string) => ({
       get: async () => {
-        const token = await getAccessToken();
-        if (!token) return { size: 0, docs: [], forEach: () => {} };
-        const res = await fetch(base + ":runQuery", {
-          method: "POST",
-          headers: {
-            Authorization: "Bearer " + token,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            structuredQuery: {
-              from: [{ collectionId: name }],
-            },
-          }),
-        });
-        if (!res.ok) {
-          console.error("[Admin] Firestore query error:", await res.text());
-          return { size: 0, docs: [], forEach: () => {} };
-        }
-        const results = await res.json();
-        const docs = results
-          .filter((r: Record<string, unknown>) => r.document)
-          .map((r: Record<string, unknown>) => {
-            const doc = r.document as Record<string, unknown>;
-            return {
-              id: (doc.name as string).split("/").pop(),
-              data: () => fromFields((doc.fields as Record<string, unknown>) || {}),
-              exists: true,
-            };
-          });
+        const rows = await sql`
+          SELECT id, data FROM collections WHERE name = ${name} ORDER BY created_at DESC
+        `;
+        const docs = rows.map((r: any) => ({
+          id: r.id,
+          exists: true,
+          data: () => ({ id: r.id, ...r.data }),
+        }));
         return {
           size: docs.length,
           docs,
-          forEach: (fn: (doc: unknown) => void) => docs.forEach(fn),
+          forEach: (fn: (doc: any) => void) => docs.forEach(fn),
         };
       },
+
       add: async (data: Record<string, unknown>) => {
-        const token = await getAccessToken();
-        if (!token) throw new Error("No access token");
-        const fields = toFields(data);
-        const res = await fetch(base + "/" + name, {
-          method: "POST",
-          headers: {
-            Authorization: "Bearer " + token,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ fields }),
-        });
-        if (!res.ok) {
-          console.error("[Admin] Firestore error:", await res.text());
-          throw new Error("Write failed: " + res.status);
-        }
-        return { id: (await res.json()).name.split("/").pop() || "" };
+        const id = crypto.randomUUID();
+        await sql`
+          INSERT INTO collections (id, name, data)
+          VALUES (${id}, ${name}, ${sql.json(data)})
+        `;
+        return { id };
       },
-      doc: (id: string) => docRef(base + "/" + name + "/" + id),
-      where: (field: string, op: string, value: unknown) => {
-        // Build a query with a single where filter
-        let opStr = "EQUAL";
-        if (op === ">=") opStr = "GREATER_THAN_OR_EQUAL";
-        if (op === "==") opStr = "EQUAL";
-        if (op === ">") opStr = "GREATER_THAN";
-        if (op === "<") opStr = "LESS_THAN";
-        if (op === "<=") opStr = "LESS_THAN_OR_EQUAL";
-        if (op === "array-contains") opStr = "ARRAY_CONTAINS";
 
-        let val: Record<string, unknown>;
-        if (value instanceof Date) val = { timestampValue: value.toISOString() };
-        else if (typeof value === "string") val = { stringValue: value };
-        else if (typeof value === "number") val = { integerValue: String(value) };
-        else if (typeof value === "boolean") val = { booleanValue: value };
-        else val = { stringValue: String(value) };
+      doc: (id: string) => ({
+        get: async () => {
+          const [row] = await sql`
+            SELECT id, data FROM collections WHERE name = ${name} AND id = ${id}
+          `;
+          if (!row) return { exists: false, data: () => null, id };
+          return {
+            id: row.id,
+            exists: true,
+            data: () => ({ id: row.id, ...row.data }),
+          };
+        },
 
-        const filter = {
-          fieldFilter: {
-            field: { fieldPath: field },
-            op: opStr,
-            value: val,
-          },
-        };
-
-        return {
-          get: async () => {
-            const token = await getAccessToken();
-            if (!token) return { size: 0, docs: [], forEach: () => {} };
-            const res = await fetch(base + ":runQuery", {
-              method: "POST",
-              headers: {
-                Authorization: "Bearer " + token,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                structuredQuery: {
-                  from: [{ collectionId: name }],
-                  where: { compositeFilter: { op: "AND", filters: [filter] } },
-                },
-              }),
-            });
-            if (!res.ok) {
-              console.error("[Admin] Firestore where error:", await res.text());
-              return { size: 0, docs: [], forEach: () => {} };
+        set: async (data: Record<string, unknown>, options?: { merge?: boolean }) => {
+          const { id: _id, ...cleanData } = data;
+          if (options?.merge) {
+            // Check if doc exists
+            const [existing] = await sql`
+              SELECT data FROM collections WHERE name = ${name} AND id = ${id}
+            `;
+            if (existing) {
+              const merged = { ...existing.data, ...cleanData };
+              await sql`
+                UPDATE collections SET data = ${sql.json(merged)}, updated_at = NOW()
+                WHERE name = ${name} AND id = ${id}
+              `;
+            } else {
+              await sql`
+                INSERT INTO collections (id, name, data)
+                VALUES (${id}, ${name}, ${sql.json(cleanData)})
+              `;
             }
-            const results = await res.json();
-            const docs = results
-              .filter((r: Record<string, unknown>) => r.document)
-              .map((r: Record<string, unknown>) => {
-                const doc = r.document as Record<string, unknown>;
-                return {
-                  id: (doc.name as string).split("/").pop(),
-                  data: () =>
-                    fromFields(
-                      (doc.fields as Record<string, unknown>) || {}
-                    ),
-                  exists: true,
-                };
-              });
-            return {
-              size: docs.length,
-              docs,
-              forEach: (fn: (doc: unknown) => void) => docs.forEach(fn),
-            };
-          },
-        };
-      },
+          } else {
+            await sql`
+              INSERT INTO collections (id, name, data)
+              VALUES (${id}, ${name}, ${sql.json(cleanData)})
+              ON CONFLICT (name, id) DO UPDATE SET data = ${sql.json(cleanData)}, updated_at = NOW()
+            `;
+          }
+        },
+
+        update: async (data: Record<string, unknown>) => {
+          const [existing] = await sql`
+            SELECT data FROM collections WHERE name = ${name} AND id = ${id}
+          `;
+          if (existing) {
+            const merged = { ...existing.data, ...data };
+            await sql`
+              UPDATE collections SET data = ${sql.json(merged)}, updated_at = NOW()
+              WHERE name = ${name} AND id = ${id}
+            `;
+          }
+        },
+
+        delete: async () => {
+          await sql`
+            DELETE FROM collections WHERE name = ${name} AND id = ${id}
+          `;
+        },
+      }),
+
+      where: (field: string, op: string, value: unknown) => ({
+        get: async () => {
+          // We fetch all docs and filter in-memory (simple approach)
+          const rows = await sql`
+            SELECT id, data FROM collections WHERE name = ${name} ORDER BY created_at DESC
+          `;
+
+          const filtered = rows.filter((r: any) => {
+            const val = r.data[field];
+            if (op === "==") return val == value;
+            if (op === ">") return val > value;
+            if (op === ">=") return val >= value;
+            if (op === "<") return val < value;
+            if (op === "<=") return val <= value;
+            if (op === "array-contains") return Array.isArray(val) && val.includes(value);
+            return false;
+          });
+
+          const docs = filtered.map((r: any) => ({
+            id: r.id,
+            exists: true,
+            data: () => ({ id: r.id, ...r.data }),
+          }));
+
+          return {
+            size: docs.length,
+            docs,
+            forEach: (fn: (doc: any) => void) => docs.forEach(fn),
+          };
+        },
+      }),
     }),
   };
 }
 
+/**
+ * Verify a Firebase ID token using the REST API.
+ * This still uses Firebase Auth (no PostgreSQL replacement for auth).
+ */
 export async function verifyIdToken(token: string) {
   try {
-    const sa = getSA();
-    if (!sa) throw new Error("No service account");
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+    if (!apiKey) throw new Error("Firebase API key not configured");
+
     const res = await fetch(
-      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${process.env.NEXT_PUBLIC_FIREBASE_API_KEY}`,
+      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
