@@ -78,7 +78,6 @@ function FAQItem({ question, answer, isOpen, onToggle, index, isInView }: FAQIte
 export default function Home(): JSX.Element {
   const { translations } = useLanguage();
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
-  const [isHydrated, setIsHydrated] = useState(false);
     const [heroAnimationsComplete, setHeroAnimationsComplete] = useState(false);
     const prefersReducedMotion = useReducedMotion();
 
@@ -109,11 +108,6 @@ export default function Home(): JSX.Element {
   const toggleFAQ = (index: number): void => {
     setOpenFAQ(openFAQ === index ? null : index);
   };
-
-  // Handle hydration
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
 
   // Safety fallback: ensure hero content is visible after animation timeout
   useEffect(() => {
@@ -169,10 +163,6 @@ export default function Home(): JSX.Element {
   const heroAnimateDelay1 = prefersReducedMotion || heroAnimationsComplete ? '' : 'hero-animate-delay-1';
   const heroAnimateDelay2 = prefersReducedMotion || heroAnimationsComplete ? '' : 'hero-animate-delay-2';
   const heroAnimateDelay3 = prefersReducedMotion || heroAnimationsComplete ? '' : 'hero-animate-delay-3';
-
-  if (!isHydrated) {
-    return null;
-  }
 
   return (
       <>
