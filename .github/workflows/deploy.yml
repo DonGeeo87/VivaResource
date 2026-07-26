@@ -14,6 +14,7 @@ jobs:
 
       - name: Create .env from secrets
         run: |
+          rm -f .env
           cat > .env << 'EOF'
           # Firebase
           NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
