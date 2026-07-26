@@ -58,3 +58,9 @@ export async function loginWithJwt(
   setSession(data.token, data.user);
   return { token: data.token, user: data.user };
 }
+
+/** Get current user UID from stored session (replaces auth.currentUser?.uid) */
+export function getCurrentUserId(): string | null {
+  const user = getUser();
+  return user?.uid || null;
+}

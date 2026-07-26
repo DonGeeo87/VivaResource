@@ -5,8 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-import type { Timestamp } from "firebase/firestore";
-import { auth } from "@/lib/firebase/config";
+import type { Timestamp } from "@/lib/db-client";
+import { getCurrentUserId } from "@/lib/auth/client";
 import ImageUpload from "@/components/ImageUpload";
 import { formTemplates } from "@/data/formTemplates";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -284,13 +284,13 @@ export default function EventForm({ initialData, onSubmit, template, formTemplat
         const method = initialData?.id ? "PUT" : "POST";
         const endpoint = initialData?.id ? `/api/events/${initialData.id}` : "/api/events";
 
-        // Get Firebase auth token
-        const user = auth.currentUser;
-        if (!user) {
+        // Get auth token
+        const uid = getCurrentUserId();
+        if (!uid) {
           throw new Error("Debes iniciar sesión para realizar esta acción");
         }
 
-        const token = await user.getIdToken();
+        const token = getToken();
 
         const response = await fetch(endpoint, {
           method,

@@ -3,10 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Send, Mail, Phone, Calendar, Check, X, Plus, ClipboardList, Inbox, MessageSquare, ChevronDown, ChevronUp } from "lucide-react";
-import { doc, getDoc, updateDoc, addDoc, collection, Timestamp, query, where, orderBy, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
-import { auth } from "@/lib/firebase/config";
-import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc, updateDoc, addDoc, collection, Timestamp, query, where, orderBy, getDocs, db } from "@/lib/db-client";
+import { getToken, getCurrentUserId } from "@/lib/auth/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { VolunteerMessage } from "@/types/volunteer";
 
@@ -54,10 +52,8 @@ export default function AdminVolunteerDetailPage(): JSX.Element {
   const [adminUid, setAdminUid] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) setAdminUid(user.uid);
-    });
-    return () => unsubscribe();
+    const uid = getCurrentUserId();
+    if (uid) setAdminUid(uid);
   }, []);
 
   // Messages state

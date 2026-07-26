@@ -3,17 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { db } from "@/lib/firebase/config";
-import { auth } from "@/lib/firebase/config";
-import {
-  doc,
-  getDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-  deleteDoc,
-} from "firebase/firestore";
+import { db, doc, getDoc, collection, query, where, getDocs, deleteDoc } from "@/lib/db-client";
+import { getCurrentUserId, getToken } from "@/lib/auth/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatMountainDate } from "@/lib/timezone";
 import {
@@ -202,11 +193,10 @@ export default function EventDetailsPage(): JSX.Element {
     setToggling(field);
     setToggleResult(null);
     try {
-      const user = auth.currentUser;
-      if (!user) {
+      const token = getToken();
+      if (!token) {
         throw new Error(language === "es" ? "Debes iniciar sesión" : "You must be logged in");
       }
-      const token = await user.getIdToken();
       const newVal = !event[field];
       const response = await fetch(`/api/events/${eventId}`, {
         method: "PUT",
@@ -241,11 +231,10 @@ export default function EventDetailsPage(): JSX.Element {
     setToggling("publishing");
     setToggleResult(null);
     try {
-      const user = auth.currentUser;
-      if (!user) {
+      const token = getToken();
+      if (!token) {
         throw new Error(language === "es" ? "Debes iniciar sesión" : "You must be logged in");
       }
-      const token = await user.getIdToken();
       const response = await fetch(`/api/events/${eventId}`, {
         method: "PUT",
         headers: {

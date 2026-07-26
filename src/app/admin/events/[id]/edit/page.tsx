@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
+import { doc, getDoc, db } from "@/lib/db-client";
+import { getToken } from "@/lib/auth/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import EventForm, { EventFormData } from "@/components/forms/EventForm";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import { auth } from "@/lib/firebase/config";
 
 interface EventData {
   title_en: string;
@@ -106,12 +105,11 @@ export default function EventEditPage(): JSX.Element {
   }, [eventId, isES]);
 
   const handleSubmit = async (data: EventFormData): Promise<void> => {
-    const user = auth.currentUser;
-    if (!user) {
+    const token = getToken();
+    if (!token) {
       throw new Error(isES ? "Debes iniciar sesión" : "You must be logged in");
     }
 
-    const token = await user.getIdToken();
     const response = await fetch(`/api/events/${eventId}`, {
       method: "PUT",
       headers: {

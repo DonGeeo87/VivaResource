@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Search, Trash2, Calendar, MapPin, Users, X, Download } from "lucide-react";
-import { Timestamp } from "firebase/firestore";
-import { auth } from "@/lib/firebase/config";
+import { Timestamp, db } from "@/lib/db-client";
+import { getCurrentUserId } from "@/lib/auth/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatMountainDate } from "@/lib/timezone";
 
@@ -100,14 +100,11 @@ export default function AdminEventsPage(): JSX.Element {
 
   const fetchEvents = async () => {
     try {
-      const user = auth.currentUser;
-      if (!user) {
+      const token = getCurrentUserId() ? getToken() : null;
+      if (!token) {
         console.error("User not authenticated");
-        setLoading(false);
         return;
       }
-
-      const token = await user.getIdToken();
       const response = await fetch("/api/events", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -152,10 +149,8 @@ export default function AdminEventsPage(): JSX.Element {
   const fetchRegistrations = async (eventId: string) => {
     try {
       setLoadingRegistrations(true);
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const token = await user.getIdToken();
+      const token = getToken();
+      if (!token) return;
       const response = await fetch(`/api/events/${eventId}/registrations`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -182,12 +177,11 @@ export default function AdminEventsPage(): JSX.Element {
   const handleDelete = async (id: string) => {
     if (confirm(language === "es" ? "¿Estás seguro de eliminar este evento?" : "Are you sure you want to delete this event?")) {
       try {
-        const user = auth.currentUser;
-        if (!user) {
-          throw new Error("User not authenticated");
-        }
-
-        const token = await user.getIdToken();
+        const token = getCurrentUserId() ? getToken() : null;
+      if (!token) {
+        console.error("User not authenticated");
+        return;
+      }
         const response = await fetch(`/api/events/${id}`, {
           method: "DELETE",
           headers: {
@@ -209,9 +203,8 @@ export default function AdminEventsPage(): JSX.Element {
   const handleToggleFinish = async (event: Event) => {
     setToggling(event.id);
     try {
-      const user = auth.currentUser;
-      if (!user) return;
-      const token = await user.getIdToken();
+      const token = getToken();
+      if (!token) return;
       const response = await fetch(`/api/events/${event.id}`, {
         method: "PUT",
         headers: {
@@ -240,9 +233,8 @@ export default function AdminEventsPage(): JSX.Element {
   const handleToggleArchive = async (event: Event) => {
     setToggling(event.id);
     try {
-      const user = auth.currentUser;
-      if (!user) return;
-      const token = await user.getIdToken();
+      const token = getToken();
+      if (!token) return;
       const response = await fetch(`/api/events/${event.id}`, {
         method: "PUT",
         headers: {
