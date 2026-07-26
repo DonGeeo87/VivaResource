@@ -171,7 +171,7 @@ export default function Home(): JSX.Element {
   const heroAnimateDelay3 = prefersReducedMotion || heroAnimationsComplete ? '' : 'hero-animate-delay-3';
 
   if (!isHydrated) {
-    return <HomeSkeleton />;
+    return null;
   }
 
   return (
