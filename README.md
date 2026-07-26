@@ -1,42 +1,43 @@
-# Viva Resource Foundation Website
+# Viva Resource Website
 
 [![Next.js](https://img.shields.io/badge/Next.js-14.2-000000?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?logo=typescript)](https://typescriptlang.org)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-06B6D4?logo=tailwindcss)](https://tailwindcss.com)
-[![Firebase](https://img.shields.io/badge/Firebase-Firestore%20Auth-FFCA28?logo=firebase)](https://firebase.google.com)
-[![Vercel](https://img.shields.io/badge/Vercel-Deploy-000?logo=vercel)](https://vercel.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql)](https://postgresql.org)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker)](https://docker.com)
 
-Sitio web bilingüe (Inglés/Español) para la Fundación Viva Resource. Nonprofit con panel admin completo.
+Sitio web bilingüe (Inglés/Español) para Viva Resource. Nonprofit con panel admin completo, migrado de Firebase a infraestructura propia en VPS.
 
 ## 🚀 Características Principales
 
 - **Páginas Públicas**: Home, About, Blog, Events, Get Involved, Resources, Contact, Donate, Forms
-- **Panel Admin**: Dashboard, Blog/Events/Volunteers/Forms/Users/Donations/Newsletter/AI/Settings
-- **Firebase**: Firestore (contenido), Auth (admin/voluntarios), Storage (imágenes)
-- **Cloudinary**: Imágenes optimizadas
+- **Panel Admin**: Dashboard, Blog, Events, Volunteers, Forms, Users, Donations, Newsletter, AI, Settings, SEO
+- **Base de Datos**: PostgreSQL (auto-gestionado en VPS, migrado desde Firestore)
+- **Auth**: JWT + Firebase Auth REST API (login existente sin SDK)
+- **Storage**: Cloudinary (imágenes optimizadas)
 - **Pagos**: PayPal (one-time/monthly)
 - **Forms Dinámicos**: Builder con validación Zod
 - **Bilingüe**: Traducciones contextuales EN/ES
 - **Accesibilidad**: WCAG 2.1 AA, ARIA, focus visible
 - **Testing**: Vitest (unit), Playwright (E2E)
-- **SEO/Performance**: SSR, sitemap, metadata dinámica, images AVIF/WebP
+- **SEO/Performance**: SSR, sitemap dinámico, metadata, images AVIF/WebP
+- **Infraestructura**: Docker, VPS propio, GitHub Actions CI/CD
 
 ## 🛠️ Tech Stack
 
-| Frontend | Backend | DevOps | Testing |
-|----------|---------|--------|---------|
-| Next.js 14 App Router | Firebase Firestore | Vercel | Vitest |
-| React 18 + TS | Firebase Auth | Firebase Hosting | Playwright |
-| Tailwind CSS | Cloudinary | Git | |
-| Zod Validation | Resend Email | | |
-| React Hook Form | PayPal | | |
+| Frontend | Backend | Infraestructura | Testing |
+|----------|---------|-----------------|---------|
+| Next.js 14 App Router | PostgreSQL 16 | Docker | Vitest |
+| React 18 + TS | Express API routes | VPS (62.146.227.146) | Playwright |
+| Tailwind CSS 3.4 | JWT Auth | GitHub Actions | |
+| Zod + React Hook Form | Cloudinary | Nginx Proxy Manager | |
+| Lucide React | Nodemailer (Gmail SMTP) | Coolify | |
 
 ## 📋 Requisitos Previos
 
 - Node.js 18+
-- [Firebase CLI](https://firebase.google.com/docs/cli) (`npm i -g firebase-tools`)
-- Cuenta Firebase (proyecto: `vivaresource`)
-- Vercel CLI (opcional: `npm i -g vercel`)
+- Docker (para deploy en VPS)
+- Acceso SSH al VPS (62.146.227.146)
 
 ## 🧪 Instalación & Setup Local
 
@@ -46,78 +47,58 @@ cd Viva-Resource
 npm install
 ```
 
-### 1. Firebase Setup
+### 1. Variables de Entorno
 
-**Opción A: Emulador Local (Recomendado para dev)**
-```bash
-npm install -g firebase-tools
-firebase init emulators
-firebase emulators:start --only firestore,auth,storage
-```
-
-**Opción B: Proyecto Real**
-```bash
-firebase login
-firebase use vivaresource
-```
-
-**Service Account para Seeds (scripts/)**
-```bash
-firebase deploy --only firestore:rules  # Primero deploy rules
-```
-Descarga `vivaresource-firebase-adminsdk-*.json` de Firebase Console > Project Settings > Service Accounts.
-
-Coloca en root como `firebase-service-account.json`.
-
-### 2. Variables de Entorno
-
-`.env.local` (todas requeridas):
-```
-# Firebase
+`.env.local`:
+```env
+# Firebase (solo para auth REST, sin SDK)
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=vivaresource
 NEXT_PUBLIC_FIREBASE_APP_ID=1:...
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=vivaresource.appspot.com
 NEXT_PUBLIC_FIREBASE_API_KEY=AIza...
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=vivaresource.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
-FIREBASE_SERVICE_ACCOUNT_PATH=./firebase-service-account.json  # Para seeds
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=vivaresource.firebasestorage.app
+FIREBASE_ADMIN_KEY=...  # Service account base64 (para migración/adminDb legacy)
+
+# PostgreSQL
+PGHOST=localhost
+PGPORT=5432
+PGDATABASE=vivaresource_blog
+PGUSER=vivaresource
+PGPASSWORD=...
 
 # Email
-RESEND_API_KEY=...
+EMAIL_USER=ginterdonatop@gmail.com
+EMAIL_APP_PASSWORD=...
 
 # Cloudinary
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=...
 CLOUDINARY_API_KEY=...
 CLOUDINARY_API_SECRET=...
 
-# AI (OpenRouter)
-OPENROUTER_API_KEY=...
-
 # Site
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 NEWSLETTER_ADMIN_EMAILS=admin@vivaresource.org
+JWT_SECRET=...  # Para firmar tokens JWT
 
 # PayPal
 NEXT_PUBLIC_PAYPAL_CLIENT_ID=...
 PAYPAL_CLIENT_SECRET=...
 PAYPAL_MODE=sandbox
+
+# Reports
+REPORT_SECRET=...
 ```
 
-### 3. Seed Database
+### 2. Desarrollo
 
 ```bash
-node scripts/init-firestore.js
-node scripts/seed-blog-posts.js
-node scripts/add-admin.js  # Agrega primer admin
+npm run dev        # http://localhost:3000
+npm run build      # Build producción (usar build.bat en Windows)
+npm test           # Vitest (51 tests)
 ```
 
-### 4. Desarrollo
-
-```bash
-npm run dev  # http://localhost:3000
-```
-
-**Admin**: `/admin` (usa email/password Firebase Auth)
+**Admin**: `/admin` (usa JWT + Firebase Auth REST)
 
 ## 🧑‍💻 Scripts NPM
 
@@ -127,25 +108,28 @@ npm run dev  # http://localhost:3000
 | `npm run build` | Build producción |
 | `npm run start` | Server prod |
 | `npm run lint` | ESLint |
-| `npm test` | Vitest unit |
+| `npm test` | Vitest unit (51 tests) |
 | `npm run test:ui` | Vitest UI |
 | `npm run test:e2e` | Playwright E2E |
-| `deploy-vercel.bat` | Deploy Windows |
+| `build.bat` | Build en Windows (evita MSYS corruption) |
 
-## 🗄️ Esquema Firestore (Resumido)
+## 🗄️ Esquema de Base de Datos
 
-Ver [DATABASE.md](DATABASE.md) completo.
+El proyecto usa PostgreSQL con una tabla genérica `collections` para datos flexibles (migrado desde Firestore):
 
-| Colección | Propósito | Permisos |
-|-----------|-----------|----------|
-| `blog_posts` | Posts bilingües | Read published, edit w/ role |
-| `events` | Eventos | Read published |
-| `event_registrations` | Registros eventos | Create public |
-| `forms` / `form_submissions` | Forms dinámicos | Create public |
-| `admin_users` | Usuarios admin | Admin only |
-| `donations` | Donaciones PayPal | View editor |
-| `volunteer_users` / `tasks` / `messages` | Portal voluntarios | Own + editor |
-| `site_settings` | Config sitio | Admin write |
+```sql
+CREATE TABLE collections (
+  id TEXT NOT NULL,
+  name TEXT NOT NULL,       -- Nombre de la colección (equivalente a Firestore)
+  data JSONB NOT NULL,       -- Datos del documento
+  created_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ,
+  PRIMARY KEY (name, id)
+);
+```
+
+Colecciones migradas (313 documentos, 16 colecciones):
+`admin_users`, `blog_posts`, `events`, `event_registrations`, `forms`, `form_submissions`, `help_requests`, `newsletter_subscribers`, `participants`, `seo_settings`, `site_images`, `site_settings`, `survey_responses`, `volunteer_messages`, `volunteer_registrations`, `volunteer_users`
 
 ## 📁 Estructura Proyecto
 
@@ -154,9 +138,12 @@ Ver [DATABASE.md](DATABASE.md) completo.
 ├── src/app/             # Pages (App Router)
 ├── src/components/      # UI reutilizables
 ├── src/contexts/        # Auth/Language/Recaptcha
-├── src/lib/             # Firebase/Cloudinary/Email
-├── src/types/           # TS Types (ver DATABASE.md)
-├── scripts/             # Seeds/Firestore init
+├── src/lib/
+│   ├── auth/            # JWT sign/verify + client session
+│   ├── admin-db.ts      # PostgreSQL wrapper (reemplaza Firestore)
+│   └── db-client.ts     # Cliente frontend (imita Firestore API)
+├── src/types/           # TS Types
+├── scripts/             # Migración Firestore→PostgreSQL
 ├── public/              # Assets estáticos
 ├── e2e/                 # Playwright tests
 └── ...
@@ -164,10 +151,29 @@ Ver [DATABASE.md](DATABASE.md) completo.
 
 ## 🚀 Despliegue
 
-Ver [DEPLOYMENT.md](DEPLOYMENT.md)
+### Pipeline CI/CD (GitHub Actions)
 
-- **Vercel**: `vercel --prod`
-- **Firebase Hosting**: `firebase deploy`
+| Branch | Workflow | Destino |
+|--------|----------|---------|
+| `master` | Deploy Viva Resource | `vivaresource.com` (producción) |
+| `migracion-vps` | Deploy Viva Migracion | `viva.codigoguerrero.dev` (staging) |
+
+### Manual (VPS)
+
+```bash
+docker compose -f docker-compose.migracion.yml build --no-cache
+docker compose -f docker-compose.migracion.yml up -d
+```
+
+## 🔄 Historial de Migración
+
+- **Jul 2026**: Migración completa de Firebase a infraestructura propia
+  - Firebase Auth → JWT + Firebase Auth REST API
+  - Firestore → PostgreSQL (tabla collections con JSONB)
+  - Firebase Storage → Cloudinary (ya estaba)
+  - Firebase Admin SDK → REST wrapper propio
+  - 0 dependencias de Firebase en el bundle frontend
+  - 313 documentos migrados, 0 pérdida de datos
 
 ## 🤝 Contribuir
 
@@ -175,10 +181,10 @@ Ver [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## 📄 Licencia
 
-Private - Viva Resource Foundation
+Private - Viva Resource
 
 ---
 
-**Live**: https://vivaresource.org  
-**Design**: Figma prototypes en stitch/  
-**Issues**: [Crear issue](https://github.com/issues/new)
+**Live**: https://vivaresource.com  
+**Staging**: https://viva.codigoguerrero.dev  
+**Issues**: [Crear issue](https://github.com/DonGeeo87/VivaResource/issues/new)

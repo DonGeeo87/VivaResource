@@ -234,7 +234,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.0.0] - 2026-03-30
+## [1.0.0] - 2026-07-26 - Migración Completa Firebase → VPS
+
+### Arquitectura 🔄
+- **Firebase Auth → JWT**: Login migrado a JWT con jsonwebtoken. Firebase Auth solo como backend REST para validar credenciales existentes
+- **Firestore → PostgreSQL**: 313 documentos migrados de 16 colecciones a tabla `collections` con JSONB
+- **Firebase Admin SDK → REST wrapper**: Eliminado firebase-admin, reemplazado por wrapper REST propio (`admin-db.ts`)
+- **Firebase Storage → Cloudinary**: Ya estaba migrado, limpieza de código muerto
+- **0 dependencias de Firebase en bundle frontend**: Eliminado `firebase` y `firebase-admin` de package.json
+
+### Nuevos Componentes 🆕
+- `src/lib/auth/jwt.ts` — Firma y verificación de JWT
+- `src/lib/auth/client.ts` — Sesión en localStorage + login con JWT
+- `src/lib/db-client.ts` — Cliente frontend que imita API de Firestore (collection, doc, getDocs, addDoc, etc.)
+- `src/lib/admin-db.ts` — Wrapper PostgreSQL para server-side (reemplaza firebase/admin)
+- `src/app/api/db/[collection]/route.ts` — API route genérica CRUD
+- `src/app/api/auth/jwt-login/route.ts` — Login con JWT
+- `scripts/migrate-firestore-to-pg.js` — Script migración datos
+- `scripts/migrate-v2.py` — Script migración v2 (0 errores, 313 docs)
+- `build.bat` — Build en Windows sin MSYS corruption
+
+### Tests 🧪
+- 24 nuevos tests de migración: db-client CRUD, auth JWT, rate-limit, timezone
+- 51 tests total en el proyecto, 0 fallos
+
+### Infraestructura 🏗️
+- Nuevo workflow: `deploy-migracion.yml` para branch `migracion-vps`
+- Subdominio staging: `viva.codigoguerrero.dev`
+- Container `viva-migracion` + `viva-migracion-db` en VPS
+- Cert SSL Let's Encrypt para staging
+
+### Archivos Eliminados 🗑️
+- `src/lib/firebase/` (config.ts, storage.ts, admin.ts)
+- `src/lib/supabase/bridge.ts`
+- `firebase` y `firebase-admin` de package.json
+
+### Breaking Changes ⚠️
+- `FIREBASE_ADMIN_KEY` ya no es necesaria (datos migrados a PostgreSQL)
+- Las API routes ahora usan PostgreSQL via `admin-db.ts`
+- El frontend ya no importa Firebase SDK
+
+---
 
 ### Added
 
