@@ -7,7 +7,7 @@ import { ArrowRight, CheckCircle, Calendar, MapPin, Clock, AlertCircle } from "l
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/components/Toast";
 import { formatMountainDate } from "@/lib/timezone";
-import type { Timestamp } from "firebase/firestore";
+import type { Timestamp } from "@/lib/db-client";
 
 import { db, addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from "@/lib/db-client";
 

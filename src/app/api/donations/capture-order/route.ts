@@ -9,22 +9,6 @@ const PAYPAL_BASE_URL =
     ? "https://api-m.paypal.com"
     : "https://api-m.sandbox.paypal.com";
 
-async function initFirebaseAdmin() {
-  const { getFirestore } = await import("firebase-admin/firestore");
-  const { initializeApp, getApps, cert } = await import("firebase-admin/app");
-  const path = await import("path");
-
-  if (getApps().length === 0) {
-    const serviceAccountPath = path.join(
-      process.cwd(),
-      "vivaresource-firebase-adminsdk-fbsvc-1c15e4d2ee.json"
-    );
-    const credential = cert(serviceAccountPath);
-    initializeApp({ credential });
-  }
-  return getFirestore();
-}
-
 async function getPayPalAccessToken(): Promise<string> {
   const auth = Buffer.from(
     `${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`
@@ -34,7 +18,7 @@ async function getPayPalAccessToken(): Promise<string> {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Basic ${auth}`,
+      Authorization: `Bearer ${auth}`,
     },
     body: "grant_type=client_credentials",
   });
@@ -96,9 +80,12 @@ export async function POST(request: NextRequest) {
     // Get payer info from PayPal
     const payerInfo = captureData.payer || {};
 
-    // Save to Firestore
-    const db = await initFirebaseAdmin();
-    const donationRef = db.collection("donations").doc();
+    // Save to Firestore via adminDb
+    const { adminDb } = await import("@/lib/admin-db");
+    const db = await adminDb();
+    if (!db) {
+      return NextResponse.json({ error: "Database not configured" }, { status: 500 });
+    }
 
     const amountValue = parseFloat(
       purchaseUnit?.payments?.captures?.[0]?.amount?.value || "0"
@@ -106,8 +93,7 @@ export async function POST(request: NextRequest) {
     const currency =
       purchaseUnit?.payments?.captures?.[0]?.amount?.currency_code || "USD";
 
-    await donationRef.set({
-      id: donationRef.id,
+    const donationRef = await db.collection("donations").add({
       paypalOrderId: orderId,
       paypalCaptureId: captureData.id,
       amount: amountValue,

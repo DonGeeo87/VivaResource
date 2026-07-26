@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
+
+import { adminDb } from "@/lib/admin-db";
 import * as XLSX from "xlsx";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         ciudad: ciudad || "Información no disponible",
         taller: taller || "Información no disponible",
         fuente: file.name.replace(".xlsx", "").substring(0, 50),
-        createdAt: serverTimestamp(),
+        createdAt: new Date().toISOString(),
       };
 
       batch.push(participant);
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (batch.length > 0) {
       for (const participant of batch) {
-        await addDoc(collection(db, "participants"), participant);
+        await addDoc(db.collection("participants"), participant);
         imported++;
       }
     }

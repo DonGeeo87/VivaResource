@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
-import { adminDb } from "@/lib/firebase/admin";
+import { adminDb } from "@/lib/admin-db";
 
 // Force dynamic rendering - uses Firebase Admin SDK at runtime
 export const dynamic = "force-dynamic";

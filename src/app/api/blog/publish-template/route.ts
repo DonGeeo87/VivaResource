@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { blogTemplates } from "@/data/blog-templates";
-import { adminDb } from "@/lib/firebase/admin";
+import { adminDb } from "@/lib/admin-db";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {

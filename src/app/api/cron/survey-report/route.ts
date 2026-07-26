@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
+import { adminDb } from "@/lib/admin-db";
 import { getTransporter, getAdminEmails, FROM_NAME, FROM_EMAIL } from "@/lib/email/nodemailer";
 
 export const dynamic = "force-dynamic";

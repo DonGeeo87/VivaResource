@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
+import { adminDb } from "@/lib/admin-db";
 
 // GET /api/db/[collection] — Listar documentos
 // GET /api/db/[collection]/[id] — Obtener un documento

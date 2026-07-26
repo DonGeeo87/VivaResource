@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { collection, getDocs, query, orderBy, deleteDoc, doc, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
+
+import { adminDb } from "@/lib/admin-db";
 
 interface NewsletterHistory {
   id: string;
@@ -24,10 +24,10 @@ export async function GET(): Promise<NextResponse> {
     // Try with orderBy first
     try {
       const q = query(
-        collection(db, "newsletter_history"),
+        db.collection("newsletter_history"),
         orderBy("sent_at", "desc")
       );
-      const snapshot = await getDocs(q);
+      const snapshot = await q.get();
       const history = snapshot.docs.map((d) => ({
         id: d.id,
         ...d.data(),
@@ -37,7 +37,7 @@ export async function GET(): Promise<NextResponse> {
     } catch {
       // Fallback: fetch without ordering and sort client-side
       console.log("[Newsletter History] Index not found, fetching without orderBy");
-      const snapshot = await getDocs(collection(db, "newsletter_history"));
+      const snapshot = await getDocs(db.collection("newsletter_history"));
       const history = snapshot.docs.map((d) => ({
         id: d.id,
         ...d.data(),
@@ -70,7 +70,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    await deleteDoc(doc(db, "newsletter_history", id));
+    await deleteDoc(db.collection("newsletter_history").doc(id));
 
     return NextResponse.json({ success: true, message: "Entry deleted" });
   } catch (error) {

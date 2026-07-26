@@ -22,8 +22,8 @@ import {
   HelpRequestData,
   VolunteerCertificateRequestData,
 } from "@/lib/email/notifications";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
+
+import { adminDb } from "@/lib/admin-db";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {

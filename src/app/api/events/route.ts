@@ -14,7 +14,7 @@ async function verifyAdmin(request: NextRequest) {
 
   const token = authHeader.split(" ")[1];
   try {
-    const { verifyIdToken, adminDb } = await import("@/lib/firebase/admin");
+    const { verifyIdToken, adminDb } = await import("@/lib/admin-db");
     const decodedToken = await verifyIdToken(token);
     const uid = decodedToken.uid;
 
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     };
 
     // Guardar en Firestore usando Admin SDK (bypass reglas de seguridad)
-    const { adminDb } = await import("@/lib/firebase/admin");
+    const { adminDb } = await import("@/lib/admin-db");
     const db = await adminDb();
     if (!db) {
       return NextResponse.json({ error: "Database not configured" }, { status: 500 });
@@ -204,7 +204,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     // Listar eventos usando Admin SDK
-    const { adminDb } = await import("@/lib/firebase/admin");
+    const { adminDb } = await import("@/lib/admin-db");
     const db = await adminDb();
     if (!db) {
       return NextResponse.json({ error: "Database not configured" }, { status: 500 });

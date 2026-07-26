@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase/config";
 import { signToken } from "@/lib/auth/jwt";
+
+const FIREBASE_API_KEY = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
 
 export async function POST(request: Request) {
   try {
@@ -15,13 +14,35 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate against Firebase Auth (existing users)
-    const result = await signInWithEmailAndPassword(auth, email, password);
+    // Use Firebase Auth REST API (no SDK needed)
+    const authRes = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, returnSecureToken: true }),
+      }
+    );
 
-    // Check admin_users collection
-    const userDoc = await getDoc(doc(db, "admin_users", result.user.uid));
+    if (!authRes.ok) {
+      return NextResponse.json(
+        { error: "Credenciales inválidas" },
+        { status: 401 }
+      );
+    }
 
-    if (!userDoc.exists()) {
+    const authData = await authRes.json();
+    const uid = authData.localId;
+
+    // Check admin_users collection via adminDb
+    const { adminDb } = await import("@/lib/admin-db");
+    const db = await adminDb();
+    if (!db) {
+      return NextResponse.json({ error: "Database not configured" }, { status: 500 });
+    }
+
+    const userDoc = await db.collection("admin_users").doc(uid).get();
+    if (!userDoc.exists) {
       return NextResponse.json(
         { error: "No tienes acceso de administrador" },
         { status: 403 }
@@ -29,12 +50,12 @@ export async function POST(request: Request) {
     }
 
     const userData = userDoc.data();
-    const role = userData.role || "viewer";
+    const role = userData?.role || "viewer";
 
     // Generate JWT
     const token = signToken({
-      uid: result.user.uid,
-      email: result.user.email || email,
+      uid,
+      email: authData.email || email,
       role,
       type: "admin",
     });
@@ -42,26 +63,12 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       token,
-      user: {
-        uid: result.user.uid,
-        email: result.user.email,
-        role,
-      },
+      user: { uid, email: authData.email, role },
     });
   } catch (error: unknown) {
     console.error("Login error:", error);
-
-    const errorMessage = error instanceof Error ? error.message : "Error al iniciar sesión";
-
-    if (errorMessage.includes("auth/invalid-credential")) {
-      return NextResponse.json(
-        { error: "Credenciales inválidas" },
-        { status: 401 }
-      );
-    }
-
     return NextResponse.json(
-      { error: errorMessage },
+      { error: error instanceof Error ? error.message : "Error al iniciar sesión" },
       { status: 500 }
     );
   }

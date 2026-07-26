@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
+
+import { adminDb } from "@/lib/admin-db";
 import { verifyToken, getTokenFromHeader } from "@/lib/auth/jwt";
 
 export async function GET(request: Request) {

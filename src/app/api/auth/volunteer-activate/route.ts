@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase/config";
 import { signToken } from "@/lib/auth/jwt";
+
+const FIREBASE_API_KEY = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
 
 export async function POST(request: Request) {
   try {
@@ -15,22 +14,42 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create Firebase Auth account (temporal — will migrate to own auth)
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    // Create Firebase Auth account via REST API
+    const signupRes = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, returnSecureToken: true }),
+      }
+    );
 
-    await updateProfile(userCredential.user, {
-      displayName: `${firstName} ${lastName}`,
-    });
+    if (!signupRes.ok) {
+      const err = await signupRes.json();
+      return NextResponse.json(
+        { error: err.error?.message || "Error al crear cuenta" },
+        { status: 400 }
+      );
+    }
 
-    // Create volunteer user document in Firestore
-    await setDoc(doc(db, "volunteer_users", userCredential.user.uid), {
+    const authData = await signupRes.json();
+    const uid = authData.localId;
+
+    // Create volunteer user document via adminDb
+    const { adminDb } = await import("@/lib/admin-db");
+    const db = await adminDb();
+    if (!db) {
+      return NextResponse.json({ error: "Database not configured" }, { status: 500 });
+    }
+
+    await db.collection("volunteer_users").doc(uid).set({
       email,
       firstName,
       lastName,
       status: "active",
       registrationId: registrationId || null,
-      joinedAt: serverTimestamp(),
-      lastLoginAt: serverTimestamp(),
+      joinedAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
       language: "en",
       notificationsEnabled: true,
       unreadMessages: 0,
@@ -39,8 +58,8 @@ export async function POST(request: Request) {
 
     // Generate JWT
     const token = signToken({
-      uid: userCredential.user.uid,
-      email: userCredential.user.email || email,
+      uid,
+      email: authData.email || email,
       role: "viewer",
       type: "volunteer",
     });
@@ -48,13 +67,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       token,
-      user: {
-        uid: userCredential.user.uid,
-        email: userCredential.user.email,
-        firstName,
-        lastName,
-        status: "active",
-      },
+      user: { uid, email: authData.email, firstName, lastName, status: "active" },
     });
   } catch (error: unknown) {
     console.error("Activation error:", error);

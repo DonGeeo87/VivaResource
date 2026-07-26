@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { collection, addDoc, getDocs, query, where, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
+
+import { adminDb } from "@/lib/admin-db";
 import nodemailer from "nodemailer";
 
 // Configurar transporte de Gmail SMTP
@@ -64,10 +64,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       // Fetch all active subscribers
       try {
         const q = query(
-          collection(db, "newsletter_subscribers"),
+          db.collection("newsletter_subscribers"),
           where("status", "==", "active")
         );
-        const snapshot = await getDocs(q);
+        const snapshot = await q.get();
         subscribers = snapshot.docs.map((doc) => ({
           id: doc.id,
           email: doc.data().email,
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       } catch (queryError) {
         console.error("Error fetching subscribers for newsletter:", queryError);
         // Fallback: fetch all and filter client-side
-        const snapshot = await getDocs(collection(db, "newsletter_subscribers"));
+        const snapshot = await getDocs(db.collection("newsletter_subscribers"));
         subscribers = snapshot.docs
           .map((doc) => ({
             id: doc.id,
@@ -100,10 +100,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Save to newsletter history BEFORE sending (so it exists even if send fails)
     let historyId: string | null = null;
     try {
-      const historyRef = await addDoc(collection(db, "newsletter_history"), {
+      const historyRef = await addDoc(db.collection("newsletter_history"), {
         subject: subject.trim(),
         content,
-        sent_at: Timestamp.now(),
+        sent_at: new Date().toISOString(),
         total_sent: 0,
         total_failed: 0,
         total_subscribers: subscribers.length,
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (historyId) {
       try {
         const { doc, updateDoc } = await import("firebase/firestore");
-        await updateDoc(doc(db, "newsletter_history", historyId), {
+        await updateDoc(db.collection("newsletter_history").doc(historyId), {
           total_sent: results.success,
           total_failed: results.failed,
           status: results.failed === 0 ? "completed" : "completed_with_errors",

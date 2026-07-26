@@ -12,7 +12,7 @@ async function verifyAdmin(request: NextRequest) {
 
   const token = authHeader.split(" ")[1];
   try {
-    const { verifyIdToken, adminDb } = await import("@/lib/firebase/admin");
+    const { verifyIdToken, adminDb } = await import("@/lib/admin-db");
     const decodedToken = await verifyIdToken(token);
     const uid = decodedToken.uid;
 
@@ -53,7 +53,7 @@ export async function GET(
     const eventId = params.id;
 
     // Get adminDb lazily
-    const { adminDb } = await import("@/lib/firebase/admin");
+    const { adminDb } = await import("@/lib/admin-db");
     const db = await adminDb();
     if (!db) {
       return NextResponse.json({ error: "Database not configured" }, { status: 500 });
