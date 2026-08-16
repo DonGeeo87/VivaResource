@@ -26,7 +26,7 @@ export default async function SiteImage({
   height,
 }: SiteImageProps) {
   const image = await getSiteImage(key);
-  const src = image ? `${image.path}?v=${image.updatedAt.seconds}` : '/placeholder.jpg';
+  const src = image ? `${image.path}?v=${image.updatedAt.getTime()}` : '/placeholder.jpg';
 
   return (
     <Image

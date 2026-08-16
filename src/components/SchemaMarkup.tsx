@@ -24,7 +24,7 @@ function OrganizationSchema() {
         const snapshot = await getDocs(collection(db, "seo_settings"));
         const settings: Record<string, string> = {};
         snapshot.forEach((doc) => {
-          settings[doc.id] = doc.data().value as string;
+          settings[doc.id] = doc.data()?.value as string;
         });
 
         const socialKeys = [

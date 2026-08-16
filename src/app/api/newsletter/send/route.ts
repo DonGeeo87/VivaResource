@@ -71,9 +71,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         const snapshot = await q.get();
         subscribers = snapshot.docs.map((doc) => ({
           id: doc.id,
-          email: doc.data().email,
-          name: doc.data().name || "",
-          status: doc.data().status || "active",
+          email: doc.data()?.email,
+          name: doc.data()?.name || "",
+          status: doc.data()?.status || "active",
         })) as Subscriber[];
       } catch (queryError) {
         console.error("Error fetching subscribers for newsletter:", queryError);

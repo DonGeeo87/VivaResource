@@ -273,7 +273,7 @@ export default function GetHelpPage() {
       // Check and send immediate notification
       try {
         const settingDoc = await getDoc(doc(db, "site_settings", "notify_on_help_request"));
-        if (settingDoc.exists && settingDoc.data().value === "true") {
+        if (settingDoc.exists && settingDoc.data()?.value === "true") {
           await fetch("/api/email/notify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },

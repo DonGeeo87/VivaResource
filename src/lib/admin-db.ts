@@ -160,7 +160,22 @@ export async function adminDb() {
           INSERT INTO collections (id, name, data)
           VALUES (${id}, ${name}, ${sql.json(data)})
         `;
-        return { id };
+        // Retorna un docRef compatible con Firestore: tiene .id y .update()
+        return {
+          id,
+          update: async (patchData: Record<string, unknown>) => {
+            const [existing] = await sql`
+              SELECT data FROM collections WHERE name = ${name} AND id = ${id}
+            `;
+            if (existing) {
+              const merged = { ...existing.data, ...patchData };
+              await sql`
+                UPDATE collections SET data = ${sql.json(merged)}, updated_at = NOW()
+                WHERE name = ${name} AND id = ${id}
+              `;
+            }
+          },
+        };
       },
 
       doc: (id: string) => ({

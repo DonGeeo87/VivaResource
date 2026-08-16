@@ -53,16 +53,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     let shouldNotify = true;
     if (type === "event-registration") {
       const setting = await getDoc(doc(db, "site_settings", "notify_on_event_registration"));
-      shouldNotify = setting.exists ? setting.data().value === "true" : true;
+      shouldNotify = setting.exists ? setting.data()?.value === "true" : true;
     } else if (type === "new-volunteer") {
       const setting = await getDoc(doc(db, "site_settings", "notify_on_volunteer_signup"));
-      shouldNotify = setting.exists ? setting.data().value === "true" : true;
+      shouldNotify = setting.exists ? setting.data()?.value === "true" : true;
     } else if (type === "form-submission") {
       const setting = await getDoc(doc(db, "site_settings", "notify_on_form_submission"));
-      shouldNotify = setting.exists ? setting.data().value === "true" : true;
+      shouldNotify = setting.exists ? setting.data()?.value === "true" : true;
     } else if (type === "help-request") {
       const setting = await getDoc(doc(db, "site_settings", "notify_on_help_request"));
-      shouldNotify = setting.exists ? setting.data().value === "true" : false;
+      shouldNotify = setting.exists ? setting.data()?.value === "true" : false;
     }
 
     if (!shouldNotify) {
