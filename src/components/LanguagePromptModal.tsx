@@ -18,8 +18,9 @@ export default function LanguagePromptModal({
   const [selected, setSelected] = useState<"en" | "es">("en");
   const [visible, setVisible] = useState(false);
   const t =
-    (allTranslations[selected] as { languagePrompt?: { title?: string; subtitle?: string } })
-      .languagePrompt;
+    (allTranslations[selected] as {
+      languagePrompt?: { title?: string; subtitle?: string; english?: string; spanish?: string; confirm?: string };
+    }).languagePrompt;
 
   useEffect(() => {
     if (isOpen) {

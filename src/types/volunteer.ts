@@ -2,6 +2,15 @@
 
 export type VolunteerStatus = "pending" | "approved" | "active" | "inactive" | "rejected";
 
+export interface VolunteerRegistration {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  status: string;
+  volunteerId?: string;
+}
+
 export interface VolunteerUser {
   uid: string;
   email: string;
