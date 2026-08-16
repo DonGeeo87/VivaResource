@@ -20,7 +20,7 @@ interface SurveyResponse {
   contact_method: string;
   contact_value: string;
   comments: string;
-  submittedAt: Date;
+  submittedAt: Date | { toDate(): Date };
   language: string;
 }
 
@@ -336,8 +336,8 @@ export default function AdminSurveysPage() {
               {displayedResponses.map((r) => (
                 <tr key={r.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
-                    {r.submittedAt && typeof r.submittedAt.toDate === "function"
-                      ? r.submittedAt.toDate().toLocaleDateString()
+                    {(r.submittedAt as { toDate?: () => Date })?.toDate
+                      ? (r.submittedAt as { toDate: () => Date }).toDate().toLocaleDateString()
                       : "—"}
                   </td>
                   <td className="px-4 py-3 max-w-[200px] truncate">

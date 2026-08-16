@@ -45,6 +45,9 @@ export interface DocRef {
 
 export interface WhereQuery {
   get: () => Promise<QuerySnapshot>;
+  where: (field: string, op: string, value: any) => WhereQuery;
+  orderBy: (field: string, direction?: "asc" | "desc") => WhereQuery;
+  limit: (n: number) => WhereQuery;
 }
 
 export interface QueryRef {
@@ -155,14 +158,32 @@ function createColRef(collection: string): ColRef {
       const docs = await request<any[]>(`/${collection}`);
       return toSnapshot(docs);
     },
-    where: (field: string, op: string, value: any) => ({
-      get: async () => {
-        const docs = await request<any[]>(
-          `/${collection}?whereField=${field}&whereOp=${encodeURIComponent(op)}&whereValue=${encodeURIComponent(String(value))}`
-        );
-        return toSnapshot(docs);
-      },
-    }),
+    where: (field: string, op: string, value: any) => {
+      // Acumula condiciones where (encadenable) y las serializa como JSON
+      const wheres: { field: string; op: string; value: string }[] = [
+        { field, op, value: String(value) },
+      ];
+      const build = (): WhereQuery => ({
+        get: async () => {
+          const docs = await request<any[]>(
+            `/${collection}?wheres=${encodeURIComponent(JSON.stringify(wheres))}`
+          );
+          return toSnapshot(docs);
+        },
+        where: (f: string, o: string, v: any) => {
+          wheres.push({ field: f, op: o, value: String(v) });
+          return build();
+        },
+        orderBy: (f: string, dir?: "asc" | "desc") => {
+          // OrderBy se maneja a nivel de query(); aquí solo ignoramos para no romper encadenado
+          return build();
+        },
+        limit: (n: number) => {
+          return build();
+        },
+      });
+      return build();
+    },
   };
 }
 

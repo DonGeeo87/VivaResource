@@ -71,7 +71,7 @@ export default function AdminSettingsPage(): JSX.Element {
       const snapshot = await getDocs(collection(db, "site_settings"));
       const data: SiteSettings = {};
       snapshot.forEach(doc => {
-        data[doc.id] = doc.data().value || "";
+        data[doc.id] = doc.data()?.value || "";
       });
       setSettings(data);
     } catch (error) {

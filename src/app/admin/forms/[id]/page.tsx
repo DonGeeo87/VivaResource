@@ -188,7 +188,7 @@ export default function AdminFormEditorPage(): JSX.Element {
       const querySnapshot = await getDocs(q);
       const eventsList: EventOption[] = querySnapshot.docs.map(doc => ({
         id: doc.id,
-        title: doc.data().title_es || doc.data().title_en || doc.id,
+        title: doc.data()?.title_es || doc.data()?.title_en || doc.id,
       }));
       setEvents(eventsList);
     } catch (error) {

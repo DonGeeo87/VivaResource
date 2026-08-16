@@ -110,7 +110,7 @@ export default function AdminSeoPage(): JSX.Element {
       const snapshot = await getDocs(collection(db, "seo_settings"));
       const data: Partial<SeoSettings> = {};
       snapshot.forEach((d) => {
-        data[d.id as keyof SeoSettings] = d.data().value as string;
+        data[d.id as keyof SeoSettings] = d.data()?.value as string;
       });
       setSettings({ ...DEFAULT_SETTINGS, ...data });
     } catch (error) {

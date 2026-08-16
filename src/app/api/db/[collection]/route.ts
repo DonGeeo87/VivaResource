@@ -26,17 +26,31 @@ export async function GET(
     }
 
     // GET /api/db/[collection] — listar todos
-    const whereField = searchParams.get("whereField");
-    const whereOp = searchParams.get("whereOp") || "==";
-    const whereValue = searchParams.get("whereValue");
+    const wheresParam = searchParams.get("wheres");
+    // Compatibilidad: antiguo whereField/whereValue
+    const legacyField = searchParams.get("whereField");
+    const legacyOp = searchParams.get("whereOp") || "==";
+    const legacyValue = searchParams.get("whereValue");
     const orderByField = searchParams.get("orderBy");
     const orderDir = searchParams.get("orderDir") || "desc";
     const limitStr = searchParams.get("limit");
 
+    let wheres: { field: string; op: string; value: unknown }[] = [];
+    if (wheresParam) {
+      try {
+        wheres = JSON.parse(wheresParam);
+      } catch { wheres = []; }
+    } else if (legacyField && legacyValue) {
+      wheres = [{ field: legacyField, op: legacyOp, value: legacyValue }];
+    }
+
     let snapshot;
-    if (whereField && whereValue) {
-      snapshot = await db.collection(params.collection)
-        .where(whereField, whereOp, whereValue)
+    if (wheres.length > 0) {
+      let q: any = db.collection(params.collection);
+      for (const w of wheres) {
+        q = q.where(w.field, w.op, w.value);
+      }
+      snapshot = await q
         .orderBy(orderByField || "created_at", orderDir === "asc" ? "asc" : "desc")
         .limit(limitStr ? parseInt(limitStr) : 1000)
         .get();
