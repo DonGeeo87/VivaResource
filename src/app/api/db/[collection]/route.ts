@@ -31,30 +31,26 @@ export async function GET(
     const whereValue = searchParams.get("whereValue");
     const orderByField = searchParams.get("orderBy");
     const orderDir = searchParams.get("orderDir") || "desc";
+    const limitStr = searchParams.get("limit");
 
     let snapshot;
     if (whereField && whereValue) {
       snapshot = await db.collection(params.collection)
         .where(whereField, whereOp, whereValue)
+        .orderBy(orderByField || "created_at", orderDir === "asc" ? "asc" : "desc")
+        .limit(limitStr ? parseInt(limitStr) : 1000)
         .get();
     } else {
-      snapshot = await db.collection(params.collection).get();
+      snapshot = await db.collection(params.collection)
+        .orderBy(orderByField || "created_at", orderDir === "asc" ? "asc" : "desc")
+        .limit(limitStr ? parseInt(limitStr) : 1000)
+        .get();
     }
 
     const docs = snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
     }));
-
-    // Simple sort (Firestore ya ordena, pero por si acaso)
-    if (orderByField) {
-      docs.sort((a: any, b: any) => {
-        const va = a[orderByField];
-        const vb = b[orderByField];
-        if (orderDir === "asc") return va > vb ? 1 : -1;
-        return va < vb ? 1 : -1;
-      });
-    }
 
     return NextResponse.json(docs);
   } catch (error) {

@@ -46,7 +46,12 @@ export interface WhereQuery {
   get: () => Promise<QuerySnapshot>;
 }
 
+export interface QueryRef {
+  get: () => Promise<QuerySnapshot>;
+}
+
 export interface ColRef {
+  __name: string;
   add: (data: any) => Promise<{ id: string }>;
   doc: (id: string) => DocRef;
   get: () => Promise<QuerySnapshot>;
@@ -54,6 +59,49 @@ export interface ColRef {
 }
 
 // --- Implementación ---
+
+function createQueryRef(
+  collection: string,
+  opts: {
+    whereField?: string;
+    whereOp?: string;
+    whereValue?: string;
+    orderBy?: string;
+    orderDir?: string;
+    limit?: number;
+  }
+): QueryRef {
+  return {
+    get: async () => {
+      const params = new URLSearchParams();
+      if (opts.whereField !== undefined && opts.whereValue !== undefined) {
+        params.set("whereField", opts.whereField);
+        params.set("whereOp", opts.whereOp || "==");
+        params.set("whereValue", opts.whereValue);
+      }
+      if (opts.orderBy) {
+        params.set("orderBy", opts.orderBy);
+        params.set("orderDir", opts.orderDir || "desc");
+      }
+      if (opts.limit != null) {
+        params.set("limit", String(opts.limit));
+      }
+      const qs = params.toString();
+      const docs = await request<any[]>(`/${collection}${qs ? `?${qs}` : ""}`);
+      const snapshots = docs.map((d: any) => ({
+        id: d.id,
+        exists: true,
+        data: () => d,
+      }));
+      return {
+        size: snapshots.length,
+        docs: snapshots,
+        forEach: (fn: (doc: DocumentSnapshot) => void) =>
+          snapshots.forEach(fn),
+      };
+    },
+  };
+}
 
 function createDocRef(collection: string, id: string): DocRef {
   return {
@@ -89,6 +137,7 @@ function createDocRef(collection: string, id: string): DocRef {
 
 function createColRef(collection: string): ColRef {
   return {
+    __name: collection,
     add: async (data: any) => {
       const result = await request<{ id: string }>(`/${collection}`, {
         method: "POST",
@@ -147,7 +196,7 @@ export function doc(db: any, path: string, ...segments: string[]): DocRef {
   return createDocRef(path, id);
 }
 
-export async function getDocs(ref: ColRef | WhereQuery): Promise<QuerySnapshot> {
+export async function getDocs(ref: ColRef | WhereQuery | QueryRef): Promise<QuerySnapshot> {
   return ref.get();
 }
 
@@ -215,7 +264,7 @@ export function serverTimestamp() {
 }
 
 export async function getCountFromServer(
-  ref: ColRef | WhereQuery
+  ref: ColRef | WhereQuery | QueryRef
 ): Promise<{ data: () => { count: number } }> {
   const snap = await ref.get();
   return { data: () => ({ count: snap.size }) };
@@ -223,7 +272,7 @@ export async function getCountFromServer(
 
 // onSnapshot - polling fallback (no real-time, but compatible)
 export function onSnapshot(
-  ref: ColRef | WhereQuery | DocRef,
+  ref: ColRef | WhereQuery | QueryRef | DocRef,
   callback: (snap: any) => void
 ): () => void {
   // Immediate first call
@@ -257,8 +306,40 @@ export function writeBatch() {
 export function query(
   ref: ColRef,
   ...filters: any[]
-): ColRef {
-  return ref; // Simplificación: ignoramos filters por ahora
+): QueryRef {
+  // El ref de colección con nombre se extrae desde createColRef; para propagar
+  // filters, capturamos el nombre de la colección y construimos un QueryRef.
+  const name = (ref as any).__name as string;
+  let whereField: string | undefined;
+  let whereOp: string | undefined;
+  let whereValue: string | undefined;
+  let orderByField: string | undefined;
+  let orderDir: string | undefined;
+  let lim: number | undefined;
+
+  for (const f of filters) {
+    if (f && typeof f === "object") {
+      if ("field" in f && "op" in f && "value" in f) {
+        whereField = f.field;
+        whereOp = f.op;
+        whereValue = String(f.value);
+      } else if ("field" in f && "direction" in f) {
+        orderByField = f.field;
+        orderDir = f.direction || "desc";
+      } else if ("limit" in f) {
+        lim = f.limit;
+      }
+    }
+  }
+
+  return createQueryRef(name, {
+    whereField,
+    whereOp,
+    whereValue,
+    orderBy: orderByField,
+    orderDir,
+    limit: lim,
+  });
 }
 
 export function where(
