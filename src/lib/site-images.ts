@@ -1,5 +1,6 @@
 import { db, Timestamp, collection, doc, getDoc, getDocs, orderBy, query, setDoc } from "@/lib/db-client";
 import type { SiteImage, SiteImageKey } from '@/types/site-images';
+export type { SiteImage, SiteImageKey } from '@/types/site-images';
 import { SITE_IMAGE_DEFAULTS } from './site-image-defaults';
 
 function toJsDate(value: unknown): Date {
