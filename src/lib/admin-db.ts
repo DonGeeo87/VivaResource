@@ -53,26 +53,106 @@ function docToObj(doc: any) {
 
 // --- Public API ---
 
+// --- Query builder (encadenable: where + orderBy + limit + get) ---
+
+interface WhereClause {
+  field: string;
+  op: string;
+  value: unknown;
+}
+
+interface QueryState {
+  name: string;
+  wheres: WhereClause[];
+  orderByField: string | null;
+  orderByDir: "asc" | "desc";
+  limit: number | null;
+}
+
+async function runQuery(state: QueryState) {
+  const rows = await sql`
+    SELECT id, data FROM collections WHERE name = ${state.name} ORDER BY created_at DESC
+  `;
+
+  // Tipar como any[] porque el wrapper de `postgres` devuelve RowList<Row[]>,
+  // y aquí lo reasignamos a arrays filtrados/sorteados.
+  let filtered: any[] = rows as any[];
+  // Apply where clauses (in-memory filtering)
+  for (const w of state.wheres) {
+    const wv: any = w.value;
+    filtered = filtered.filter((r: any) => {
+      const val = r.data[w.field];
+      if (w.op === "==") return val == wv;
+      if (w.op === ">") return val > wv;
+      if (w.op === ">=") return val >= wv;
+      if (w.op === "<") return val < wv;
+      if (w.op === "<=") return val <= wv;
+      if (w.op === "!=") return val != wv;
+      if (w.op === "array-contains") return Array.isArray(val) && val.includes(wv);
+      return false;
+    });
+  }
+
+  // Apply orderBy
+  if (state.orderByField) {
+    const dir = state.orderByDir === "desc" ? -1 : 1;
+    filtered = filtered.sort((a: any, b: any) => {
+      const va = a.data[state.orderByField as string];
+      const vb = b.data[state.orderByField as string];
+      if (va === vb) return 0;
+      // Handle Date/Timestamp-like values
+      const ta = va instanceof Date ? va.getTime() : typeof va === "object" && va?.toDate ? va.toDate().getTime() : va;
+      const tb = vb instanceof Date ? vb.getTime() : typeof vb === "object" && vb?.toDate ? vb.toDate().getTime() : vb;
+      if (ta === undefined || ta === null) return 1;
+      if (tb === undefined || tb === null) return -1;
+      return (ta > tb ? 1 : -1) * dir;
+    });
+  }
+
+  // Apply limit
+  if (state.limit != null) {
+    filtered = filtered.slice(0, state.limit);
+  }
+
+  const docs = filtered.map((r: any) => ({
+    id: r.id,
+    exists: true,
+    data: () => ({ id: r.id, ...r.data }),
+  }));
+  return {
+    size: docs.length,
+    docs,
+    forEach: (fn: (doc: any) => void) => docs.forEach(fn),
+  };
+}
+
+function makeQuery(state: QueryState) {
+  return {
+    get: async () => runQuery(state),
+    where: (field: string, op: string, value: unknown) =>
+      makeQuery({
+        ...state,
+        wheres: [...state.wheres, { field, op, value }],
+      }),
+    orderBy: (field: string, dir: "asc" | "desc" = "asc") =>
+      makeQuery({ ...state, orderByField: field, orderByDir: dir }),
+    limit: (n: number) => makeQuery({ ...state, limit: n }),
+  };
+}
+
 export async function adminDb() {
   await init();
 
   return {
     collection: (name: string) => ({
-      get: async () => {
-        const rows = await sql`
-          SELECT id, data FROM collections WHERE name = ${name} ORDER BY created_at DESC
-        `;
-        const docs = rows.map((r: any) => ({
-          id: r.id,
-          exists: true,
-          data: () => ({ id: r.id, ...r.data }),
-        }));
-        return {
-          size: docs.length,
-          docs,
-          forEach: (fn: (doc: any) => void) => docs.forEach(fn),
-        };
-      },
+      // read query API (encadenable)
+      get: async () => runQuery({ name, wheres: [], orderByField: null, orderByDir: "asc", limit: null }),
+      where: (field: string, op: string, value: unknown) =>
+        makeQuery({ name, wheres: [{ field, op, value }], orderByField: null, orderByDir: "asc", limit: null }),
+      orderBy: (field: string, dir: "asc" | "desc" = "asc") =>
+        makeQuery({ name, wheres: [], orderByField: field, orderByDir: dir, limit: null }),
+      limit: (n: number) =>
+        makeQuery({ name, wheres: [], orderByField: null, orderByDir: "asc", limit: n }),
 
       add: async (data: Record<string, unknown>) => {
         const id = crypto.randomUUID();
@@ -141,38 +221,6 @@ export async function adminDb() {
           await sql`
             DELETE FROM collections WHERE name = ${name} AND id = ${id}
           `;
-        },
-      }),
-
-      where: (field: string, op: string, value: unknown) => ({
-        get: async () => {
-          // We fetch all docs and filter in-memory (simple approach)
-          const rows = await sql`
-            SELECT id, data FROM collections WHERE name = ${name} ORDER BY created_at DESC
-          `;
-
-          const filtered = rows.filter((r: any) => {
-            const val = r.data[field];
-            if (op === "==") return val == value;
-            if (op === ">") return val > value;
-            if (op === ">=") return val >= value;
-            if (op === "<") return val < value;
-            if (op === "<=") return val <= value;
-            if (op === "array-contains") return Array.isArray(val) && val.includes(value);
-            return false;
-          });
-
-          const docs = filtered.map((r: any) => ({
-            id: r.id,
-            exists: true,
-            data: () => ({ id: r.id, ...r.data }),
-          }));
-
-          return {
-            size: docs.length,
-            docs,
-            forEach: (fn: (doc: any) => void) => docs.forEach(fn),
-          };
         },
       }),
     }),
