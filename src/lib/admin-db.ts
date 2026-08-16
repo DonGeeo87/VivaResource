@@ -246,7 +246,7 @@ export async function verifyIdToken(token: string) {
     );
     if (!res.ok) throw new Error("Token invalid");
     const data = await res.json();
-    return { uid: data.users[0].localId };
+    return { uid: data.users[0].localId, email: data.users[0].email || "" };
   } catch {
     throw new Error("Token verification failed");
   }

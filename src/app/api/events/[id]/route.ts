@@ -15,24 +15,25 @@ async function verifyAdmin(request: NextRequest) {
   try {
     const { verifyIdToken, adminDb } = await import("@/lib/admin-db");
     const decodedToken = await verifyIdToken(token);
-    const uid = decodedToken.uid;
+    const email = decodedToken.email;
 
     const db = await adminDb();
     if (!db) {
       return { error: "Database not configured", status: 500 };
     }
 
-    const userDoc = await db.collection("admin_users").doc(uid).get();
-    if (!userDoc.exists) {
+    // Verificar que el usuario esté en admin_users por email (los uids migrados no coinciden con Firebase Auth)
+    const adminSnap = await db.collection("admin_users").where("email", "==", email).get();
+    if (adminSnap.size === 0) {
       return { error: "No tienes acceso de administrador", status: 403 };
     }
 
-    const userData = userDoc.data();
+    const userData = adminSnap.docs[0].data();
     if (!userData || !["admin", "editor"].includes(userData.role)) {
       return { error: "No tienes permisos suficientes", status: 403 };
     }
 
-    return { uid, role: userData.role };
+    return { uid: decodedToken.uid, email, role: userData.role };
   } catch (error) {
     console.error("Error verifying token:", error);
     return { error: "Token inválido", status: 401 };

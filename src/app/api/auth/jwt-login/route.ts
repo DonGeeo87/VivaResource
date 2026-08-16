@@ -33,23 +33,24 @@ export async function POST(request: Request) {
 
     const authData = await authRes.json();
     const uid = authData.localId;
+    const authEmail = authData.email || email;
 
-    // Check admin_users collection via adminDb
+    // Check admin_users collection via adminDb (por email, ya que los uids migrados no coinciden con Firebase Auth)
     const { adminDb } = await import("@/lib/admin-db");
     const db = await adminDb();
     if (!db) {
       return NextResponse.json({ error: "Database not configured" }, { status: 500 });
     }
 
-    const userDoc = await db.collection("admin_users").doc(uid).get();
-    if (!userDoc.exists) {
+    const adminSnap = await db.collection("admin_users").where("email", "==", authEmail).get();
+    if (adminSnap.size === 0) {
       return NextResponse.json(
         { error: "No tienes acceso de administrador" },
         { status: 403 }
       );
     }
 
-    const userData = userDoc.data();
+    const userData = adminSnap.docs[0].data();
     const role = userData?.role || "viewer";
 
     // Generate JWT

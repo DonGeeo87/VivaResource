@@ -71,12 +71,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           const decoded = await verifyIdToken(token);
           const db = await adminDb();
           if (db) {
-            const userDoc = await db
+            const adminSnap = await db
               .collection("admin_users")
-              .doc(decoded.uid)
+              .where("email", "==", decoded.email)
               .get();
-            if (userDoc.exists) {
-              const role = userDoc.data()?.role;
+            if (adminSnap.size > 0) {
+              const role = adminSnap.docs[0].data()?.role;
               if (
                 role === "admin" ||
                 role === "editor" ||
