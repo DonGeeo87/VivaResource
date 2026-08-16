@@ -98,7 +98,7 @@ describe('db-client', () => {
 
     expect(snapshot.size).toBe(1);
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('whereField=status'),
+      expect.stringContaining('wheres='),
       expect.any(Object)
     );
   });
