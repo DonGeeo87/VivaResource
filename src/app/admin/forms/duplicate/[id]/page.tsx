@@ -19,7 +19,7 @@ export default function DuplicateFormPage(): JSX.Element {
         const formRef = doc(db, "forms", id as string);
         const formSnap = await getDoc(formRef);
 
-        if (!formSnap.exists()) {
+        if (!formSnap.exists) {
           setError(language === "es" ? "Formulario no encontrado" : "Form not found");
           return;
         }

@@ -88,7 +88,7 @@ export default function EventDetailsPage(): JSX.Element {
 
         // Fetch event
         const eventDoc = await getDoc(doc(db, "events", eventId));
-        if (!eventDoc.exists()) {
+        if (!eventDoc.exists) {
           setError(language === "es" ? "Evento no encontrado" : "Event not found");
           setLoading(false);
           return;
@@ -134,7 +134,7 @@ export default function EventDetailsPage(): JSX.Element {
         if (eventData.formId) {
           try {
             const formDoc = await getDoc(doc(db, "forms", eventData.formId));
-            if (formDoc.exists() && formDoc.data().linkedEventId === eventId) {
+            if (formDoc.exists && formDoc.data().linkedEventId === eventId) {
               const formData = formDoc.data();
               const subQuery = query(
                 collection(db, "form_submissions"),

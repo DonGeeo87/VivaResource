@@ -61,7 +61,7 @@ export default function EventRegistrationPage(): JSX.Element {
       try {
         // Fetch event
         const eventDoc = await getDoc(doc(db, "events", eventId));
-        if (eventDoc.exists()) {
+        if (eventDoc.exists) {
           setEvent({ id: eventDoc.id, ...eventDoc.data() } as EventData);
         }
 

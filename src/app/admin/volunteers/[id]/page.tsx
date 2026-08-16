@@ -80,7 +80,7 @@ export default function AdminVolunteerDetailPage(): JSX.Element {
       const docRef = doc(db, "volunteer_registrations", id);
       const docSnap = await getDoc(docRef);
 
-      if (docSnap.exists()) {
+      if (docSnap.exists) {
         setVolunteer({
           id: docSnap.id,
           ...docSnap.data()

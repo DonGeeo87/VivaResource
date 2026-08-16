@@ -202,7 +202,7 @@ export default function AdminFormEditorPage(): JSX.Element {
       const docRef = doc(db, 'forms', id);
       const docSnap = await getDoc(docRef);
       
-      if (docSnap.exists()) {
+      if (docSnap.exists) {
         const data = docSnap.data() as Form;
         setFormData({
           ...data,

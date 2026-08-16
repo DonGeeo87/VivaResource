@@ -42,7 +42,7 @@ function ActivateForm() {
       try {
         // Verify the activation token matches the registration
         const regDoc = await getDoc(doc(db, "volunteer_registrations", regId));
-        if (!regDoc.exists()) {
+        if (!regDoc.exists) {
           setValidating(false);
           return;
         }

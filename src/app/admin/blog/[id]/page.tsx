@@ -29,7 +29,7 @@ export default function EditBlogPostPage(): JSX.Element {
     try {
       const docRef = doc(db, "blog_posts", id);
       const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
+      if (docSnap.exists) {
         const data = docSnap.data();
         setPostData({
           title: (data.title as string) || "",

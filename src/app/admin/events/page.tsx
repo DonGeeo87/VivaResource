@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Search, Trash2, Calendar, MapPin, Users, X, Download } from "lucide-react";
 import { Timestamp, db } from "@/lib/db-client";
-import { getCurrentUserId } from "@/lib/auth/client";
+import { getCurrentUserId, getToken } from "@/lib/auth/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatMountainDate } from "@/lib/timezone";
 

@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import type { Timestamp } from "@/lib/db-client";
-import { getCurrentUserId } from "@/lib/auth/client";
+import { getCurrentUserId, getToken } from "@/lib/auth/client";
 import ImageUpload from "@/components/ImageUpload";
 import { formTemplates } from "@/data/formTemplates";
 import { useLanguage } from "@/contexts/LanguageContext";

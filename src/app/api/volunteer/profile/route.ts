@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { adminDb } from "@/lib/admin-db";
 import { verifyToken, getTokenFromHeader } from "@/lib/auth/jwt";
+import { db, doc, getDoc } from "@/lib/db-client";
 
 export async function GET(request: Request) {
   try {
@@ -17,7 +18,7 @@ export async function GET(request: Request) {
 
     // Fetch volunteer profile from Firestore (temporal — will migrate to PostgreSQL)
     const userDoc = await getDoc(doc(db, "volunteer_users", payload.uid));
-    if (!userDoc.exists()) {
+    if (!userDoc.exists) {
       return NextResponse.json({ error: "Voluntario no encontrado" }, { status: 404 });
     }
 

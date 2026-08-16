@@ -50,7 +50,7 @@ export default function EventEditPage(): JSX.Element {
 
       try {
         const eventDoc = await getDoc(doc(db, "events", eventId));
-        if (!eventDoc.exists()) {
+        if (!eventDoc.exists) {
           setError(isES ? "Evento no encontrado" : "Event not found");
           setLoading(false);
           return;

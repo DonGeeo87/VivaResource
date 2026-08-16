@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { adminDb } from "@/lib/admin-db";
+import { db, query, orderBy, getDocs, deleteDoc, Timestamp } from "@/lib/db-client";
 
 interface NewsletterHistory {
   id: string;

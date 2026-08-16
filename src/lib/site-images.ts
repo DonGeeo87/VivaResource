@@ -80,7 +80,7 @@ export const getSiteImage = async (key: SiteImageKey): Promise<SiteImage | null>
   if (!def) return null;
 
   const docSnap = await getDoc(doc(db, 'site_images', key));
-  if (!docSnap.exists()) {
+  if (!docSnap.exists) {
     return { key, path: def.path, descriptionEn: def.descriptionEn, descriptionEs: def.descriptionEs, updatedAt: new Date() };
   }
   const data = docSnap.data();

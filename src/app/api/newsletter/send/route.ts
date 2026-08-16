@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { adminDb } from "@/lib/admin-db";
+import { db, query, where, getDocs, addDoc } from "@/lib/db-client";
 import nodemailer from "nodemailer";
 
 // Configurar transporte de Gmail SMTP

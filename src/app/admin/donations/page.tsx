@@ -45,8 +45,8 @@ export default function AdminDonationsPage(): JSX.Element {
       const modeDoc = await getDoc(doc(db, "site_settings", "paypal_mode"));
 
       setSettings({
-        paypal_email: emailDoc.exists() ? emailDoc.data().value : "",
-        paypal_mode: modeDoc.exists() ? modeDoc.data().value : "sandbox"
+        paypal_email: emailDoc.exists ? emailDoc.data().value : "",
+        paypal_mode: modeDoc.exists ? modeDoc.data().value : "sandbox"
       });
     } catch (error) {
       console.error("Error fetching settings:", error);

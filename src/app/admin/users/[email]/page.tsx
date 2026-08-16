@@ -15,6 +15,7 @@ import {
   HelpCircle,
   Save,
   Loader2,
+  ArrowLeft,
 } from "lucide-react";
 
 interface TimelineItem {
@@ -224,7 +225,7 @@ export default function AdminUserProfilePage(): JSX.Element {
 
       setTimeline(items);
 
-      if (notesSnap.exists()) {
+      if (notesSnap.exists) {
         const data = notesSnap.data() as UserNotes;
         setNotes(data.notes || "");
       } else {

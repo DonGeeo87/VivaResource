@@ -56,7 +56,7 @@ export default function FormResponsesPage(): JSX.Element {
       try {
         // Fetch form
         const formDoc = await getDoc(doc(db, "forms", formId));
-        if (!formDoc.exists()) {
+        if (!formDoc.exists) {
           router.push("/admin/forms");
           return;
         }

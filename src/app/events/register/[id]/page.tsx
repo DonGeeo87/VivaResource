@@ -82,7 +82,7 @@ export default function EventRegisterPage(): JSX.Element {
 
       try {
         const eventDoc = await getDoc(doc(db, "events", eventId));
-        if (eventDoc.exists()) {
+        if (eventDoc.exists) {
           const eventData = { id: eventDoc.id, ...eventDoc.data() } as EventData;
           setEvent(eventData);
 
@@ -92,7 +92,7 @@ export default function EventRegisterPage(): JSX.Element {
           if (eventData.formId) {
             try {
               const formDoc = await getDoc(doc(db, "forms", eventData.formId));
-              if (formDoc.exists()) {
+              if (formDoc.exists) {
                 const formData = formDoc.data();
                 const fields = (formData.fields || []) as FormFieldDef[];
                 if (fields.length > 0) {

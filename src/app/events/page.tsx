@@ -8,6 +8,7 @@ import {
   MapPin,
   Clock,
   Heart,
+  Calendar,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { EventsHeroSkeleton, EventsFilterSkeleton, EventsGridSkeleton } from "@/components/Skeleton";

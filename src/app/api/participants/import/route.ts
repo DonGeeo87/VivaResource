@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { adminDb } from "@/lib/admin-db";
 import * as XLSX from "xlsx";
+import { db, addDoc } from "@/lib/db-client";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {

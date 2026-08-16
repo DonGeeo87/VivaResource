@@ -48,7 +48,7 @@ export default function PublicFormPage() {
         const docRef = doc(db, 'forms', formId);
         const docSnap = await getDoc(docRef);
 
-        if (docSnap.exists()) {
+        if (docSnap.exists) {
           const data = docSnap.data() as Form;
           // Solo mostrar si está publicado
           if (data.published && data.status === 'published') {
@@ -68,7 +68,7 @@ export default function PublicFormPage() {
             if (data.linkedEventId) {
               const eventRef = doc(db, 'events', data.linkedEventId);
               const eventSnap = await getDoc(eventRef);
-              if (eventSnap.exists()) {
+              if (eventSnap.exists) {
                 const eventData = eventSnap.data();
                 setEventInfo({
                   id: data.linkedEventId,
