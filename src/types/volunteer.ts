@@ -69,3 +69,16 @@ export interface VolunteerDashboardData {
     eventsAttended: number;
   };
 }
+
+export interface VolunteerCertificateRequest {
+  id: string;
+  volunteerId: string;
+  volunteerEmail: string;
+  purpose: string;
+  recipientOrganization: string;
+  additionalNotes?: string;
+  status: string;
+  adminNote?: string;
+  createdAt: Date;
+  updatedAt?: Date;
+}

@@ -31,6 +31,7 @@ export interface DocumentSnapshot {
 
 export interface QuerySnapshot {
   size: number;
+  empty: boolean;
   docs: DocumentSnapshot[];
   forEach: (fn: (doc: DocumentSnapshot) => void) => void;
 }
@@ -60,6 +61,20 @@ export interface ColRef {
 
 // --- Implementación ---
 
+function toSnapshot(docs: any[]): QuerySnapshot {
+  const snapshots: DocumentSnapshot[] = docs.map((d: any) => ({
+    id: d.id,
+    exists: true,
+    data: () => d,
+  }));
+  return {
+    size: snapshots.length,
+    empty: snapshots.length === 0,
+    docs: snapshots,
+    forEach: (fn: (doc: DocumentSnapshot) => void) => snapshots.forEach(fn),
+  };
+}
+
 function createQueryRef(
   collection: string,
   opts: {
@@ -88,17 +103,7 @@ function createQueryRef(
       }
       const qs = params.toString();
       const docs = await request<any[]>(`/${collection}${qs ? `?${qs}` : ""}`);
-      const snapshots = docs.map((d: any) => ({
-        id: d.id,
-        exists: true,
-        data: () => d,
-      }));
-      return {
-        size: snapshots.length,
-        docs: snapshots,
-        forEach: (fn: (doc: DocumentSnapshot) => void) =>
-          snapshots.forEach(fn),
-      };
+      return toSnapshot(docs);
     },
   };
 }
@@ -148,34 +153,14 @@ function createColRef(collection: string): ColRef {
     doc: (id: string) => createDocRef(collection, id),
     get: async () => {
       const docs = await request<any[]>(`/${collection}`);
-      const snapshots = docs.map((d: any) => ({
-        id: d.id,
-        exists: true,
-        data: () => d,
-      }));
-      return {
-        size: snapshots.length,
-        docs: snapshots,
-        forEach: (fn: (doc: DocumentSnapshot) => void) =>
-          snapshots.forEach(fn),
-      };
+      return toSnapshot(docs);
     },
     where: (field: string, op: string, value: any) => ({
       get: async () => {
         const docs = await request<any[]>(
           `/${collection}?whereField=${field}&whereOp=${encodeURIComponent(op)}&whereValue=${encodeURIComponent(String(value))}`
         );
-        const snapshots = docs.map((d: any) => ({
-          id: d.id,
-          exists: true,
-          data: () => d,
-        }));
-        return {
-          size: snapshots.length,
-          docs: snapshots,
-          forEach: (fn: (doc: DocumentSnapshot) => void) =>
-            snapshots.forEach(fn),
-        };
+        return toSnapshot(docs);
       },
     }),
   };
