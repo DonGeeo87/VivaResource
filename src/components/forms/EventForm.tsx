@@ -753,16 +753,16 @@ export default function EventForm({ initialData, onSubmit, template, formTemplat
         </div>
       )}
 
-      {/* Paso 3: Publicación */}
-      {currentStep === 3 && registrationRequired && (
+      {/* Paso 3: Publicación - SIEMPRE disponible (tambien sin registro) */}
+      {(currentStep === 3 || !registrationRequired) && (
         <div className="border-t pt-6 mt-6 space-y-6">
           <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
             <Eye className="w-5 h-5" />
-            {isES ? "Revisar y Publicar" : "Review and Publish"}
+            {isES ? "Publicación" : "Publishing"}
           </h3>
 
           {/* Estado del evento */}
-          <div className={`p-4 border rounded-lg ${registrationRequired && currentStep !== 3 ? 'bg-gray-50' : ''}`}>
+          <div className="p-4 border rounded-lg bg-gray-50">
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {isES ? "Estado del evento *" : "Event status *"}
