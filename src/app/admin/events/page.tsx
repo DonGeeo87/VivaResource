@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Search, Trash2, Calendar, MapPin, Users, X, Download } from "lucide-react";
+import { Plus, Search, Trash2, Calendar, MapPin, Users, X, Download, Copy } from "lucide-react";
 import { Timestamp, db } from "@/lib/db-client";
 import { getCurrentUserId, getToken } from "@/lib/auth/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -21,6 +21,8 @@ interface Event {
   is_archived?: boolean;
   registration_required: boolean;
   image_url?: string;
+  time?: string;
+  formTemplate?: string;
   created_at: unknown;
   registrationCount?: number;
 }
@@ -257,6 +259,60 @@ export default function AdminEventsPage(): JSX.Element {
       console.error("Error toggling event archive:", error);
     } finally {
       setToggling(null);
+    }
+  };
+
+  const handleDuplicate = async (event: Event) => {
+    const suffix = language === "es" ? " (copia)" : " (copy)";
+    try {
+      const token = getToken();
+      if (!token) return;
+
+      // Fecha: si viene como Date/Timestamp la formateamos a YYYY-MM-DD en Mountain Time
+      let dateStr = "";
+      if (typeof event.date === "string") {
+        dateStr = event.date.slice(0, 10);
+      } else {
+        const d = event.date instanceof Date ? event.date : (event.date as { toDate?: () => Date })?.toDate?.();
+        if (d && !isNaN(d.getTime())) {
+          const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+          dateStr = local.toISOString().slice(0, 10);
+        }
+      }
+      if (!dateStr) {
+        alert(language === "es" ? "No se pudo duplicar: fecha inválida" : "Could not duplicate: invalid date");
+        return;
+      }
+
+      const response = await fetch("/api/events", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title_en: `${event.title_en || event.title_es || "Evento"}${suffix}`,
+          title_es: `${event.title_es || event.title_en || "Evento"}${suffix}`,
+          slug: `${event.slug || "evento"}-copia`,
+          date: dateStr,
+          time: event.time || "",
+          location: event.location || "",
+          category: event.category || "community",
+          registration_required: event.registration_required,
+          status: "draft",
+          image_url: event.image_url || "",
+          formTemplate: (event as { formTemplate?: string }).formTemplate || "",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to duplicate event");
+      }
+
+      await fetchEvents();
+    } catch (error) {
+      console.error("Error duplicating event:", error);
+      alert(language === "es" ? "Error al duplicar el evento" : "Error duplicating event");
     }
   };
 
@@ -506,6 +562,14 @@ export default function AdminEventsPage(): JSX.Element {
                     }
                   >
                     {event.is_archived ? (language === "es" ? "Desarchivar" : "Unarchive") : (language === "es" ? "Archivar" : "Archive")}
+                  </button>
+                  <button
+                    onClick={() => handleDuplicate(event)}
+                    disabled={toggling === event.id}
+                    className="px-3 py-2 text-sm rounded-lg border border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50"
+                    title={language === "es" ? "Duplicar evento" : "Duplicate event"}
+                  >
+                    <Copy className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(event.id)}

@@ -120,10 +120,10 @@ export default function AdminCertificatesPage(): JSX.Element {
         const data = docSnap.data();
         volsMap[docSnap.id] = {
           id: docSnap.id,
-          firstName: data.firstName || "",
-          lastName: data.lastName || "",
-          email: data.email || "",
-          status: data.status || "pending",
+          firstName: data?.firstName || "",
+          lastName: data?.lastName || "",
+          email: data?.email || "",
+          status: data?.status || "pending",
         };
       });
 
@@ -132,10 +132,10 @@ export default function AdminCertificatesPage(): JSX.Element {
         const data = docSnap.data();
         volsMap[docSnap.id] = {
           id: docSnap.id,
-          firstName: data.firstName || "",
-          lastName: data.lastName || "",
-          email: data.email || "",
-          status: data.status || "pending",
+          firstName: data?.firstName || "",
+          lastName: data?.lastName || "",
+          email: data?.email || "",
+          status: data?.status || "pending",
         };
       });
       setVolunteers(volsMap);
@@ -148,19 +148,19 @@ export default function AdminCertificatesPage(): JSX.Element {
       const certsSnapshot = await getDocs(certsQuery);
       const certsData: CertificateRequestWithName[] = certsSnapshot.docs.map((docSnap) => {
         const data = docSnap.data();
-        const vol = volsMap[data.volunteerId];
+        const vol = volsMap[data?.volunteerId];
         return {
           id: docSnap.id,
-          volunteerId: data.volunteerId || "",
-          volunteerEmail: data.volunteerEmail || "",
-          purpose: data.purpose || "",
-          recipientOrganization: data.recipientOrganization || "",
-          additionalNotes: data.additionalNotes,
-          status: data.status || "pending",
-          adminNote: data.adminNote,
-          createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
-          updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt ? new Date(data.updatedAt) : undefined,
-          volunteerName: vol ? `${vol.firstName} ${vol.lastName}` : data.volunteerEmail || "Unknown",
+          volunteerId: data?.volunteerId || "",
+          volunteerEmail: data?.volunteerEmail || "",
+          purpose: data?.purpose || "",
+          recipientOrganization: data?.recipientOrganization || "",
+          additionalNotes: data?.additionalNotes,
+          status: data?.status || "pending",
+          adminNote: data?.adminNote,
+          createdAt: data?.createdAt?.toDate ? data.createdAt.toDate() : data?.createdAt ? new Date(data.createdAt) : new Date(),
+          updatedAt: data?.updatedAt?.toDate ? data.updatedAt.toDate() : data?.updatedAt ? new Date(data.updatedAt) : undefined,
+          volunteerName: vol ? `${vol.firstName} ${vol.lastName}` : data?.volunteerEmail || "Unknown",
         };
       });
       setRequests(certsData);
