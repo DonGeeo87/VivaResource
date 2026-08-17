@@ -232,6 +232,7 @@ export default function GetInvolvedPage(): JSX.Element {
         phone: "",
         program: "volunteer",
         skills: [],
+        otherSkill: "",
         interests: [],
         availability: "",
         experience: "",

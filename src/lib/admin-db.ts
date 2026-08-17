@@ -158,7 +158,7 @@ export async function adminDb() {
         const id = crypto.randomUUID();
         await sql`
           INSERT INTO collections (id, name, data)
-          VALUES (${id}, ${name}, ${sql.json(data)})
+          VALUES (${id}, ${name}, ${sql.json(data as any)})
         `;
         // Retorna un docRef compatible con Firestore: tiene .id y .update()
         return {
@@ -207,14 +207,14 @@ export async function adminDb() {
             } else {
               await sql`
                 INSERT INTO collections (id, name, data)
-                VALUES (${id}, ${name}, ${sql.json(cleanData)})
+                VALUES (${id}, ${name}, ${sql.json(cleanData as any)})
               `;
             }
           } else {
             await sql`
               INSERT INTO collections (id, name, data)
-              VALUES (${id}, ${name}, ${sql.json(cleanData)})
-              ON CONFLICT (name, id) DO UPDATE SET data = ${sql.json(cleanData)}, updated_at = NOW()
+              VALUES (${id}, ${name}, ${sql.json(cleanData as any)})
+              ON CONFLICT (name, id) DO UPDATE SET data = ${sql.json(cleanData as any)}, updated_at = NOW()
             `;
           }
         },

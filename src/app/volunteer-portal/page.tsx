@@ -69,7 +69,7 @@ export default function VolunteerPortalPage() {
     );
 
     const unsubscribeTasks = onSnapshot(tasksQuery, (snapshot) => {
-      const tasksData = snapshot.docs.map(doc => ({
+      const tasksData = snapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data()
       })) as VolunteerTask[];
@@ -84,7 +84,7 @@ export default function VolunteerPortalPage() {
         completedTasks: completed,
         pendingTasks: pending,
       }));
-    }, (error) => {
+    }, (error: any) => {
       // Silently handle missing index error - will show empty state
       if (error.code === "failed-precondition") {
         console.warn("Firestore index needed for volunteer_tasks. Creating index...");
@@ -102,7 +102,7 @@ export default function VolunteerPortalPage() {
     );
 
     const unsubscribeMessages = onSnapshot(messagesQuery, (snapshot) => {
-      const messagesData = snapshot.docs.map(doc => ({
+      const messagesData = snapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data()
       })) as VolunteerMessage[];
@@ -113,7 +113,7 @@ export default function VolunteerPortalPage() {
         ...prev,
         unreadMessages: unread,
       }));
-    }, (error) => {
+    }, (error: any) => {
       // Silently handle missing index error - will show empty state
       if (error.code === "failed-precondition") {
         console.warn("Firestore index needed for volunteer_messages. Creating index...");

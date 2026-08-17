@@ -29,8 +29,8 @@ export default function DuplicateFormPage(): JSX.Element {
 
         const newFormData = {
           ...formData,
-          title: `${formData.title}${copySuffix}`,
-          titleEs: formData.titleEs ? `${formData.titleEs} (Copia)` : undefined,
+          title: `${formData?.title}${copySuffix}`,
+          titleEs: formData?.titleEs ? `${formData.titleEs} (Copia)` : undefined,
           status: "draft" as const,
           published: false,
           createdAt: Timestamp.now(),

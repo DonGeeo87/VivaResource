@@ -74,7 +74,7 @@ export default function EventsPage(): JSX.Element {
           id: doc.id,
           ...data,
           // Map image_url to image for compatibility with existing code
-          image: data.image_url || data.image || "",
+          image: data?.image_url || data?.image || "",
         };
       }) as Event[];
 

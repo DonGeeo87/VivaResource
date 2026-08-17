@@ -237,4 +237,4 @@ const services = [
   },
 ];
 
-export const blogTemplates: BlogTemplate[] = services;
+export const blogTemplates: BlogTemplate[] = services as BlogTemplate[];

@@ -41,7 +41,7 @@ export default function AdminVolunteersPage(): JSX.Element {
     // Real-time listener for unread messages count
     const messagesQuery = query(collection(db, "volunteer_messages"));
     const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
-      const unread = snapshot.docs.filter(doc => {
+      const unread = snapshot.docs.filter((doc: any) => {
         const data = doc.data();
         return !data.read && !data.isReply;
       }).length;

@@ -41,7 +41,7 @@ export default function AdminMessagesPage(): JSX.Element {
     );
 
     const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
-      const msgs = snapshot.docs.map(doc => ({
+      const msgs = snapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data()
       })) as VolunteerMessage[];

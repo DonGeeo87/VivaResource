@@ -76,9 +76,9 @@ export default function EventRegistrationPage(): JSX.Element {
           const formData = formSnap.docs[0].data();
           setLinkedForm({
             id: formSnap.docs[0].id,
-            title: formData.title || "",
-            titleEs: formData.titleEs,
-            customSlug: formData.customSlug,
+            title: formData?.title || "",
+            titleEs: formData?.titleEs,
+            customSlug: formData?.customSlug,
           });
         }
       } catch (error) {

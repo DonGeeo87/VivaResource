@@ -296,7 +296,7 @@ export function onSnapshot(
 }
 
 // writeBatch - stub compatible
-export function writeBatch() {
+export function writeBatch(_db?: unknown) {
   let ops: any[] = [];
   return {
     set: (ref: DocRef, data: any) => { ops.push({ type: "set", ref, data }); },
