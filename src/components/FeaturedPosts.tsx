@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ChevronRight, Calendar } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -13,6 +14,7 @@ interface BlogPost {
   category: string;
   language: string;
   published_at: string;
+  featured_image?: string;
 }
 
 export default function FeaturedPosts() {
@@ -87,29 +89,42 @@ export default function FeaturedPosts() {
             <Link
               key={post.id}
               href={`/blog/${post.slug}`}
-              className="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:border-primary/20 transition-all"
+              className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg hover:border-primary/20 transition-all"
             >
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-primary bg-primary/5 px-3 py-1 rounded-full">
-                  {post.category}
-                </span>
-                {post.published_at && (
-                  <span className="text-xs text-gray-400 flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    {new Date(post.published_at).toLocaleDateString()}
+              {post.featured_image && (
+                <div className="relative aspect-[16/9] overflow-hidden bg-gray-100">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={post.featured_image}
+                    alt={post.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+              <div className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-xs font-bold uppercase tracking-wider text-primary bg-primary/5 px-3 py-1 rounded-full">
+                    {post.category}
                   </span>
-                )}
+                  {post.published_at && (
+                    <span className="text-xs text-gray-400 flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {new Date(post.published_at).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
+                <h3 className="font-headline font-bold text-lg text-on-surface mb-3 group-hover:text-primary transition-colors line-clamp-2">
+                  {post.title}
+                </h3>
+                <p className="text-sm text-on-surface-variant line-clamp-3 mb-4">
+                  {post.excerpt}
+                </p>
+                <span className="text-primary font-bold text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                  {isES ? "Leer más" : "Read More"}
+                  <ChevronRight className="w-4 h-4" />
+                </span>
               </div>
-              <h3 className="font-headline font-bold text-lg text-on-surface mb-3 group-hover:text-primary transition-colors line-clamp-2">
-                {post.title}
-              </h3>
-              <p className="text-sm text-on-surface-variant line-clamp-3 mb-4">
-                {post.excerpt}
-              </p>
-              <span className="text-primary font-bold text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
-                {isES ? "Leer más" : "Read More"}
-                <ChevronRight className="w-4 h-4" />
-              </span>
             </Link>
           ))}
         </div>
