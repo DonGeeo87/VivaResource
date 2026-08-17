@@ -157,15 +157,15 @@ export default function AdminUserProfilePage(): JSX.Element {
         items.push({
           id: d.id,
           type: "help_request",
-          date: parseDate(data.createdAt),
-          title: String(data.fullName || "Help Request"),
+          date: parseDate(data?.createdAt),
+          title: String(data?.fullName || "Help Request"),
           summary: [
-            (data.assistanceTypes as string[])?.join(", "),
-            data.status ? `Status: ${data.status}` : "",
+            (data?.assistanceTypes as string[])?.join(", "),
+            data?.status ? `Status: ${data.status}` : "",
           ]
             .filter(Boolean)
             .join(" | "),
-          raw: data,
+          raw: data || {},
         });
       });
 
@@ -174,29 +174,29 @@ export default function AdminUserProfilePage(): JSX.Element {
         items.push({
           id: d.id,
           type: "event_registration",
-          date: parseDate(data.created_at),
-          title: String(data.name || data.full_name || "Event Registration"),
+          date: parseDate(data?.created_at),
+          title: String(data?.name || data?.full_name || "Event Registration"),
           summary: [
-            data.event_id ? `Event: ${data.event_id}` : "",
-            data.phone ? `Phone: ${data.phone}` : "",
+            data?.event_id ? `Event: ${data.event_id}` : "",
+            data?.phone ? `Phone: ${data.phone}` : "",
           ]
             .filter(Boolean)
             .join(" | "),
-          raw: data,
+          raw: data || {},
         });
       });
 
       formSnap.docs.forEach((d) => {
         const data = d.data();
-        const responses = data.responses as Record<string, string> | undefined;
+        const responses = data?.responses as Record<string, string> | undefined;
         const firstFieldValue = responses ? Object.values(responses).find((v) => v) : "";
         items.push({
           id: d.id,
           type: "form_submission",
-          date: parseDate(data.submittedAt),
+          date: parseDate(data?.submittedAt),
           title: firstFieldValue || "Form Submission",
-          summary: data.formId ? `Form: ${data.formId}` : "",
-          raw: data,
+          summary: data?.formId ? `Form: ${data.formId}` : "",
+          raw: data || {},
         });
       });
 
@@ -205,15 +205,15 @@ export default function AdminUserProfilePage(): JSX.Element {
         items.push({
           id: d.id,
           type: "volunteer_registration",
-          date: parseDate(data.created_at),
-          title: `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Volunteer Registration",
+          date: parseDate(data?.created_at),
+          title: `${data?.firstName || ""} ${data?.lastName || ""}`.trim() || "Volunteer Registration",
           summary: [
-            data.program ? `Program: ${data.program}` : "",
-            data.status ? `Status: ${data.status}` : "",
+            data?.program ? `Program: ${data.program}` : "",
+            data?.status ? `Status: ${data.status}` : "",
           ]
             .filter(Boolean)
             .join(" | "),
-          raw: data,
+          raw: data || {},
         });
       });
 

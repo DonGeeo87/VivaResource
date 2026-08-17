@@ -195,19 +195,19 @@ export default function AdminSeoPage(): JSX.Element {
       blogSnapshot.forEach((post) => {
         const data = post.data();
         const issues: string[] = [];
-        if (!data.meta_description && !data.excerpt) {
+        if (!data?.meta_description && !data?.excerpt) {
           issues.push(language === "es" ? "Sin meta descripción" : "No meta description");
         }
-        if (!data.image_url && !data.cover_image) {
+        if (!data?.image_url && !data?.cover_image) {
           issues.push(language === "es" ? "Sin imagen para Open Graph" : "No Open Graph image");
         }
 
         results.push({
-          page: data.title_en || data.title_es || post.id,
-          url: `/blog/${data.slug || post.id}`,
-          hasTitle: !!(data.title_en || data.title_es),
-          hasDescription: !!(data.meta_description || data.excerpt),
-          hasOgImage: !!(data.image_url || data.cover_image),
+          page: data?.title_en || data?.title_es || post.id,
+          url: `/blog/${data?.slug || post.id}`,
+          hasTitle: !!(data?.title_en || data?.title_es),
+          hasDescription: !!(data?.meta_description || data?.excerpt),
+          hasOgImage: !!(data?.image_url || data?.cover_image),
           hasSchema: true, // Blog posts include Article schema
           hasCanonical: true,
           issues,
@@ -223,17 +223,17 @@ export default function AdminSeoPage(): JSX.Element {
       eventsSnapshot.forEach((event) => {
         const data = event.data();
         const issues: string[] = [];
-        if (!data.image_url) {
+        if (!data?.image_url) {
           issues.push(language === "es" ? "Sin imagen para Open Graph" : "No Open Graph image");
         }
         issues.push(language === "es" ? "Falta Schema Event y metadata dinámica" : "Missing Event Schema and dynamic metadata");
 
         results.push({
-          page: data.title_en || event.id,
+          page: data?.title_en || event.id,
           url: `/events/${event.id}`,
-          hasTitle: !!(data.title_en),
-          hasDescription: !!(data.description_en),
-          hasOgImage: !!data.image_url,
+          hasTitle: !!(data?.title_en),
+          hasDescription: !!(data?.description_en),
+          hasOgImage: !!data?.image_url,
           hasSchema: false,
           hasCanonical: false,
           issues,

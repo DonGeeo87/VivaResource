@@ -31,7 +31,7 @@ export const getAllSiteImages = async (): Promise<Record<string, string>> => {
   const snapshot = await getDocs(q);
   snapshot.docs.forEach((d) => {
     const data = d.data();
-    if (data.path) {
+    if (data?.path) {
       result[d.id] = data.path;
     }
   });
@@ -47,11 +47,11 @@ export const getSiteImages = async (): Promise<SiteImage[]> => {
     const data = d.data();
     existing.set(d.id, {
       key: d.id as SiteImageKey,
-      path: data.path ?? SITE_IMAGE_DEFAULTS[d.id as SiteImageKey]?.path ?? '',
-      url: data.url,
-      descriptionEn: data.descriptionEn ?? SITE_IMAGE_DEFAULTS[d.id as SiteImageKey]?.descriptionEn ?? '',
-      descriptionEs: data.descriptionEs ?? SITE_IMAGE_DEFAULTS[d.id as SiteImageKey]?.descriptionEs ?? '',
-      updatedAt: toJsDate(data.updatedAt),
+      path: data?.path ?? SITE_IMAGE_DEFAULTS[d.id as SiteImageKey]?.path ?? '',
+      url: data?.url,
+      descriptionEn: data?.descriptionEn ?? SITE_IMAGE_DEFAULTS[d.id as SiteImageKey]?.descriptionEn ?? '',
+      descriptionEs: data?.descriptionEs ?? SITE_IMAGE_DEFAULTS[d.id as SiteImageKey]?.descriptionEs ?? '',
+      updatedAt: toJsDate(data?.updatedAt),
     });
   });
 
@@ -87,11 +87,11 @@ export const getSiteImage = async (key: SiteImageKey): Promise<SiteImage | null>
   const data = docSnap.data();
   return {
     key: docSnap.id as SiteImageKey,
-    path: data.path ?? def.path,
-    url: data.url,
-    descriptionEn: data.descriptionEn ?? def.descriptionEn,
-    descriptionEs: data.descriptionEs ?? def.descriptionEs,
-    updatedAt: toJsDate(data.updatedAt),
+    path: data?.path ?? def.path,
+    url: data?.url,
+    descriptionEn: data?.descriptionEn ?? def.descriptionEn,
+    descriptionEs: data?.descriptionEs ?? def.descriptionEs,
+    updatedAt: toJsDate(data?.updatedAt),
   };
 };
 
