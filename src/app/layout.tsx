@@ -50,7 +50,7 @@ export const metadata: Metadata = {
   publisher: "Viva Resource",
   icons: {
     icon: "/favicon-vivaresource.png",
-    apple: "/favicon-vivaresource.png",
+    apple: "/apple-touch-icon.png",
   },
   formatDetection: {
     email: false,
