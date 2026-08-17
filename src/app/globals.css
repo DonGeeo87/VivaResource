@@ -346,3 +346,201 @@
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
+
+/* ============================================================
+   CONTENIDO DE ARTÍCULOS (prose-content)
+   Estilos estándar para el HTML renderizado de posts del blog.
+   Aplica a títulos, subtítulos, listas, párrafos, links, etc.
+   ============================================================ */
+.prose-content {
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  color: #334155;
+}
+
+.prose-content > *:first-child {
+  margin-top: 0;
+}
+
+.prose-content > *:last-child {
+  margin-bottom: 0;
+}
+
+/* Párrafos */
+.prose-content p {
+  margin: 1.25rem 0;
+}
+
+/* Encabezados: jerarquía clara */
+.prose-content h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #0f172a;
+  margin: 2rem 0 1rem;
+  letter-spacing: -0.02em;
+}
+
+.prose-content h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #0f172a;
+  margin: 2rem 0 0.75rem;
+  letter-spacing: -0.01em;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.prose-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #1e293b;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.prose-content h4 {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 1.25rem 0 0.5rem;
+}
+
+/* Listas */
+.prose-content ul,
+.prose-content ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.prose-content ul {
+  list-style: disc;
+}
+
+.prose-content ol {
+  list-style: decimal;
+}
+
+.prose-content li {
+  margin: 0.375rem 0;
+}
+
+.prose-content li::marker {
+  color: var(--color-primary, #025689);
+  font-weight: 600;
+}
+
+/* Links */
+.prose-content a {
+  color: var(--color-primary, #025689);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: opacity 0.15s ease;
+}
+
+.prose-content a:hover {
+  opacity: 0.75;
+}
+
+/* Texto en negrita / itálica / código */
+.prose-content strong {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.prose-content em {
+  font-style: italic;
+}
+
+.prose-content code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+  background: #f1f5f9;
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+  color: #be123c;
+}
+
+/* Blockquote */
+.prose-content blockquote {
+  border-left: 4px solid var(--color-primary, #025689);
+  background: #f8fafc;
+  padding: 0.75rem 1.25rem;
+  margin: 1.5rem 0;
+  border-radius: 0 8px 8px 0;
+  color: #475569;
+  font-style: italic;
+}
+
+/* Imágenes dentro del contenido */
+.prose-content img {
+  border-radius: 12px;
+  margin: 1.5rem auto;
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Código en bloque */
+.prose-content pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1.25rem 0;
+  font-size: 0.9em;
+}
+
+.prose-content pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+/* Tablas dentro del contenido */
+.prose-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+
+.prose-content th,
+.prose-content td {
+  border: 1px solid #e2e8f0;
+  padding: 0.6rem 0.9rem;
+  text-align: left;
+}
+
+.prose-content th {
+  background: #f8fafc;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.prose-content tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+/* Línea divisoria */
+.prose-content hr {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 2rem 0;
+}
+
+/* Responsive: reducir títulos en mobile */
+@media (max-width: 640px) {
+  .prose-content {
+    font-size: 1rem;
+  }
+  .prose-content h1 {
+    font-size: 1.5rem;
+  }
+  .prose-content h2 {
+    font-size: 1.25rem;
+  }
+}
