@@ -12,9 +12,14 @@ async function verifyAdmin(request: NextRequest) {
 
   const token = authHeader.split(" ")[1];
   try {
-    const { verifyIdToken, adminDb } = await import("@/lib/admin-db");
-    const decodedToken = await verifyIdToken(token);
-    const email = decodedToken.email;
+    // El login emite un JWT local (jsonwebtoken). Validar con verifyToken, no con Firebase.
+    const { verifyToken } = await import("@/lib/auth/jwt");
+    const { adminDb } = await import("@/lib/admin-db");
+    const payload = verifyToken(token);
+    if (!payload) {
+      return { error: "Token inválido", status: 401 };
+    }
+    const email = payload.email;
 
     const db = await adminDb();
     if (!db) {
@@ -32,7 +37,7 @@ async function verifyAdmin(request: NextRequest) {
       return { error: "No tienes permisos suficientes", status: 403 };
     }
 
-    return { uid: decodedToken.uid, email, role: userData.role };
+    return { uid: payload.uid, email, role: userData.role };
   } catch (error) {
     console.error("Error verifying token:", error);
     return { error: "Token inválido", status: 401 };

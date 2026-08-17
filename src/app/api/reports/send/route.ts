@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
-import { adminDb, verifyIdToken } from "@/lib/admin-db";
+import { adminDb } from "@/lib/admin-db";
+import { verifyToken } from "@/lib/auth/jwt";
 
 // Force dynamic rendering - uses Firebase Admin SDK at runtime
 export const dynamic = "force-dynamic";
@@ -68,12 +69,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       if (authHeader?.startsWith("Bearer ")) {
         const token = authHeader.slice(7);
         try {
-          const decoded = await verifyIdToken(token);
+          const payload = verifyToken(token);
           const db = await adminDb();
-          if (db) {
+          if (db && payload) {
             const adminSnap = await db
               .collection("admin_users")
-              .where("email", "==", decoded.email)
+              .where("email", "==", payload.email)
               .get();
             if (adminSnap.size > 0) {
               const role = adminSnap.docs[0].data()?.role;
