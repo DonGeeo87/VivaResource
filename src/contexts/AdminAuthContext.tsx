@@ -22,6 +22,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const token = getToken();
     if (storedUser && token) {
       setUser(storedUser);
+    } else if (token && !storedUser) {
+      // Sesión corrupta: hay token pero el user no se puede restaurar.
+      // Limpiar para evitar página en blanco (layout retorna null con !user pero token presente).
+      clearSession();
     }
     setLoading(false);
   }, []);
