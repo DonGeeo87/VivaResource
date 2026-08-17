@@ -533,7 +533,7 @@ export default function AdminEventsPage(): JSX.Element {
                     </AdminButton>
                   </Link>
                   <Link
-                    href={`/admin/events/${event.id}`}
+                    href={`/admin/events/${event.id}/edit`}
                     className="flex-1"
                   >
                     <AdminButton variant="secondary" size="xs" fullWidth className="w-full text-gray-700">
