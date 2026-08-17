@@ -118,7 +118,7 @@ export default function BlogPage() {
       {!loading && filteredPosts.length > 0 && (
         <section className="max-w-7xl mx-auto px-6 -mt-16 relative z-10 mb-24">
           <div className="bg-white rounded-xl shadow-ambient-lg overflow-hidden flex flex-col lg:flex-row">
-            <div className="lg:w-3/5 h-[400px] lg:h-auto overflow-hidden">
+            <div className="lg:w-3/5 h-[400px] lg:h-[420px] overflow-hidden">
               <Image
                 src={brokenImages.has(filteredPosts[0].featured_image) ? placeholderImage : filteredPosts[0].featured_image || placeholderImage}
                 alt={filteredPosts[0].title}
