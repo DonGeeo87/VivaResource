@@ -6,6 +6,29 @@
 export const TIMEZONE = "America/Denver";
 
 /**
+ * Normaliza cualquier formato de fecha (Timestamp, Date, string ISO, objeto con toDate)
+ * a un objeto Date. Devuelve null si no se puede parsear.
+ * La BD migrada entrega fechas como strings ISO, por eso es crítico no asumir .toDate().
+ */
+export function toDate(value: unknown): Date | null {
+  if (!value) return null;
+  try {
+    if (value instanceof Date) return value;
+    if (typeof value === "object" && typeof (value as { toDate?: () => Date }).toDate === "function") {
+      return (value as { toDate: () => Date }).toDate() || null;
+    }
+    if (typeof value === "string" || typeof value === "number") {
+      const parsed = new Date(value);
+      return isNaN(parsed.getTime()) ? null : parsed;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+
+/**
  * Parse date/time in Mountain Time to UTC.
  * Simple approach: assume DST for Apr-Oct, standard time otherwise.
  */

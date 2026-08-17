@@ -282,11 +282,15 @@ export default function AdminVolunteerDetailPage(): JSX.Element {
     }
   };
 
-  const getDateValue = (date: Timestamp | Date | { toDate: () => Date } | null): Date | null => {
+  const getDateValue = (date: Timestamp | Date | { toDate: () => Date } | string | null): Date | null => {
     if (!date) return null;
     if (date instanceof Timestamp) return date.toDate();
     if (typeof date === 'object' && 'toDate' in date) return date.toDate();
     if (date instanceof Date) return date;
+    if (typeof date === 'string') {
+      const parsed = new Date(date);
+      return isNaN(parsed.getTime()) ? null : parsed;
+    }
     return null;
   };
 

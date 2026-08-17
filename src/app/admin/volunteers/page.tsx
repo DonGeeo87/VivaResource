@@ -6,6 +6,7 @@ import { Search, Check, X, Download, Mail, Phone, Calendar, Eye, CheckCheck, XCi
 import { useLanguage } from "@/contexts/LanguageContext";
 
 import { db, collection, doc, getDocs, onSnapshot, orderBy, query, updateDoc, writeBatch } from "@/lib/db-client";
+import { toDate } from "@/lib/timezone";
 
 interface Volunteer {
   id: string;
@@ -196,7 +197,7 @@ export default function AdminVolunteersPage(): JSX.Element {
       (v.interests || []).join(", "),
       v.availability || "",
       v.status,
-      v.created_at ? v.created_at.toDate().toLocaleDateString() : ""
+      toDate(v.created_at)?.toLocaleDateString() || ""
     ]);
 
     const csv = [headers, ...rows].map(row => row.join(",")).join("\n");
@@ -400,9 +401,7 @@ export default function AdminVolunteersPage(): JSX.Element {
                     )}
                     <div className="flex items-center gap-2 text-gray-600">
                       <Calendar className="w-4 h-4" />
-                      {volunteer.created_at 
-                        ? volunteer.created_at.toDate().toLocaleDateString() 
-                        : "-"}
+                      {toDate(volunteer.created_at)?.toLocaleDateString() || "-"}
                     </div>
                   </div>
 
