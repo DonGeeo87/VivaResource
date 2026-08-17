@@ -7,6 +7,7 @@ import { Timestamp, db } from "@/lib/db-client";
 import { getCurrentUserId, getToken } from "@/lib/auth/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatMountainDate } from "@/lib/timezone";
+import { AdminButton, PageHeader, Pagination, EmptyState } from "@/components/admin";
 
 interface Event {
   id: string;
@@ -364,19 +365,17 @@ export default function AdminEventsPage(): JSX.Element {
 
   return (
     <div>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">{language === "es" ? "Eventos" : "Events"}</h1>
-          <p className="text-gray-600 mt-1">{language === "es" ? "Gestiona los eventos" : "Manage events"}</p>
-        </div>
-        <Link
-          href="/admin/events/new"
-          className="mt-4 md:mt-0 inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-hover transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          {language === "es" ? "Nuevo Evento" : "New Event"}
-        </Link>
-      </div>
+      <PageHeader
+        title={language === "es" ? "Eventos" : "Events"}
+        description={language === "es" ? "Gestiona los eventos" : "Manage events"}
+        actions={
+          <Link href="/admin/events/new">
+            <AdminButton size="md" icon={<Plus className="w-4 h-4" />}>
+              {language === "es" ? "Nuevo Evento" : "New Event"}
+            </AdminButton>
+          </Link>
+        }
+      />
 
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
@@ -510,73 +509,76 @@ export default function AdminEventsPage(): JSX.Element {
                     </div>
                   )}
                 </div>
-                <div className="flex gap-1 flex-wrap">
+                <div className="flex gap-1.5 flex-wrap">
                   <Link
                     href={`/admin/events/${event.id}`}
-                    className="flex-1 text-center py-2 text-sm text-primary hover:bg-gray-50 rounded-lg border border-primary"
+                    className="flex-1"
                   >
-                    {language === "es" ? "Detalles" : "Details"}
+                    <AdminButton variant="outline" size="xs" fullWidth className="w-full">
+                      {language === "es" ? "Detalles" : "Details"}
+                    </AdminButton>
                   </Link>
                   <Link
                     href={`/admin/events/${event.id}`}
-                    className="flex-1 text-center py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg border border-gray-300"
+                    className="flex-1"
                   >
-                    {language === "es" ? "Editar" : "Edit"}
+                    <AdminButton variant="secondary" size="xs" fullWidth className="w-full">
+                      {language === "es" ? "Editar" : "Edit"}
+                    </AdminButton>
                   </Link>
                   {event.registration_required && (
-                    <button
+                    <AdminButton
+                      variant="outline"
+                      size="xs"
+                      icon={<Users className="w-3.5 h-3.5" />}
                       onClick={() => handleViewRegistrations(event)}
-                      className="flex-1 text-center py-2 text-sm text-secondary hover:bg-secondary/5 rounded-lg border border-secondary"
                       title={language === "es" ? "Ver inscritos" : "View registrations"}
                     >
-                      <Users className="w-4 h-4 inline mr-1" />
                       {event.registrationCount || 0}
-                    </button>
+                    </AdminButton>
                   )}
-                  <button
+                  <AdminButton
+                    variant="ghost"
+                    size="xs"
                     onClick={() => handleToggleFinish(event)}
                     disabled={toggling === event.id}
-                    className={`px-3 py-2 text-sm rounded-lg border transition-colors ${
-                      event.is_finished
-                        ? "text-orange-600 border-orange-200 bg-orange-50 hover:bg-orange-100"
-                        : "text-green-600 border-green-200 bg-green-50 hover:bg-green-100"
-                    } disabled:opacity-50`}
                     title={event.is_finished
                       ? (language === "es" ? "Marcar como activo" : "Mark as active")
                       : (language === "es" ? "Finalizar evento" : "Finish event")
                     }
+                    className={event.is_finished ? "text-orange-600 hover:text-orange-700" : "text-green-600 hover:text-green-700"}
                   >
                     {event.is_finished ? (language === "es" ? "Reactivar" : "Reopen") : (language === "es" ? "Finalizar" : "Finish")}
-                  </button>
-                  <button
+                  </AdminButton>
+                  <AdminButton
+                    variant="ghost"
+                    size="xs"
                     onClick={() => handleToggleArchive(event)}
                     disabled={toggling === event.id}
-                    className={`px-3 py-2 text-sm rounded-lg border transition-colors ${
-                      event.is_archived
-                        ? "text-gray-600 border-gray-200 bg-gray-50 hover:bg-gray-100"
-                        : "text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100"
-                    } disabled:opacity-50`}
                     title={event.is_archived
                       ? (language === "es" ? "Desarchivar" : "Unarchive")
                       : (language === "es" ? "Archivar" : "Archive")
                     }
+                    className={event.is_archived ? "text-gray-500" : "text-blue-600 hover:text-blue-700"}
                   >
                     {event.is_archived ? (language === "es" ? "Desarchivar" : "Unarchive") : (language === "es" ? "Archivar" : "Archive")}
-                  </button>
-                  <button
+                  </AdminButton>
+                  <AdminButton
+                    variant="ghost"
+                    size="xs"
+                    icon={<Copy className="w-3.5 h-3.5" />}
                     onClick={() => handleDuplicate(event)}
                     disabled={toggling === event.id}
-                    className="px-3 py-2 text-sm rounded-lg border border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50"
                     title={language === "es" ? "Duplicar evento" : "Duplicate event"}
-                  >
-                    <Copy className="w-4 h-4" />
-                  </button>
-                  <button
+                  />
+                  <AdminButton
+                    variant="ghost"
+                    size="xs"
+                    icon={<Trash2 className="w-3.5 h-3.5" />}
                     onClick={() => handleDelete(event.id)}
-                    className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-200"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    title={language === "es" ? "Eliminar evento" : "Delete event"}
+                  />
                 </div>
               </div>
             </div>
