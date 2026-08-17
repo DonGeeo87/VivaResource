@@ -25,10 +25,15 @@ interface BlogPost {
 }
 
 /**
- * Detect user's preferred language from the viva-lang cookie.
- * Shared between generateMetadata and BlogPostPage to avoid duplication.
+ * Detect user's preferred language from the viva-lang cookie OR the slug suffix.
+ * Los slugs de blog ya codifican el idioma (foo-es, foo-en), así que el idioma
+ * del post se deriva del slug, no de la cookie del visitante.
  */
-function getUserLanguage(): "en" | "es" {
+function getPostLanguage(slug: string): "en" | "es" {
+  // Si el slug termina en -es o -en, ese es el idioma del post (determinante)
+  if (slug.endsWith("-es")) return "es";
+  if (slug.endsWith("-en")) return "en";
+  // Fallback: cookie viva-lang
   try {
     const cookieStore = cookies();
     const langCookie = cookieStore.get("viva-lang");
@@ -64,7 +69,7 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }) {
-  const userLang = getUserLanguage();
+  const userLang = getPostLanguage(params.slug);
   const post = await getPostBySlug(params.slug, userLang);
 
   if (!post) {
@@ -153,7 +158,7 @@ export default async function BlogPostPage({
 }: {
   params: { slug: string };
 }): Promise<JSX.Element> {
-  const userLang = getUserLanguage();
+  const userLang = getPostLanguage(params.slug);
   const post = await getPostBySlug(params.slug, userLang);
 
   if (!post) {
