@@ -284,8 +284,8 @@ export default function AdminEventsPage(): JSX.Element {
   };
 
   const filteredEvents = events.filter(event => {
-    const matchesSearch = event.title_en.toLowerCase().includes(search.toLowerCase()) ||
-      event.title_es?.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = (event.title_en || "").toLowerCase().includes(search.toLowerCase()) ||
+      (event.title_es || "").toLowerCase().includes(search.toLowerCase());
     const matchesFilter = filter === "all" ||
       (filter === "finished" && event.is_finished) ||
       (filter === "archived" && event.is_archived) ||
@@ -432,7 +432,7 @@ export default function AdminEventsPage(): JSX.Element {
                 <span className={`inline-block px-2 py-1 rounded text-xs font-medium mb-2 ${categoryColors[event.category]}`}>
                   {event.category}
                 </span>
-                <h3 className="font-semibold text-lg text-gray-900 mb-2">{event.title_en}</h3>
+                <h3 className="font-semibold text-lg text-gray-900 mb-2">{event.title_en || event.title_es || "Sin título"}</h3>
                 <div className="space-y-2 text-sm text-gray-600 mb-4">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
