@@ -78,9 +78,9 @@ export default function AdminMessagesPage(): JSX.Element {
         const data = doc.data();
         volsMap[doc.id] = {
           id: doc.id,
-          firstName: data.firstName || "",
-          lastName: data.lastName || "",
-          email: data.email || "",
+          firstName: data?.firstName || "",
+          lastName: data?.lastName || "",
+          email: data?.email || "",
         };
       });
       setVolunteers(volsMap);

@@ -125,13 +125,13 @@ export default function EventDetailsPage(): JSX.Element {
           const subSnap = await getDocs(subQuery);
           forms.push({
             id: formDoc.id,
-            title: formData.title || "",
-            published: formData.published ?? false,
+            title: formData?.title || "",
+            published: formData?.published ?? false,
             responseCount: subSnap.size,
           });
         }
         // Also check if event.formId points to a form
-        if (eventData.formId) {
+        if (eventData?.formId) {
           try {
             const formDoc = await getDoc(doc(db, "forms", eventData.formId));
             if (formDoc.exists && formDoc.data()?.linkedEventId === eventId) {
@@ -143,8 +143,8 @@ export default function EventDetailsPage(): JSX.Element {
               const subSnap = await getDocs(subQuery);
               forms.push({
                 id: formDoc.id,
-                title: formData.title || "",
-                published: formData.published ?? false,
+                title: formData?.title || "",
+                published: formData?.published ?? false,
                 responseCount: subSnap.size,
               });
             }

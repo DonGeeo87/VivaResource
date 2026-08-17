@@ -91,13 +91,13 @@ export default function EventRegisterPage(): JSX.Element {
           // First try: fetch form by formId
           if (eventData.formId) {
             try {
-              const formDoc = await getDoc(doc(db, "forms", eventData.formId));
+              const formDoc = await getDoc(doc(db, "forms", eventData?.formId));
               if (formDoc.exists) {
                 const formData = formDoc.data();
-                const fields = (formData.fields || []) as FormFieldDef[];
+                const fields = (formData?.fields || []) as FormFieldDef[];
                 if (fields.length > 0) {
                   setFormFields(fields);
-                  setFormData({ title: formData.title || "", titleEs: formData.titleEs || "" });
+                  setFormData({ title: formData?.title || "", titleEs: formData?.titleEs || "" });
                   const initialValues: Record<string, string> = {};
                   fields.forEach((f: FormFieldDef) => { initialValues[f.id] = ""; });
                   setFormValues(initialValues);
@@ -119,10 +119,10 @@ export default function EventRegisterPage(): JSX.Element {
               const formSnap = await getDocs(formQuery);
               if (!formSnap.empty) {
                 const formData = formSnap.docs[0].data();
-                const fields = (formData.fields || []) as FormFieldDef[];
+                const fields = (formData?.fields || []) as FormFieldDef[];
                 if (fields.length > 0) {
                   setFormFields(fields);
-                  setFormData({ title: formData.title || "", titleEs: formData.titleEs || "" });
+                  setFormData({ title: formData?.title || "", titleEs: formData?.titleEs || "" });
                   const initialValues: Record<string, string> = {};
                   fields.forEach((f: FormFieldDef) => { initialValues[f.id] = ""; });
                   setFormValues(initialValues);

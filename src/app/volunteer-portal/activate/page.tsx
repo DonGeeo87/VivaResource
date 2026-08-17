@@ -48,19 +48,19 @@ function ActivateForm() {
         }
 
         const data = regDoc.data();
-        if (data.activation_token !== token) {
+        if (data?.activation_token !== token) {
           setValidating(false);
           return;
         }
 
-        if (data.status !== "approved") {
+        if (data?.status !== "approved") {
           setValidating(false);
           return;
         }
 
-        setEmailState(data.email || email || "");
-        setFirstName(data.firstName || "");
-        setLastName(data.lastName || "");
+        setEmailState(data?.email || email || "");
+        setFirstName(data?.firstName || "");
+        setLastName(data?.lastName || "");
         setValid(true);
       } catch (err) {
         console.error("Error validating token:", err);

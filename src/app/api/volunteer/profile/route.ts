@@ -26,17 +26,17 @@ export async function GET(request: Request) {
     return NextResponse.json({
       uid: payload.uid,
       email: payload.email,
-      firstName: data.firstName || "",
-      lastName: data.lastName || "",
-      phone: data.phone || "",
-      status: data.status || "active",
-      registrationId: data.registrationId,
-      joinedAt: data.joinedAt?.toDate?.()?.toISOString() || data.joinedAt,
-      lastLoginAt: data.lastLoginAt?.toDate?.()?.toISOString() || data.lastLoginAt,
-      language: data.language || "en",
-      notificationsEnabled: data.notificationsEnabled ?? true,
-      unreadMessages: data.unreadMessages || 0,
-      upcomingTasks: data.upcomingTasks || 0,
+      firstName: data?.firstName || "",
+      lastName: data?.lastName || "",
+      phone: data?.phone || "",
+      status: data?.status || "active",
+      registrationId: data?.registrationId,
+      joinedAt: data?.joinedAt?.toDate?.()?.toISOString() || data?.joinedAt,
+      lastLoginAt: data?.lastLoginAt?.toDate?.()?.toISOString() || data?.lastLoginAt,
+      language: data?.language || "en",
+      notificationsEnabled: data?.notificationsEnabled ?? true,
+      unreadMessages: data?.unreadMessages || 0,
+      upcomingTasks: data?.upcomingTasks || 0,
     });
   } catch (error) {
     console.error("Volunteer profile error:", error);

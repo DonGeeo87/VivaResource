@@ -166,16 +166,16 @@ export default function AdminDashboard(): JSX.Element {
 
         for (const doc of regSnap.docs) {
           const data = doc.data();
-          let eventName = eventCache[data.event_id];
+          let eventName = eventCache[data?.event_id ?? ""];
 
-          if (!eventName && data.event_id) {
+          if (!eventName && data?.event_id) {
             try {
               const eventRef = collection(db, "events");
               const eventQuery = query(eventRef, where("__name__", "==", data.event_id));
               const eventSnap = await getDocs(eventQuery);
               if (!eventSnap.empty) {
                 const eventData = eventSnap.docs[0].data();
-                eventName = eventData.title || eventData.titleEs || "Evento";
+                eventName = eventData?.title || eventData?.titleEs || "Evento";
                 eventCache[data.event_id] = eventName;
               }
             } catch {
@@ -185,11 +185,11 @@ export default function AdminDashboard(): JSX.Element {
 
           let createdAt: Date;
           try {
-            if (data.created_at && typeof data.created_at.toDate === "function") {
+            if (data?.created_at && typeof data.created_at.toDate === "function") {
               createdAt = data.created_at.toDate();
-            } else if (data.created_at instanceof Date) {
+            } else if (data?.created_at instanceof Date) {
               createdAt = data.created_at;
-            } else if (typeof data.created_at === "string") {
+            } else if (typeof data?.created_at === "string") {
               createdAt = new Date(data.created_at);
             } else {
               createdAt = new Date();
@@ -200,10 +200,10 @@ export default function AdminDashboard(): JSX.Element {
 
           registrations.push({
             id: doc.id,
-            eventId: data.event_id || "",
+            eventId: data?.event_id || "",
             eventName: eventName || "Evento",
-            name: data.name || data.full_name || "Anónimo",
-            email: data.email || "",
+            name: data?.name || data?.full_name || "Anónimo",
+            email: data?.email || "",
             createdAt
           });
         }
@@ -221,16 +221,16 @@ export default function AdminDashboard(): JSX.Element {
 
         for (const doc of subSnap.docs) {
           const data = doc.data();
-          let formTitle = formCache[data.formId];
+          let formTitle = formCache[data?.formId ?? ""];
 
-          if (!formTitle && data.formId) {
+          if (!formTitle && data?.formId) {
             try {
               const formRef = collection(db, "forms");
               const formQuery = query(formRef, where("__name__", "==", data.formId));
               const formSnap = await getDocs(formQuery);
               if (!formSnap.empty) {
                 const formData = formSnap.docs[0].data();
-                formTitle = formData.title || formData.titleEs || "Formulario";
+                formTitle = formData?.title || formData?.titleEs || "Formulario";
                 formCache[data.formId] = formTitle;
               }
             } catch {
@@ -240,11 +240,11 @@ export default function AdminDashboard(): JSX.Element {
 
           let submittedAt: Date;
           try {
-            if (data.submittedAt && typeof data.submittedAt.toDate === "function") {
+            if (data?.submittedAt && typeof data.submittedAt.toDate === "function") {
               submittedAt = data.submittedAt.toDate();
-            } else if (data.submittedAt instanceof Date) {
+            } else if (data?.submittedAt instanceof Date) {
               submittedAt = data.submittedAt;
-            } else if (typeof data.submittedAt === "string") {
+            } else if (typeof data?.submittedAt === "string") {
               submittedAt = new Date(data.submittedAt);
             } else {
               submittedAt = new Date();
@@ -255,9 +255,9 @@ export default function AdminDashboard(): JSX.Element {
 
           submissions.push({
             id: doc.id,
-            formId: data.formId || "",
+            formId: data?.formId || "",
             formTitle: formTitle || "Formulario",
-            email: data.email || "",
+            email: data?.email || "",
             submittedAt
           });
         }
@@ -274,11 +274,11 @@ export default function AdminDashboard(): JSX.Element {
           
           let createdAt: Date;
           try {
-            if (data.created_at && typeof data.created_at.toDate === "function") {
+            if (data?.created_at && typeof data.created_at.toDate === "function") {
               createdAt = data.created_at.toDate();
-            } else if (data.created_at instanceof Date) {
+            } else if (data?.created_at instanceof Date) {
               createdAt = data.created_at;
-            } else if (typeof data.created_at === "string") {
+            } else if (typeof data?.created_at === "string") {
               createdAt = new Date(data.created_at);
             } else {
               createdAt = new Date();
@@ -289,9 +289,9 @@ export default function AdminDashboard(): JSX.Element {
 
           return {
             id: doc.id,
-            name: data.name || data.full_name || "Anónimo",
-            email: data.email || "",
-            status: data.status || "pending",
+            name: data?.name || data?.full_name || "Anónimo",
+            email: data?.email || "",
+            status: data?.status || "pending",
             createdAt
           };
         });
@@ -322,11 +322,11 @@ export default function AdminDashboard(): JSX.Element {
 
           let eventDate: Date | undefined;
           try {
-            if (data.date && typeof data.date.toDate === "function") {
+            if (data?.date && typeof data.date.toDate === "function") {
               eventDate = data.date.toDate();
-            } else if (data.date instanceof Date) {
+            } else if (data?.date instanceof Date) {
               eventDate = data.date;
-            } else if (typeof data.date === "string") {
+            } else if (typeof data?.date === "string") {
               eventDate = new Date(data.date);
             }
           } catch {
@@ -335,11 +335,11 @@ export default function AdminDashboard(): JSX.Element {
 
           events.push({
             id: doc.id,
-            title: data.title_en || data.title || "",
-            titleEs: data.title_es || "",
-            status: data.status || "published",
+            title: data?.title_en || data?.title || "",
+            titleEs: data?.title_es || "",
+            status: data?.status || "published",
             attendeeCount: regSnap.data().count,
-            capacity: data.capacity || undefined,
+            capacity: data?.capacity || undefined,
             date: eventDate
           });
         }
@@ -381,11 +381,11 @@ export default function AdminDashboard(): JSX.Element {
           if (!lastSubSnap.empty) {
             const lastSubData = lastSubSnap.docs[0].data();
             try {
-              if (lastSubData.submittedAt && typeof lastSubData.submittedAt.toDate === "function") {
+              if (lastSubData?.submittedAt && typeof lastSubData.submittedAt.toDate === "function") {
                 lastSubmission = lastSubData.submittedAt.toDate();
-              } else if (lastSubData.submittedAt instanceof Date) {
+              } else if (lastSubData?.submittedAt instanceof Date) {
                 lastSubmission = lastSubData.submittedAt;
-              } else if (typeof lastSubData.submittedAt === "string") {
+              } else if (typeof lastSubData?.submittedAt === "string") {
                 lastSubmission = new Date(lastSubData.submittedAt);
               }
             } catch {
@@ -395,9 +395,9 @@ export default function AdminDashboard(): JSX.Element {
 
           forms.push({
             id: doc.id,
-            title: data.title || "",
-            titleEs: data.titleEs,
-            status: data.status || "draft",
+            title: data?.title || "",
+            titleEs: data?.titleEs,
+            status: data?.status || "draft",
             submissionCount: subSnap.data().count,
             lastSubmission
           });

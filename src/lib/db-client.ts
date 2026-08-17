@@ -279,13 +279,18 @@ export async function getCountFromServer(
 // onSnapshot - polling fallback (no real-time, but compatible)
 export function onSnapshot(
   ref: ColRef | WhereQuery | QueryRef | DocRef,
-  callback: (snap: any) => void
+  callback: (snap: any) => void,
+  onError?: (error: unknown) => void
 ): () => void {
   // Immediate first call
-  ref.get().then(callback).catch(() => {});
+  ref.get().then(callback).catch((e: unknown) => {
+    if (onError) onError(e);
+  });
   // Poll every 5 seconds
   const interval = setInterval(() => {
-    ref.get().then(callback).catch(() => {});
+    ref.get().then(callback).catch((e: unknown) => {
+      if (onError) onError(e);
+    });
   }, 5000);
   return () => clearInterval(interval);
 }

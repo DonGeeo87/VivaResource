@@ -71,11 +71,11 @@ export default function PublicFormPage() {
               if (eventSnap.exists) {
                 const eventData = eventSnap.data();
                 setEventInfo({
-                  id: data.linkedEventId,
-                  title: eventData.title_es || eventData.title_en || '',
-                  date: eventData.date ? new Date(eventData.date.toDate()).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : undefined,
-                  time: eventData.time,
-                  location: eventData.location,
+                  id: data?.linkedEventId,
+                  title: eventData?.title_es || eventData?.title_en || '',
+                  date: eventData?.date ? new Date((eventData.date as { toDate?: () => Date }).toDate?.() || eventData.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : undefined,
+                  time: eventData?.time,
+                  location: eventData?.location,
                 });
               }
             }
