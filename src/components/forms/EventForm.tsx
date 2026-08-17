@@ -242,6 +242,12 @@ export default function EventForm({ initialData, onSubmit, template, formTemplat
       const valid = await trigger(["title_en", "title_es", "date", "location", "description_en", "description_es"]);
       if (!valid) return;
     }
+    // Si no requiere registro, saltar del paso 1 (detalles) directo al paso 3 (publicacion).
+    // El paso 2 (configuracion de registro) solo aplica cuando registrationRequired es true.
+    if (!registrationRequired) {
+      setCurrentStep(3);
+      return;
+    }
     setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
   };
 
@@ -339,34 +345,32 @@ export default function EventForm({ initialData, onSubmit, template, formTemplat
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6 max-w-2xl">
-      {/* Step Indicator */}
-      {registrationRequired && (
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            {steps.map((step, idx) => (
-              <div key={step.num} className="flex items-center">
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full font-medium text-sm ${
-                  currentStep >= step.num 
-                    ? "bg-primary text-white" 
-                    : "bg-gray-200 text-gray-500"
-                }`}>
-                  {currentStep > step.num ? <Check className="w-4 h-4" /> : step.num}
-                </div>
-                <span className={`ml-2 text-sm hidden sm:block ${
-                  currentStep >= step.num ? "text-gray-900 font-medium" : "text-gray-400"
-                }`}>
-                  {isES ? step.labelEs : step.label}
-                </span>
-                {idx < steps.length - 1 && (
-                  <div className={`w-12 h-0.5 mx-2 ${
-                    currentStep > step.num ? "bg-primary" : "bg-gray-200"
-                  }`} />
-                )}
+      {/* Step Indicator - SIEMPRE visible */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          {steps.map((step, idx) => (
+            <div key={step.num} className="flex items-center">
+              <div className={`flex items-center justify-center w-8 h-8 rounded-full font-medium text-sm ${
+                currentStep >= step.num 
+                  ? "bg-primary text-white" 
+                  : "bg-gray-200 text-gray-500"
+              }`}>
+                {currentStep > step.num ? <Check className="w-4 h-4" /> : step.num}
               </div>
-            ))}
+              <span className={`ml-2 text-sm hidden sm:block ${
+                currentStep >= step.num ? "text-gray-900 font-medium" : "text-gray-400"
+              }`}>
+                {isES ? step.labelEs : step.label}
+              </span>
+              {idx < steps.length - 1 && (
+                <div className={`w-12 h-0.5 mx-2 ${
+                  currentStep > step.num ? "bg-primary" : "bg-gray-200"
+                }`} />
+              )}
+            </div>
+          ))}
           </div>
         </div>
-      )}
       {/* Errores globales */}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
@@ -807,7 +811,7 @@ export default function EventForm({ initialData, onSubmit, template, formTemplat
 
       {/* Botones */}
       <div className="flex gap-4 pt-4">
-        {registrationRequired && currentStep > 1 && (
+        {currentStep > 1 && (
           <button
             type="button"
             onClick={handlePrev}
@@ -818,7 +822,7 @@ export default function EventForm({ initialData, onSubmit, template, formTemplat
           </button>
         )}
         
-        {registrationRequired && currentStep < totalSteps ? (
+        {currentStep < totalSteps ? (
           <button
             type="button"
             onClick={handleNext}
