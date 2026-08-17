@@ -306,7 +306,7 @@ function ImageCard({
       <div className="p-4 flex flex-col flex-1">
         <div className="flex items-start justify-between gap-2 mb-2">
           <h3 className="font-bold text-sm text-gray-800 leading-tight">
-            {image.key.replace(/-/g, " ").toUpperCase()}
+            {(image.key || "").replace(/-/g, " ").toUpperCase()}
           </h3>
           {def?.section && (
             <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-md font-medium shrink-0">

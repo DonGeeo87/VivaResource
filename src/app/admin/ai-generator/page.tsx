@@ -570,7 +570,7 @@ export default function AIGeneratorPage(): JSX.Element {
                         <p className="text-sm font-medium text-gray-900 truncate">{item.topic}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-xs text-gray-500">
-                            {item.language === "both" ? "EN/ES" : item.language.toUpperCase()}
+                            {item.language === "both" ? "EN/ES" : (item.language || "en").toUpperCase()}
                           </span>
                           <span className="text-xs text-gray-400">
                             {formatDate(item.created_at)}
