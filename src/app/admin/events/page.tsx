@@ -45,6 +45,8 @@ export default function AdminEventsPage(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 6;
   
   // Modal state for registrations
   const [showRegistrationsModal, setShowRegistrationsModal] = useState(false);
@@ -350,6 +352,15 @@ export default function AdminEventsPage(): JSX.Element {
     return matchesSearch && matchesFilter;
   });
 
+  const totalPages = Math.max(1, Math.ceil(filteredEvents.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedEvents = filteredEvents.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const statusColors: Record<string, string> = {
     draft: "bg-gray-100 text-gray-700",
     published: "bg-green-100 text-green-700",
@@ -432,7 +443,7 @@ export default function AdminEventsPage(): JSX.Element {
             {error ? (<div className="text-red-600"><p className="font-semibold mb-2">Error: {error}</p><p className="text-sm text-gray-500">Check server logs</p></div>) : (<p className="text-gray-500">{language === "es" ? "No se encontraron eventos" : "No events found"}</p>)}
           </div>
         ) : (
-          filteredEvents.map((event) => (
+          paginatedEvents.map((event) => (
             <div
               key={event.id}
               className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-opacity ${
@@ -441,7 +452,7 @@ export default function AdminEventsPage(): JSX.Element {
             >
               {/* Event Image */}
               {event.image_url ? (
-                <div className="h-32 relative overflow-hidden">
+                <div className="aspect-video relative overflow-hidden bg-gray-100">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={event.image_url}
@@ -465,7 +476,10 @@ export default function AdminEventsPage(): JSX.Element {
                   </div>
                 </div>
               ) : (
-                <div className="h-32 bg-gradient-to-br from-primary to-primary-container relative">
+                <div className="aspect-video bg-gradient-to-br from-primary to-primary-container relative flex items-center justify-center p-6">
+                  <p className="text-white/90 font-semibold text-center leading-snug line-clamp-3">
+                    {event.title_en || event.title_es || (language === "es" ? "Evento" : "Event")}
+                  </p>
                   <div className="absolute top-3 right-3 flex flex-col gap-1">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[event.status]}`}>
                       {event.status}
@@ -514,7 +528,7 @@ export default function AdminEventsPage(): JSX.Element {
                     href={`/admin/events/${event.id}`}
                     className="flex-1"
                   >
-                    <AdminButton variant="outline" size="xs" fullWidth className="w-full">
+                    <AdminButton variant="secondary" size="xs" fullWidth className="w-full text-gray-700">
                       {language === "es" ? "Detalles" : "Details"}
                     </AdminButton>
                   </Link>
@@ -522,15 +536,15 @@ export default function AdminEventsPage(): JSX.Element {
                     href={`/admin/events/${event.id}`}
                     className="flex-1"
                   >
-                    <AdminButton variant="secondary" size="xs" fullWidth className="w-full">
+                    <AdminButton variant="secondary" size="xs" fullWidth className="w-full text-gray-700">
                       {language === "es" ? "Editar" : "Edit"}
                     </AdminButton>
                   </Link>
                   {event.registration_required && (
                     <AdminButton
-                      variant="outline"
+                      variant="secondary"
                       size="xs"
-                      icon={<Users className="w-3.5 h-3.5" />}
+                      icon={<Users className="w-3.5 h-3.5 text-gray-500" />}
                       onClick={() => handleViewRegistrations(event)}
                       title={language === "es" ? "Ver inscritos" : "View registrations"}
                     >
@@ -538,7 +552,7 @@ export default function AdminEventsPage(): JSX.Element {
                     </AdminButton>
                   )}
                   <AdminButton
-                    variant="ghost"
+                    variant="secondary"
                     size="xs"
                     onClick={() => handleToggleFinish(event)}
                     disabled={toggling === event.id}
@@ -546,12 +560,12 @@ export default function AdminEventsPage(): JSX.Element {
                       ? (language === "es" ? "Marcar como activo" : "Mark as active")
                       : (language === "es" ? "Finalizar evento" : "Finish event")
                     }
-                    className={event.is_finished ? "text-orange-600 hover:text-orange-700" : "text-green-600 hover:text-green-700"}
+                    className={event.is_finished ? "text-orange-600" : "text-green-600"}
                   >
                     {event.is_finished ? (language === "es" ? "Reactivar" : "Reopen") : (language === "es" ? "Finalizar" : "Finish")}
                   </AdminButton>
                   <AdminButton
-                    variant="ghost"
+                    variant="secondary"
                     size="xs"
                     onClick={() => handleToggleArchive(event)}
                     disabled={toggling === event.id}
@@ -559,24 +573,24 @@ export default function AdminEventsPage(): JSX.Element {
                       ? (language === "es" ? "Desarchivar" : "Unarchive")
                       : (language === "es" ? "Archivar" : "Archive")
                     }
-                    className={event.is_archived ? "text-gray-500" : "text-blue-600 hover:text-blue-700"}
+                    className={event.is_archived ? "text-gray-500" : "text-blue-600"}
                   >
                     {event.is_archived ? (language === "es" ? "Desarchivar" : "Unarchive") : (language === "es" ? "Archivar" : "Archive")}
                   </AdminButton>
                   <AdminButton
-                    variant="ghost"
+                    variant="secondary"
                     size="xs"
-                    icon={<Copy className="w-3.5 h-3.5" />}
+                    icon={<Copy className="w-3.5 h-3.5 text-gray-500" />}
                     onClick={() => handleDuplicate(event)}
                     disabled={toggling === event.id}
                     title={language === "es" ? "Duplicar evento" : "Duplicate event"}
                   />
                   <AdminButton
-                    variant="ghost"
+                    variant="secondary"
                     size="xs"
-                    icon={<Trash2 className="w-3.5 h-3.5" />}
+                    icon={<Trash2 className="w-3.5 h-3.5 text-red-600" />}
                     onClick={() => handleDelete(event.id)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="hover:bg-red-50"
                     title={language === "es" ? "Eliminar evento" : "Delete event"}
                   />
                 </div>
@@ -585,6 +599,17 @@ export default function AdminEventsPage(): JSX.Element {
           ))
         )}
       </div>
+
+      {/* Pagination */}
+      {!loading && filteredEvents.length > PAGE_SIZE && (
+        <div className="mt-8 flex justify-center">
+          <Pagination
+            currentPage={safePage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </div>
+      )}
 
       {/* Registrations Modal */}
       {showRegistrationsModal && selectedEvent && (
