@@ -7,6 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 import { db, collection, doc, getDocs, onSnapshot, orderBy, query, updateDoc, writeBatch } from "@/lib/db-client";
 import { toDate } from "@/lib/timezone";
+import { AdminButton, PageHeader, Pagination } from "@/components/admin";
 
 interface Volunteer {
   id: string;
@@ -34,6 +35,8 @@ export default function AdminVolunteersPage(): JSX.Element {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [bulkAction, setBulkAction] = useState<"approve" | "reject" | null>(null);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 6;
 
   useEffect(() => {
     fetchVolunteers();
@@ -217,6 +220,14 @@ export default function AdminVolunteersPage(): JSX.Element {
     return matchesSearch && matchesFilter;
   });
 
+  const totalPages = Math.max(1, Math.ceil(filteredVolunteers.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedVolunteers = filteredVolunteers.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   const statusColors: Record<string, string> = {
     pending: "bg-yellow-100 text-yellow-700",
     approved: "bg-green-100 text-green-700",
@@ -237,64 +248,53 @@ export default function AdminVolunteersPage(): JSX.Element {
 
   return (
     <div>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            {isES ? "Voluntarios" : "Volunteers"}
-          </h1>
-          <p className="text-gray-600 mt-1">
-            {isES ? "Gestiona las solicitudes de voluntarios" : "Manage volunteer applications"}
-          </p>
-        </div>
-        <div className="flex gap-2 mt-4 md:mt-0">
-          <Link
-            href="/admin/volunteers/messages"
-            className="relative inline-flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-          >
-            <Inbox className="w-4 h-4" />
-            {isES ? "Mensajes" : "Messages"}
-            {unreadMessages > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
-                {unreadMessages}
-              </span>
+      <PageHeader
+        title={isES ? "Voluntarios" : "Volunteers"}
+        description={isES ? "Gestiona las solicitudes de voluntarios" : "Manage volunteer applications"}
+        actions={
+          <>
+            <Link href="/admin/volunteers/tasks">
+              <AdminButton variant="secondary" icon={<Calendar className="w-4 h-4" />}>
+                {isES ? "Tareas" : "Tasks"}
+              </AdminButton>
+            </Link>
+            <Link href="/admin/volunteers/messages" className="relative">
+              <AdminButton variant="secondary" icon={<Inbox className="w-4 h-4" />}>
+                {isES ? "Mensajes" : "Messages"}
+                {unreadMessages > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                    {unreadMessages}
+                  </span>
+                )}
+              </AdminButton>
+            </Link>
+            <AdminButton variant="secondary" icon={<Download className="w-4 h-4" />} onClick={exportCSV}>
+              {isES ? "Exportar CSV" : "Export CSV"}
+            </AdminButton>
+            {selectedIds.length > 0 && (
+              <>
+                <AdminButton
+                  variant="danger"
+                  icon={<CheckCheck className="w-4 h-4" />}
+                  onClick={() => handleBulkAction("approve")}
+                  disabled={bulkAction !== null}
+                  className="bg-green-600 border-green-600 text-white hover:bg-green-700"
+                >
+                  {isES ? "Aprobar" : "Approve"} ({selectedIds.length})
+                </AdminButton>
+                <AdminButton
+                  variant="danger"
+                  icon={<XCircle className="w-4 h-4" />}
+                  onClick={() => handleBulkAction("reject")}
+                  disabled={bulkAction !== null}
+                >
+                  {isES ? "Rechazar" : "Reject"} ({selectedIds.length})
+                </AdminButton>
+              </>
             )}
-          </Link>
-          <button
-            onClick={exportCSV}
-            className="inline-flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-          >
-            <Download className="w-4 h-4" />
-            {isES ? "Exportar CSV" : "Export CSV"}
-          </button>
-          {selectedIds.length > 0 && (
-            <>
-              <button
-                onClick={() => handleBulkAction("approve")}
-                disabled={bulkAction !== null}
-                className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50"
-              >
-                <CheckCheck className="w-5 h-5" />
-                {isES ? "Aprobar" : "Approve"} ({selectedIds.length})
-              </button>
-              <button
-                onClick={() => handleBulkAction("reject")}
-                disabled={bulkAction !== null}
-                className="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
-              >
-                <XCircle className="w-5 h-5" />
-                {isES ? "Rechazar" : "Reject"} ({selectedIds.length})
-              </button>
-            </>
-          )}
-          <button
-            onClick={exportCSV}
-            className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-hover transition-colors"
-          >
-            <Download className="w-5 h-5" />
-            {isES ? "Exportar CSV" : "Export CSV"}
-          </button>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
@@ -359,7 +359,7 @@ export default function AdminVolunteersPage(): JSX.Element {
             {isES ? "No se encontraron voluntarios" : "No volunteers found"}
           </div>
         ) : (
-          filteredVolunteers.map((volunteer) => (
+          paginatedVolunteers.map((volunteer) => (
             <div
               key={volunteer.id}
               className="bg-white rounded-xl p-6 shadow-sm border border-gray-100"
@@ -430,20 +430,22 @@ export default function AdminVolunteersPage(): JSX.Element {
 
                 {volunteer.status === "pending" && (
                   <div className="flex gap-2">
-                    <button
+                    <AdminButton
+                      variant="secondary"
+                      icon={<Check className="w-4 h-4 text-green-600" />}
                       onClick={() => updateStatus(volunteer.id, "approved")}
-                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      className="text-green-700"
                     >
-                      <Check className="w-4 h-4" />
                       {isES ? "Aprobar" : "Approve"}
-                    </button>
-                    <button
+                    </AdminButton>
+                    <AdminButton
+                      variant="secondary"
+                      icon={<X className="w-4 h-4 text-red-600" />}
                       onClick={() => updateStatus(volunteer.id, "rejected")}
-                      className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                      className="text-red-700"
                     >
-                      <X className="w-4 h-4" />
                       {isES ? "Rechazar" : "Reject"}
-                    </button>
+                    </AdminButton>
                   </div>
                 )}
               </div>
@@ -451,6 +453,17 @@ export default function AdminVolunteersPage(): JSX.Element {
           ))
         )}
       </div>
+
+      {/* Pagination */}
+      {!loading && filteredVolunteers.length > PAGE_SIZE && (
+        <div className="mt-8 flex justify-center">
+          <Pagination
+            currentPage={safePage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </div>
+      )}
     </div>
   );
 }
