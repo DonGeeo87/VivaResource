@@ -1,0 +1,30 @@
+EMERGENCIA: Enviar reporte semanal de Viva Resource AHORA.
+
+El container se llama vivaresource.
+
+INSTRUCCIONES:
+1. docker exec vivaresource sh -c 'cd /app && npm install nodemailer'
+2. Escribe /tmp/send-report.js con node.js (fs.writeFileSync)
+3. Ejecuta: docker exec -w /app vivaresource node /tmp/send-report.js
+4. Reporta el resultado completo
+
+EL SCRIPT DEBE:
+- Usar process.env.FIREBASE_PRIVATE_KEY, FIREBASE_CLIENT_EMAIL, EMAIL_USER, EMAIL_APP_PASSWORD, NEWSLETTER_ADMIN_EMAILS
+- Obtener OAuth2 token via JWT + crypto.createPrivateKey
+- Consultar Firestore REST API v1 colecciones (ultimos 7 dias):
+  * form_submissions (submittedAt)
+  * event_registrations (created_at)
+  * help_requests (createdAt)
+  * volunteer_registrations (created_at)
+- Construir HTML email con branding Viva Resource (header azul #025689)
+- Enviar con nodemailer via Gmail SMTP
+- TO: vivaresourcefoundation@gmail.com
+- BCC: ginterdonatop@gmail.com
+- Subject: [Viva Resource] Weekly Activity Report
+
+LOGICA:
+- Periodo: ultimos 7 dias desde now()
+- Para cada coleccion: contar y listar ultimos 10 (name, email, date)
+- Si count=0, omitir seccion
+- Total de items al inicio
+- Si OK, notificar exito con conteo
