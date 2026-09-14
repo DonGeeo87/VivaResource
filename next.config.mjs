@@ -86,6 +86,20 @@ const nextConfig = {
         { source: `/blog/${from}-en`, destination: `/blog/${to}-en`, permanent: true },
         { source: `/blog/${from}-es`, destination: `/blog/${to}-es`, permanent: true },
       ]),
+      // URLs legacy de la version anterior del sitio (Wix). Google las tiene
+      // indexadas y hoy devuelven 404: sin redirect se pierde su autoridad.
+      {
+        source: "/post/viva-resource-empowering-communities-transforming-lives",
+        destination: "/blog/welcome-to-viva-resource-en",
+        permanent: true,
+      },
+      {
+        source: "/post/april-2nd-world-autism-awareness-day",
+        destination: "/blog",
+        permanent: true,
+      },
+      // Cualquier otra URL /post/* heredada
+      { source: "/post/:slug*", destination: "/blog", permanent: true },
     ];
   },
   compiler: {

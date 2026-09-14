@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { generatePageMeta } from "@/lib/metadata";
 
 export const metadata: Metadata = generatePageMeta({
-  title: "Events - Eventos Comunitarios",
+  title: "Events — Community Workshops & Gatherings",
   description: "Join community events, workshops, and gatherings organized by Viva Resource in Colorado. Free bilingual events for rural families.",
   path: "/events",
   keywords: ["community events Colorado", "eventos comunitarios Colorado", "Colorado community events", "free workshops Peyton", "Viva Resource events"],
