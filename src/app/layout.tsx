@@ -36,7 +36,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = s.site_title || defaultTitle;
   const description = s.site_description || defaultDescription;
   const canonical = s.canonical_url || siteUrl;
-  const ogImage = s.og_default_image || `${siteUrl}/logo-rectangular.png`;
+  const ogImage = s.og_default_image || `${siteUrl}/og-viva.jpg`;
+  const ogImageAlt = s.og_image_alt || "Viva Resource — Community Resources in Rural Colorado";
   const keywords = s.site_keywords
     ? s.site_keywords.split(",").map((k) => k.trim()).filter(Boolean)
     : defaultKeywords;
@@ -77,7 +78,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: ogImage,
           width: 1400,
           height: 600,
-          alt: "Viva Resource — Community Resources in Rural Colorado",
+          alt: ogImageAlt,
         },
       ],
     },
@@ -114,6 +115,9 @@ export async function generateMetadata(): Promise<Metadata> {
         "https://www.gstatic.com",
       ],
       "dns-prefetch": "https://res.cloudinary.com",
+      // Facebook exige fb:app_id para el preview de enlaces. Se configura en
+      // /admin/seo; si no hay App ID cargado, la etiqueta no se emite.
+      ...(s.fb_app_id ? { "fb:app_id": s.fb_app_id } : {}),
     },
   };
 }

@@ -17,10 +17,12 @@ export interface SeoSettings {
   canonical_url?: string;
   og_site_name?: string;
   og_default_image?: string;
+  og_image_alt?: string;
   twitter_handle?: string;
   twitter_card_type?: string;
   google_verification_code?: string;
   bing_verification_code?: string;
+  fb_app_id?: string;
 }
 
 export async function getSeoSettings(): Promise<SeoSettings> {

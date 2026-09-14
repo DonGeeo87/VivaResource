@@ -51,6 +51,7 @@ interface SeoSettings {
   // Twitter
   twitter_handle: string;
   twitter_card_type: string;
+  fb_app_id: string;
 }
 
 const DEFAULT_SETTINGS: SeoSettings = {
@@ -68,7 +69,7 @@ const DEFAULT_SETTINGS: SeoSettings = {
   youtube_url: "",
   tiktok_url: "",
   og_site_name: "Viva Resource",
-  og_default_image: "https://www.vivaresource.com/og-default.jpg",
+  og_default_image: "https://www.vivaresource.com/og-viva.jpg",
   og_locale: "en_US",
   og_locale_alternate: "es_419",
   google_verification_code: "",
@@ -78,6 +79,7 @@ const DEFAULT_SETTINGS: SeoSettings = {
   custom_robots_rules: "",
   twitter_handle: "@vivaresource",
   twitter_card_type: "summary_large_image",
+  fb_app_id: "",
 };
 
 interface SeoAudit {
@@ -461,6 +463,23 @@ export default function AdminSeoPage(): JSX.Element {
                 <option value="summary_large_image">Summary Large Image</option>
                 <option value="summary">Summary</option>
               </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Facebook App ID
+              </label>
+              <input
+                type="text"
+                value={settings.fb_app_id}
+                onChange={(e) => handleChange("fb_app_id", e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                placeholder="1234567890123456"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                {language === "es"
+                  ? "Obligatorio para la vista previa de enlaces en Facebook. Se obtiene en developers.facebook.com"
+                  : "Required for Facebook link previews. Get it at developers.facebook.com"}
+              </p>
             </div>
           </div>
 
