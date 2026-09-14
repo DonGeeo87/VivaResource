@@ -60,11 +60,37 @@ const nextConfig = {
       },
     ];
   },
+  // Redirects 301: slugs de blog renombrados al alinear el posicionamiento.
+  // Sin esto, los enlaces y el SEO acumulado de las URLs viejas se pierden.
+  async redirects() {
+    // Slugs que antes eran compartidos EN/ES (y por eso daban 404). Ahora cada
+    // idioma tiene su URL propia: la vieja redirige al post en ingles.
+    const sharedSlug = [
+      'community-resource-fair-2026',
+      'how-to-volunteer-guide',
+      'welcome-to-viva-resource',
+      'programs-transforming-lives',
+      'food-security-rural-communities',
+    ];
+    const langAgnostic = [
+      ['resources-for-immigrant-community', 'resources-available-for-the-community'],
+      ['immigrant-resources-colorado', 'legal-aid-referrals-colorado'],
+    ];
+    return [
+      ...sharedSlug.map((slug) => ({
+        source: `/blog/${slug}`,
+        destination: `/blog/${slug}-en`,
+        permanent: true,
+      })),
+      ...langAgnostic.flatMap(([from, to]) => [
+        { source: `/blog/${from}-en`, destination: `/blog/${to}-en`, permanent: true },
+        { source: `/blog/${from}-es`, destination: `/blog/${to}-es`, permanent: true },
+      ]),
+    ];
+  },
   compiler: {
     removeConsole: isDev ? false : true,
   },
-  // Keep firebase-admin as external (not bundled)
-    serverExternalPackages: ['firebase-admin'],
 };
 
 export default nextConfig;

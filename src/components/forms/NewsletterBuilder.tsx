@@ -96,7 +96,7 @@ export const newsletterTemplates: NewsletterTemplate[] = [
         content: {
           buttonText: "View Events",
           buttonTextEs: "Ver Eventos",
-          buttonUrl: "https://vivaresourcefoundation.org/events",
+          buttonUrl: "https://www.vivaresource.com/events",
         },
       },
     ],
@@ -142,7 +142,7 @@ export const newsletterTemplates: NewsletterTemplate[] = [
         content: {
           buttonText: "Register Now",
           buttonTextEs: "Registrarse Ahora",
-          buttonUrl: "https://vivaresourcefoundation.org/events",
+          buttonUrl: "https://www.vivaresource.com/events",
         },
       },
     ],
@@ -193,7 +193,7 @@ export const newsletterTemplates: NewsletterTemplate[] = [
         content: {
           buttonText: "Learn More",
           buttonTextEs: "Saber Más",
-          buttonUrl: "https://vivaresourcefoundation.org/about",
+          buttonUrl: "https://www.vivaresource.com/about",
         },
       },
     ],
@@ -550,10 +550,10 @@ export default function NewsletterBuilder({
                 style={{ backgroundColor: templateData?.headerColor || "#025689", padding: "24px", textAlign: "center" }}
               >
                 <div style={{ color: "white", fontSize: "18px", fontWeight: "bold" }}>
-                  Viva Resource Foundation
+                  Viva Resource
                 </div>
                 <div style={{ color: "rgba(255,255,255,0.8)", fontSize: "12px", marginTop: "4px" }}>
-                  {isES ? "Recursos para Inmigrantes en Colorado" : "Immigrant Resources in Colorado"}
+                  {isES ? "Recursos Comunitarios en Colorado" : "Community Resources in Colorado"}
                 </div>
               </div>
 
@@ -625,7 +625,7 @@ export default function NewsletterBuilder({
               {/* Footer */}
               <div style={{ backgroundColor: "#f3f3f3", padding: "24px", textAlign: "center", fontSize: "12px", color: "#717880" }}>
                 <div style={{ marginBottom: "8px" }}>
-                  © 2026 Viva Resource Foundation
+                  © 2026 Viva Resource
                 </div>
                 <div>
                   {isES ? "Si no deseas recibir más correos" : "If you no longer wish to receive these emails"}

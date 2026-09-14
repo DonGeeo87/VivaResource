@@ -1,4 +1,4 @@
-// reCAPTCHA v3 Provider for Viva Resource Foundation
+// reCAPTCHA v3 Provider for Viva Resource
 // Optimizado con carga lazy - solo se carga cuando se necesita
 "use client";
 

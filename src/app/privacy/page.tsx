@@ -101,8 +101,8 @@ export default function PrivacyPolicyPage(): JSX.Element {
                   {language === "es" ? "E" : "A"}
                 </span>
                 {language === "es"
-                  ? "n Viva Resource Foundation, reconocemos que la privacidad es un derecho humano fundamental. Como organización 501(c)(3) dedicada al desarrollo rural, manejamos su información con el mismo cuidado y respeto que aportamos a nuestro trabajo de campo."
-                  : "t Viva Resource Foundation, we recognize that privacy is a fundamental human right. As a 501(c)(3) organization dedicated to rural development, we handle your information with the same care and respect we bring to our field work."}
+                  ? "n Viva Resource, reconocemos que la privacidad es un derecho humano fundamental. Como organización 501(c)(3) dedicada al desarrollo rural, manejamos su información con el mismo cuidado y respeto que aportamos a nuestro trabajo de campo."
+                  : "t Viva Resource, we recognize that privacy is a fundamental human right. As a 501(c)(3) organization dedicated to rural development, we handle your information with the same care and respect we bring to our field work."}
               </p>
             </section>
 

@@ -116,8 +116,8 @@ async function seedDatabase() {
         enabled: false
       },
       email: {
-        from: 'noreply@vivaresource.org',
-        support_email: 'support@vivaresource.org'
+        from: 'noreply@vivaresource.com',
+        support_email: 'support@vivaresource.com'
       },
       social: {
         facebook: 'https://facebook.com/vivaresource',
@@ -125,7 +125,7 @@ async function seedDatabase() {
         linkedin: 'https://linkedin.com/company/vivaresource'
       },
       organization: {
-        name: 'Viva Resource Foundation',
+        name: 'Viva Resource',
         description: 'Empowering Rural Communities',
         founded_year: 2024
       },

@@ -3,9 +3,9 @@ import { generatePageMeta } from "@/lib/metadata";
 
 export const metadata: Metadata = generatePageMeta({
   title: "Get Involved - Únete como Voluntario o Embajador",
-  description: "Join Viva Resource Foundation as a volunteer or community ambassador. Make a difference in immigrant communities across Colorado, Denver, and Peyton.",
+  description: "Join Viva Resource as a volunteer or community ambassador. Make a difference in rural Colorado communities across El Paso County.",
   path: "/get-involved",
-  keywords: ["volunteer Colorado", "voluntariado inmigrante", "community ambassador", "Colorado nonprofit volunteer", "join Viva Resource"],
+  keywords: ["volunteer Colorado", "voluntariado Colorado", "community ambassador", "Colorado nonprofit volunteer", "join Viva Resource"],
 });
 
 export default function GetInvolvedLayout({ children }: { children: React.ReactNode }) {

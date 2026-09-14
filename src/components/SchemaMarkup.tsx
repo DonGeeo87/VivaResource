@@ -4,7 +4,7 @@ import Script from "next/script";
 import { useEffect, useState } from "react";
 import { db, collection, getDocs } from "@/lib/db-client";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vivaresourcefoundation.org";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.vivaresource.com";
 
 interface SchemaMarkupProps {
   type?: "organization" | "localBusiness" | "event" | "article" | "breadcrumb" | "faq" | "service";
@@ -50,13 +50,13 @@ function OrganizationSchema() {
     "@context": "https://schema.org",
     "@type": "Organization",
     "@id": `${siteUrl}#organization`,
-    name: "Viva Resource Foundation",
+    name: "Viva Resource",
     alternateName: "Viva Resource",
     url: siteUrl,
     logo: `${siteUrl}/logo.png`,
     image: `${siteUrl}/logo-rectangular.png`,
     description:
-      "Viva Resource Foundation provides essential immigrant resources, community services, and advocacy in Colorado, USA.",
+      "Viva Resource is a 501(c)(3) nonprofit connecting rural Colorado communities with essential resources, community services, and advocacy.",
     address: {
       "@type": "PostalAddress",
       streetAddress: "13055 Bradshaw Drive #301",
@@ -96,7 +96,7 @@ function LocalBusinessSchema() {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "@id": `${siteUrl}#localbusiness`,
-    name: "Viva Resource Foundation",
+    name: "Viva Resource",
     image: `${siteUrl}/logo-rectangular.png`,
     url: siteUrl,
     telephone: "",
@@ -145,7 +145,7 @@ function LocalBusinessSchema() {
       },
     ],
     serviceType: [
-      "Immigrant Resources",
+      "Community Resources",
       "Community Services",
       "Food Assistance",
       "Housing Support",
@@ -175,9 +175,9 @@ function WebSiteSchema() {
     "@type": "WebSite",
     "@id": `${siteUrl}#website`,
     url: siteUrl,
-    name: "Viva Resource Foundation",
+    name: "Viva Resource",
     description:
-      "Immigrant resources and community services in Colorado, USA",
+      "Community resources and support services in rural Colorado, USA",
     publisher: {
       "@id": `${siteUrl}#organization`,
     },
@@ -210,7 +210,7 @@ function EventSchema({ data }: { data: Record<string, unknown> }) {
     startDate: (data.date as string) || "",
     location: {
       "@type": "Place",
-      name: (data.location as string) || "Viva Resource Foundation",
+      name: (data.location as string) || "Viva Resource",
       address: {
         "@type": "PostalAddress",
         streetAddress: "13055 Bradshaw Drive #301",
@@ -222,7 +222,7 @@ function EventSchema({ data }: { data: Record<string, unknown> }) {
     },
     organizer: {
       "@type": "Organization",
-      name: "Viva Resource Foundation",
+      name: "Viva Resource",
       url: siteUrl,
     },
     eventStatus: "https://schema.org/EventScheduled",
@@ -259,12 +259,12 @@ function ArticleSchema({ data }: { data: Record<string, unknown> }) {
     dateModified: (data.updated_at as string) || new Date().toISOString(),
     author: {
       "@type": "Organization",
-      name: (data.author as string) || "Viva Resource Foundation",
+      name: (data.author as string) || "Viva Resource",
       url: siteUrl,
     },
     publisher: {
       "@type": "Organization",
-      name: "Viva Resource Foundation",
+      name: "Viva Resource",
       logo: {
         "@type": "ImageObject",
         url: `${siteUrl}/logo.png`,
@@ -274,7 +274,7 @@ function ArticleSchema({ data }: { data: Record<string, unknown> }) {
       "@type": "WebPage",
       "@id": `${siteUrl}/blog/${data.slug as string}`,
     },
-    keywords: (data.keywords as string) || "immigrant resources Colorado, community services",
+    keywords: (data.keywords as string) || "community resources Colorado, community services",
     articleSection: (data.category as string) || "News",
     inLanguage: ["en", "es"],
   };
@@ -367,7 +367,7 @@ function ServiceSchema({ data }: { data: Record<string, unknown> }) {
     },
     audience: {
       "@type": "Audience",
-      name: "Immigrants and rural community members in Colorado",
+      name: "Rural community members in Colorado",
     },
     serviceType: (data.serviceType as string) || "Community Service",
     offers: {

@@ -15,8 +15,8 @@ const faqData: FAQItem[] = [
   {
     question: "What services does Viva Resource provide?",
     questionEs: "¿Qué servicios ofrece Viva Resource?",
-    answer: "Viva Resource provides food assistance, housing support, legal aid referrals, healthcare navigation, educational workshops, and emergency response services to immigrant and rural communities across El Paso County, Colorado.",
-    answerEs: "Viva Resource ofrece asistencia alimentaria, apoyo de vivienda, referencias legales, navegación de salud, talleres educativos y servicios de respuesta de emergencia para comunidades inmigrantes y rurales en todo el Condado de El Paso, Colorado.",
+    answer: "Viva Resource provides food assistance, housing support, legal aid referrals, healthcare navigation, educational workshops, and emergency response services to rural communities across El Paso County, Colorado.",
+    answerEs: "Viva Resource ofrece asistencia alimentaria, apoyo de vivienda, referencias legales, navegación de salud, talleres educativos y servicios de respuesta de emergencia para las comunidades rurales de todo el Condado de El Paso, Colorado.",
   },
   {
     question: "Is Viva Resource a nonprofit organization?",

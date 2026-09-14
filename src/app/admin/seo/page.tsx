@@ -54,12 +54,12 @@ interface SeoSettings {
 }
 
 const DEFAULT_SETTINGS: SeoSettings = {
-  site_title: "Viva Resource Foundation - Immigrant Support Colorado",
+  site_title: "Viva Resource | Community Resources in Rural Colorado",
   site_description:
-    "Viva Resource Foundation empowers immigrant families in Colorado with resources, legal guidance, community events, and advocacy. Fundación sin fines de lucro 501(c)(3).",
+    "Viva Resource is a 501(c)(3) nonprofit connecting rural Colorado communities with essential resources: food assistance, housing support, healthcare navigation, education, and legal aid referrals.",
   site_keywords:
-    "immigrant resources colorado, apoyo inmigrantes, familia inmigrante, colorado nonprofit, 501c3, immigration support, recursos para inmigrantes, fundacion colorado",
-  canonical_url: "https://vivaresourcefoundation.org",
+    "community resources colorado, recursos comunitarios colorado, food assistance el paso county, rural colorado nonprofit, 501c3, housing support, healthcare navigation, ayuda comunitaria colorado",
+  canonical_url: "https://www.vivaresource.com",
   site_locale: "en_US",
   facebook_url: "",
   twitter_url: "",
@@ -67,8 +67,8 @@ const DEFAULT_SETTINGS: SeoSettings = {
   linkedin_url: "",
   youtube_url: "",
   tiktok_url: "",
-  og_site_name: "Viva Resource Foundation",
-  og_default_image: "https://vivaresourcefoundation.org/og-default.jpg",
+  og_site_name: "Viva Resource",
+  og_default_image: "https://www.vivaresource.com/og-default.jpg",
   og_locale: "en_US",
   og_locale_alternate: "es_419",
   google_verification_code: "",
@@ -344,7 +344,7 @@ export default function AdminSeoPage(): JSX.Element {
                   value={settings.site_title}
                   onChange={(e) => handleChange("site_title", e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                  placeholder="Viva Resource Foundation - Immigrant Support Colorado"
+                  placeholder="Viva Resource | Community Resources in Rural Colorado"
                 />
                 <p className="mt-1 text-xs text-gray-500">
                   {settings.site_title.length}/60{" "}
@@ -364,7 +364,7 @@ export default function AdminSeoPage(): JSX.Element {
                   onChange={(e) => handleChange("site_description", e.target.value)}
                   rows={3}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                  placeholder="Empowering immigrant families in Colorado..."
+                  placeholder="Connecting rural Colorado communities with essential resources..."
                 />
                 <p className="mt-1 text-xs text-gray-500">
                   {settings.site_description.length}/160{" "}
@@ -393,7 +393,7 @@ export default function AdminSeoPage(): JSX.Element {
                 onChange={(e) => handleChange("site_keywords", e.target.value)}
                 rows={3}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                placeholder="immigrant resources, colorado nonprofit, apoyo inmigrantes..."
+                placeholder="community resources, colorado nonprofit, recursos comunitarios..."
               />
               <p className="mt-1 text-xs text-gray-500">
                 {language === "es"
@@ -414,7 +414,7 @@ export default function AdminSeoPage(): JSX.Element {
                 value={settings.canonical_url}
                 onChange={(e) => handleChange("canonical_url", e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                placeholder="https://vivaresourcefoundation.org"
+                placeholder="https://www.vivaresource.com"
               />
             </div>
             <div>
@@ -472,15 +472,15 @@ export default function AdminSeoPage(): JSX.Element {
             </h2>
             <div className="border border-gray-200 rounded-lg p-4 bg-white max-w-xl">
               <p className="text-lg text-[#1a0dab] truncate font-medium">
-                {settings.site_title || "Viva Resource Foundation"}
+                {settings.site_title || "Viva Resource"}
               </p>
               <p className="text-sm text-[#006621] truncate">
-                {settings.canonical_url || "https://vivaresourcefoundation.org"}
+                {settings.canonical_url || "https://www.vivaresource.com"}
               </p>
               <p className="text-sm text-[#545454] mt-1 line-clamp-2">
                 {settings.site_description || language === "es"
-                  ? "Fundación que apoya a familias inmigrantes en Colorado..."
-                  : "Foundation supporting immigrant families in Colorado..."}
+                  ? "Conectando a las comunidades rurales de Colorado con recursos esenciales..."
+                  : "Connecting rural Colorado communities with essential resources..."}
               </p>
             </div>
           </div>
@@ -543,7 +543,7 @@ export default function AdminSeoPage(): JSX.Element {
                 value={settings.og_site_name}
                 onChange={(e) => handleChange("og_site_name", e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                placeholder="Viva Resource Foundation"
+                placeholder="Viva Resource"
               />
             </div>
             <div>
@@ -555,7 +555,7 @@ export default function AdminSeoPage(): JSX.Element {
                 value={settings.og_default_image}
                 onChange={(e) => handleChange("og_default_image", e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                placeholder="https://vivaresourcefoundation.org/og-default.jpg"
+                placeholder="https://www.vivaresource.com/og-default.jpg"
               />
               <p className="mt-1 text-xs text-gray-500">
                 {language === "es"
@@ -805,7 +805,7 @@ export default function AdminSeoPage(): JSX.Element {
             </h3>
             <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm overflow-auto max-h-64">
               <pre>
-{`# robots.txt for Viva Resource Foundation
+{`# robots.txt for Viva Resource
 User-agent: *
 Disallow: /admin/
 Disallow: /api/

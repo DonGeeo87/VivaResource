@@ -22,12 +22,12 @@ const samplePosts = [
   {
     title_en: "Building Community Resilience in Rural Colorado",
     title_es: "Construyendo Resiliencia Comunitaria en el Colorado Rural",
-    excerpt_en: "How local organizations are coming together to support immigrant families through sustainable programs and shared resources.",
-    excerpt_es: "Cómo las organizaciones locales se unen para apoyar a familias inmigrantes a través de programas sostenibles y recursos compartidos.",
+    excerpt_en: "How local organizations are coming together to support rural families through sustainable programs and shared resources.",
+    excerpt_es: "Cómo las organizaciones locales se unen para apoyar a las familias rurales a través de programas sostenibles y recursos compartidos.",
     content_en: `
-      <p>In rural Colorado, communities are facing unique challenges. Rising costs, limited access to services, and language barriers can make it difficult for immigrant families to thrive.</p>
+      <p>In rural Colorado, communities are facing unique challenges. Rising costs, limited access to services, and language barriers can make it difficult for rural families to thrive.</p>
       <h2>Our Approach</h2>
-      <p>At Viva Resource Foundation, we believe in the power of community-led solutions. Our programs focus on:</p>
+      <p>At Viva Resource, we believe in the power of community-led solutions. Our programs focus on:</p>
       <ul>
         <li>Emergency response and crisis intervention</li>
         <li>Food security through local partnerships</li>
@@ -41,9 +41,9 @@ const samplePosts = [
       <p>Whether you need support or want to volunteer, we're here to help. Contact us today to learn more about our programs.</p>
     `,
     content_es: `
-      <p>En el Colorado rural, las comunidades enfrentan desafíos únicos. El aumento de costos, el acceso limitado a servicios y las barreras del idioma pueden dificultar que las familias inmigrantes prosperen.</p>
+      <p>En el Colorado rural, las comunidades enfrentan desafíos únicos. El aumento de costos, el acceso limitado a servicios y las barreras del idioma pueden dificultar que las familias rurales prosperen.</p>
       <h2>Nuestro Enfoque</h2>
-      <p>En Viva Resource Foundation, creemos en el poder de las soluciones lideradas por la comunidad. Nuestros programas se enfocan en:</p>
+      <p>En Viva Resource, creemos en el poder de las soluciones lideradas por la comunidad. Nuestros programas se enfocan en:</p>
       <ul>
         <li>Respuesta a emergencias e intervención en crisis</li>
         <li>Seguridad alimentaria a través de asociaciones locales</li>

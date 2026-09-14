@@ -1,6 +1,11 @@
 import { MetadataRoute } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vivaresource.org";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.vivaresource.com";
+
+// Render at request time. Sin esto, Next prerenderiza el sitemap durante el
+// build de Docker, donde no existe Postgres: el try/catch falla y la imagen
+// queda con las 10 rutas estaticas horneadas, sin blog ni eventos.
+export const dynamic = "force-dynamic";
 
 const staticRoutes: MetadataRoute.Sitemap = [
   { url: siteUrl, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
@@ -36,7 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           priority: 0.7,
         });
       });
-    } catch { /* skip blog */ }
+    } catch (e) { console.warn("[sitemap] blog_posts query failed:", e); }
 
     // Events
     try {
@@ -49,7 +54,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           priority: 0.6,
         });
       });
-    } catch { /* skip events */ }
+    } catch (e) { console.warn("[sitemap] events query failed:", e); }
 
     // Forms
     try {
@@ -65,7 +70,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           });
         }
       });
-    } catch { /* skip forms */ }
+    } catch (e) { console.warn("[sitemap] forms query failed:", e); }
   } catch {
     // If adminDb fails, return static routes only
   }

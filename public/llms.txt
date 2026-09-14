@@ -1,12 +1,12 @@
 # Viva Resource
 
-Viva Resource is a 501(c)(3) nonprofit organization based in Peyton, Colorado, serving rural communities across El Paso County with essential immigrant resources, food assistance, housing support, legal aid referrals, healthcare navigation, educational workshops, and emergency response.
+Viva Resource is a 501(c)(3) nonprofit organization based in Peyton, Colorado, serving rural communities across El Paso County with essential community resources, food assistance, housing support, healthcare navigation, educational workshops, emergency response, and legal aid referrals. Services are free and available to all residents, regardless of background.
 
 ## Services
 
 - **Food Assistance**: Food distribution programs and partnerships with local producers serving Peyton, Colorado Springs, Pueblo, Fountain, and Monument.
 - **Housing Support**: Rental assistance, housing navigation, and emergency shelter referrals for families in crisis.
-- **Legal Aid Referrals**: Connections to immigration legal services, know-your-rights workshops, and documentation assistance.
+- **Legal Aid Referrals**: Connections to trusted legal services, know-your-rights workshops, and documentation assistance.
 - **Healthcare Navigation**: Help accessing preventive care, mental health resources, health insurance enrollment, and sliding-scale clinics.
 - **Educational Workshops**: ESL classes, financial literacy, parenting skills, and job readiness training.
 - **Emergency Response**: Crisis intervention, disaster relief coordination, and emergency food/housing for families facing sudden hardship.

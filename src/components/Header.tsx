@@ -71,7 +71,7 @@ export default function Header(): JSX.Element {
               <Link href="/" className="flex items-center">
                 <Image
                   src="/logo-rectangular.png"
-                  alt="Viva Resource Foundation"
+                  alt="Viva Resource"
                   width={140}
                   height={60}
                   className="h-12 w-auto"

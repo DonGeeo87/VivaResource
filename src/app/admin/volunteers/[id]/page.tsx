@@ -181,9 +181,9 @@ export default function AdminVolunteerDetailPage(): JSX.Element {
       await addDoc(collection(db, "volunteer_messages"), {
         volunteerId: volunteer.id, // Changed from volunteer_id
         from: adminUid || "unknown",
-        fromName: "Viva Resource Foundation",
-        subject: isES ? "Mensaje de Viva Resource Foundation" : "Message from Viva Resource Foundation",
-        subjectEs: isES ? "Mensaje de Viva Resource Foundation" : null,
+        fromName: "Viva Resource",
+        subject: isES ? "Mensaje de Viva Resource" : "Message from Viva Resource",
+        subjectEs: isES ? "Mensaje de Viva Resource" : null,
         body: message,
         bodyEs: null,
         read: false,
@@ -200,7 +200,7 @@ export default function AdminVolunteerDetailPage(): JSX.Element {
           data: {
             volunteerEmail: volunteer.email,
             volunteerName: `${volunteer.firstName} ${volunteer.lastName}`,
-            subject: isES ? "Mensaje de Viva Resource Foundation" : "Message from Viva Resource Foundation",
+            subject: isES ? "Mensaje de Viva Resource" : "Message from Viva Resource",
             message: message,
           }
         })

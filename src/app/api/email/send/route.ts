@@ -91,7 +91,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           </div>
           <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
           <p style="color: #666; font-size: 14px;">
-            This message was sent from the Viva Resource Foundation contact form.
+            This message was sent from the Viva Resource contact form.
           </p>
         </div>
       `;
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           </div>
           <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
           <p style="color: #666; font-size: 14px;">
-            Este es un mensaje del sistema de Viva Resource Foundation.
+            Este es un mensaje del sistema de Viva Resource.
           </p>
         </div>
       `;
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Send email
     await transporter.sendMail({
-      from: `"Viva Resource Foundation" <${fromEmail}>`,
+      from: `"Viva Resource" <${fromEmail}>`,
       to: emailTo,
       replyTo: emailReplyTo,
       subject: emailSubject,

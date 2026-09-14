@@ -3,9 +3,9 @@ import { generatePageMeta } from "@/lib/metadata";
 
 export const metadata: Metadata = generatePageMeta({
   title: "About Us - Nuestra Historia y Misión",
-  description: "Learn about Viva Resource Foundation's mission to support immigrant families in Colorado. Our history, values, and commitment to community empowerment in Denver and Peyton.",
+  description: "Learn about Viva Resource's mission to connect rural Colorado communities with essential resources. Our history, values, and commitment to community empowerment in El Paso County.",
   path: "/about",
-  keywords: ["about Viva Resource", "inmigrant nonprofit Colorado", "nuestra misión", "immigrant advocacy Denver", "community foundation Peyton"],
+  keywords: ["about Viva Resource", "rural Colorado nonprofit", "nuestra misión", "community empowerment Colorado", "community foundation Peyton"],
 });
 
 export default function AboutLayout({ children }: { children: React.ReactNode }) {

@@ -391,7 +391,7 @@ export default function PublicFormPage() {
                 <span className="text-white font-bold text-lg">V</span>
               </div>
               <div className="text-left">
-                <p className="font-bold text-gray-900">Viva Resource Foundation</p>
+                <p className="font-bold text-gray-900">Viva Resource</p>
                 <p className="text-sm text-gray-500">{language === "es" ? "Formulario de registro" : "Registration Form"}</p>
               </div>
             </div>
@@ -489,7 +489,7 @@ export default function PublicFormPage() {
 
         {/* Footer */}
         <div className="text-center mt-8 text-white/80 text-sm">
-          <p>© {new Date().getFullYear()} Viva Resource Foundation</p>
+          <p>© {new Date().getFullYear()} Viva Resource</p>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 // Metadata helper for public pages
 import type { Metadata } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vivaresource.org";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.vivaresource.com";
 
 interface PageMetaProps {
   title: string;
@@ -12,39 +12,38 @@ interface PageMetaProps {
 }
 
 export function generatePageMeta({ title, description, path, keywords = [], image }: PageMetaProps): Metadata {
-  const fullTitle = `${title} | Viva Resource Foundation`;
   const imageUrl = image ? `${siteUrl}${image}` : `${siteUrl}/logo-rectangular.png`;
 
   return {
-    title: fullTitle,
+    title,
     description,
     keywords: [
       ...keywords,
-      "immigrant resources Colorado",
-      "ayuda inmigrante Denver",
-      "community services Colorado",
-      "nonprofit Colorado immigrant",
+      "community resources Colorado",
+      "recursos comunitarios Colorado",
+      "rural Colorado nonprofit",
+      "El Paso County community services",
     ],
     openGraph: {
       type: "website",
       locale: "en_US",
-      alternateLocale: "es_ES",
+      alternateLocale: "es_US",
       url: `${siteUrl}${path}`,
-      siteName: "Viva Resource Foundation",
-      title: fullTitle,
+      siteName: "Viva Resource",
+      title,
       description,
       images: [
         {
           url: imageUrl,
-          width: 1200,
-          height: 630,
+          width: 1400,
+          height: 600,
           alt: title,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: fullTitle,
+      title,
       description,
       images: [imageUrl],
     },

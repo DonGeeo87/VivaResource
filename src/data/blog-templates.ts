@@ -26,7 +26,7 @@ const services = [
 <li><strong>SNAP Enrollment Assistance:</strong> Our team helps families navigate the application process for Supplemental Nutrition Assistance Program benefits.</li>
 </ul>
 <h2>Who Can Access These Services</h2>
-<p>All residents of El Paso County are welcome. We do not require proof of income, immigration status, or any documentation. Services are available in both English and Spanish.</p>
+<p>All residents of El Paso County are welcome. We do not require proof of income, documentation, or any paperwork. Services are available in both English and Spanish.</p>
 <h2>How to Get Food Assistance</h2>
 <p>Visit our <a href="/get-help">Get Help page</a> to submit a request, or contact us directly. You can also call 211 for immediate resource referrals.</p>`,
     contentEs: `<p>Viva Resource se compromete a garantizar que ninguna familia en el Condado de El Paso se quede sin comidas saludables. Nuestros programas de asistencia alimentaria sirven a comunidades en Peyton, Colorado Springs, Pueblo, Fountain y Monument.</p>
@@ -38,7 +38,7 @@ const services = [
 <li><strong>Asistencia para Inscripción en SNAP:</strong> Nuestro equipo ayuda a las familias a navegar el proceso de solicitud de beneficios del Programa de Asistencia Nutricional Suplementaria.</li>
 </ul>
 <h2>Quién Puede Acceder a Estos Servicios</h2>
-<p>Todos los residentes del Condado de El Paso son bienvenidos. No requerimos prueba de ingresos, estatus migratorio ni documentación. Los servicios están disponibles tanto en inglés como en español.</p>
+<p>Todos los residentes del Condado de El Paso son bienvenidos. No requerimos prueba de ingresos, documentación ni trámites. Los servicios están disponibles tanto en inglés como en español.</p>
 <h2>Cómo Obtener Asistencia Alimentaria</h2>
 <p>Visite nuestra página de <a href="/get-help">Obtener Ayuda</a> para enviar una solicitud, o contáctenos directamente. También puede llamar al 211 para referencias inmediatas de recursos.</p>`,
     tags: ["food assistance", "food security", "nutrition", "El Paso County", "Colorado"],
@@ -76,36 +76,36 @@ const services = [
     tags: ["housing", "rental assistance", "emergency shelter", "El Paso County", "Colorado"],
   },
   {
-    slug: "immigrant-resources-colorado",
-    titleEn: "Immigrant Resources and Legal Aid Referrals in Colorado",
-    titleEs: "Recursos para Inmigrantes y Referencias Legales en Colorado",
-    excerptEn: "Access know-your-rights workshops, immigration legal services, and documentation assistance for immigrant families in El Paso County.",
-    excerptEs: "Acceda a talleres de conozca sus derechos, servicios legales de inmigración y asistencia con documentación para familias inmigrantes en el Condado de El Paso.",
-    contentEn: `<p>Viva Resource is committed to supporting immigrant families across Colorado with essential resources, legal aid referrals, and educational programs. All services are confidential and available regardless of immigration status.</p>
-<h2>Services for Immigrant Families</h2>
+    slug: "legal-aid-referrals-colorado",
+    titleEn: "Legal Aid and Know Your Rights Resources in Colorado",
+    titleEs: "Asistencia Legal y Conozca Sus Derechos en Colorado",
+    excerptEn: "Access know-your-rights workshops, trusted legal aid referrals, and documentation assistance for families in El Paso County. Free and open to all residents.",
+    excerptEs: "Acceda a talleres de conozca sus derechos, referencias legales de confianza y asistencia con documentación para familias del Condado de El Paso. Gratis y abierto a todos los residentes.",
+    contentEn: `<p>Viva Resource is committed to supporting families across rural Colorado with essential resources, legal aid referrals, and educational programs. All services are confidential and free for every resident.</p>
+<h2>Legal Aid &amp; Know Your Rights Services</h2>
 <ul>
 <li><strong>Know Your Rights Workshops:</strong> Educational sessions covering constitutional rights, interactions with law enforcement, and what to do in various situations.</li>
-<li><strong>Legal Aid Referrals:</strong> Connections to trusted immigration attorneys and accredited representatives for consultations and case assistance.</li>
+<li><strong>Legal Aid Referrals:</strong> Connections to trusted legal aid organizations and accredited representatives for consultations and case assistance.</li>
 <li><strong>Documentation Assistance:</strong> Help with forms, applications, and understanding legal processes.</li>
 <li><strong>Community Navigation:</strong> Guidance on accessing healthcare, education, and other public services available to all residents.</li>
 </ul>
 <h2>Confidential and Safe</h2>
-<p>We do not ask about immigration status to provide services. Your information is kept confidential and secure. Our team is bilingual and culturally competent.</p>
+<p>No documentation is required to receive services. Your information is kept confidential and secure. Our team is bilingual and culturally competent.</p>
 <h2>Get Started</h2>
-<p>Visit our <a href="/get-help">Get Help page</a> or contact us to learn more about our immigrant resources and programs.</p>`,
-    contentEs: `<p>Viva Resource se compromete a apoyar a las familias inmigrantes en todo Colorado con recursos esenciales, referencias legales y programas educativos. Todos los servicios son confidenciales y están disponibles independientemente del estatus migratorio.</p>
-<h2>Servicios para Familias Inmigrantes</h2>
+<p>Visit our <a href="/get-help">Get Help page</a> or contact us to learn more about our legal aid referrals and community programs.</p>`,
+    contentEs: `<p>Viva Resource se compromete a apoyar a las familias de la Colorado rural con recursos esenciales, referencias legales y programas educativos. Todos los servicios son confidenciales y gratuitos para todo residente.</p>
+<h2>Servicios de Asistencia Legal y Conozca Sus Derechos</h2>
 <ul>
 <li><strong>Talleres de Conozca Sus Derechos:</strong> Sesiones educativas sobre derechos constitucionales, interacciones con las autoridades y qué hacer en diversas situaciones.</li>
-<li><strong>Referencias Legales:</strong> Conexiones con abogados de inmigración de confianza y representantes acreditados para consultas y asistencia con casos.</li>
+<li><strong>Referencias Legales:</strong> Conexiones con organizaciones de asistencia legal de confianza y representantes acreditados para consultas y asistencia con casos.</li>
 <li><strong>Asistencia con Documentación:</strong> Ayuda con formularios, solicitudes y comprensión de procesos legales.</li>
 <li><strong>Navegación Comunitaria:</strong> Orientación sobre cómo acceder a servicios de salud, educación y otros servicios públicos disponibles para todos los residentes.</li>
 </ul>
 <h2>Confidencial y Seguro</h2>
-<p>No preguntamos sobre el estatus migratorio para proporcionar servicios. Su información se mantiene confidencial y segura. Nuestro equipo es bilingüe y culturalmente competente.</p>
+<p>No se requiere documentación para recibir servicios. Su información se mantiene confidencial y segura. Nuestro equipo es bilingüe y culturalmente competente.</p>
 <h2>Cómo Empezar</h2>
-<p>Visite nuestra página de <a href="/get-help">Obtener Ayuda</a> o contáctenos para obtener más información sobre nuestros recursos y programas para inmigrantes.</p>`,
-    tags: ["immigrant resources", "legal aid", "know your rights", "Colorado", "immigration"],
+<p>Visite nuestra página de <a href="/get-help">Obtener Ayuda</a> o contáctenos para obtener más información sobre nuestras referencias legales y programas comunitarios.</p>`,
+    tags: ["legal aid", "know your rights", "community resources", "Colorado", "resident rights"],
   },
   {
     slug: "healthcare-navigation",

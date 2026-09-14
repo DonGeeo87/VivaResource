@@ -38,7 +38,7 @@ function buildPrompt(type: string, topic: string, language: string): string {
       "For social media: include 3 variations with hashtags. Return JSON with fields: variations (array of objects with 'text' and 'hashtags' fields).";
   }
 
-  return `You are a professional content writer and SEO specialist for Viva Resource Foundation, a nonprofit serving the immigrant community in Colorado, USA.
+  return `You are a professional content writer and SEO specialist for Viva Resource, a nonprofit serving the immigrant community in Colorado, USA.
 
 Generate content based on the following:
 - Type: ${type}

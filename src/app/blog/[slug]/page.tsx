@@ -7,7 +7,7 @@ import { ArrowLeft, Calendar, User } from "lucide-react";
 import SchemaMarkup from "@/components/SchemaMarkup";
 import { getPostBySlug as getPostFromDb } from "@/lib/db";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vivaresourcefoundation.org";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.vivaresource.com";
 
 interface BlogPost {
   id: number;
@@ -74,7 +74,7 @@ export async function generateMetadata({
 
   if (!post) {
     return {
-      title: "Post Not Found | Viva Resource Foundation",
+      title: "Post Not Found | Viva Resource",
     };
   }
 
@@ -82,22 +82,22 @@ export async function generateMetadata({
   const excerpt = post.excerpt;
 
   return {
-    title: `${title} | Viva Resource Foundation Blog - Colorado`,
+    title: `${title} | Viva Resource Blog - Colorado`,
     description: excerpt || `Read about ${title.toLowerCase()} and community impact in Colorado.`,
     keywords: [
       title.toLowerCase(),
-      "Colorado immigrant stories",
+      "Colorado community stories",
       "community impact Colorado",
       post.category,
-      "Denver community",
+      "rural Colorado community",
     ],
     openGraph: {
-      title: `${title} | Viva Resource Foundation`,
+      title: `${title} | Viva Resource`,
       description: excerpt || `Read about ${title.toLowerCase()} and community impact in Colorado.`,
       type: "article",
       images: post.featured_image
         ? [{ url: post.featured_image, width: 1200, height: 630, alt: title }]
-        : [{ url: `${siteUrl}/logo-rectangular.png`, width: 1400, height: 600, alt: "Viva Resource Foundation" }],
+        : [{ url: `${siteUrl}/logo-rectangular.png`, width: 1400, height: 600, alt: "Viva Resource" }],
     },
   };
 }
@@ -197,7 +197,7 @@ export default async function BlogPostPage({
           published_at: publishedDate,
           slug: post.slug,
           category: post.category,
-          keywords: `${title}, Colorado immigrant stories, community impact`,
+          keywords: `${title}, Colorado community stories, community impact`,
         }}
       />
       <SchemaMarkup

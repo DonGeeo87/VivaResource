@@ -106,9 +106,9 @@ export default function Footer(): JSX.Element {
       <div className="max-w-7xl mx-auto px-6 py-20 grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16">
         {/* Column 1: Logo + Description + Social Icons */}
         <div className="space-y-6">
-          <Link href="/" className="block" aria-label="Viva Resource Foundation Home">
+          <Link href="/" className="block" aria-label="Viva Resource Home">
             <span className="text-2xl font-bold text-on-primary font-headline">
-              Viva Resource Foundation
+              Viva Resource
             </span>
           </Link>
           <p className="text-on-primary/70 leading-relaxed font-body">

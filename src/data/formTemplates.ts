@@ -1,5 +1,5 @@
 /**
- * Plantillas de Formularios para Viva Resource Foundation
+ * Plantillas de Formularios para Viva Resource
  * Estas plantillas se pueden cargar desde el admin panel
  * para crear formularios rápidamente.
  */

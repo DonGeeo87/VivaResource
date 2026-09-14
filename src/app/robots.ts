@@ -1,6 +1,6 @@
 import { MetadataRoute } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vivaresource.org";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.vivaresource.com";
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
   let allowIndexing = true;

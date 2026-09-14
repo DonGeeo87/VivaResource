@@ -54,8 +54,8 @@ export async function POST(request: NextRequest) {
             value: parseFloat(amount).toFixed(2),
           },
           description: frequency === "monthly"
-            ? "Monthly donation to Viva Resource Foundation"
-            : "Donation to Viva Resource Foundation",
+            ? "Monthly donation to Viva Resource"
+            : "Donation to Viva Resource",
           custom_id: JSON.stringify({
             donorName,
             donorEmail,
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       application_context: {
         return_url: `${request.nextUrl.origin}/donate?status=success`,
         cancel_url: `${request.nextUrl.origin}/donate?status=cancelled`,
-        brand_name: "Viva Resource Foundation",
+        brand_name: "Viva Resource",
         landing_page: "DONATION",
         user_action: "PAY_NOW",
       },

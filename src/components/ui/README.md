@@ -1,4 +1,4 @@
-# UI Components - Viva Resource Foundation
+# UI Components - Viva Resource
 
 Componentes reutilizables para mantener consistencia en todo el frontend.
 

@@ -762,7 +762,7 @@ export default function Home(): JSX.Element {
       </section>
 
       <SchemaMarkup type="faq" data={{ questions: [
-        { question: "What services does Viva Resource provide?", answer: "Viva Resource provides food assistance, housing support, legal aid referrals, healthcare navigation, educational workshops, and emergency response services to immigrant and rural communities across El Paso County, Colorado." },
+        { question: "What services does Viva Resource provide?", answer: "Viva Resource provides food assistance, housing support, legal aid referrals, healthcare navigation, educational workshops, and emergency response services to rural communities across El Paso County, Colorado." },
         { question: "Is Viva Resource a nonprofit organization?", answer: "Yes, Viva Resource is a registered 501(c)(3) nonprofit organization. All donations are tax-deductible to the extent allowed by law." },
         { question: "Do I need to be a U.S. citizen to receive services?", answer: "No. Viva Resource serves all community members regardless of immigration status. We do not ask about immigration status to provide services." },
         { question: "What areas do you serve?", answer: "We serve all of El Paso County, Colorado, including Peyton (headquarters), Colorado Springs, Pueblo, Fountain, Monument, and surrounding rural communities." },

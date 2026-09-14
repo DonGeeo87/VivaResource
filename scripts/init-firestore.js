@@ -19,7 +19,7 @@ async function initializeCollections() {
   // 1. Configuraciones iniciales del sitio
   const settings = {
     'organization_name': {
-      value: 'Viva Resource Foundation',
+      value: 'Viva Resource',
       category: 'general',
       description: 'Nombre de la organización',
       updated_at: new Date()
@@ -67,7 +67,7 @@ async function initializeCollections() {
       updated_at: new Date()
     },
     'default_meta_title': {
-      value: 'Viva Resource Foundation - Building Hope in Rural Communities',
+      value: 'Viva Resource - Building Hope in Rural Communities',
       category: 'seo',
       description: 'Título por defecto para SEO',
       updated_at: new Date()

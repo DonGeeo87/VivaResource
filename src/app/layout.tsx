@@ -21,95 +21,115 @@ const publicSans = Public_Sans({
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.vivaresource.com";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    default: "Viva Resource | Immigrant Resources in Colorado, USA",
-    template: "%s | Viva Resource",
-  },
-  description:
-    "Viva Resource provides essential immigrant resources, community services, and advocacy in Colorado, USA. Free bilingual support for housing, food, legal aid, healthcare, and education in Denver, Peyton, and rural Colorado communities.",
-  // Canonical URL para evitar contenido duplicado
-  alternates: {
-    canonical: siteUrl,
-  },
-  keywords: [
-    "immigrant resources Colorado",
-    "ayuda inmigrante Denver",
-    "community services Colorado",
-    "immigrant support Peyton CO",
-    "bilingual services Colorado",
-    "nonprofit Colorado immigrant",
-    "recursos para inmigrantes Colorado",
-    "Colorado community foundation",
-    "immigrant advocacy Denver",
-    "rural community services Colorado",
-  ],
-  authors: [{ name: "Viva Resource", url: siteUrl }],
-  creator: "Viva Resource",
-  publisher: "Viva Resource",
-  icons: {
-    icon: "/favicon-vivaresource.png",
-    apple: "/apple-touch-icon.png",
-  },
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    alternateLocale: "es_ES",
-    url: siteUrl,
-    siteName: "Viva Resource",
-    title: "Viva Resource | Immigrant Resources in Colorado, USA",
-    description:
-      "Essential immigrant resources and community services in Colorado. Free bilingual support for housing, food, legal aid, healthcare, and education.",
-    images: [
-      {
-        url: `${siteUrl}/logo-rectangular.png`,
-        width: 1400,
-        height: 600,
-        alt: "Viva Resource Logo",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Viva Resource | Immigrant Resources in Colorado",
-    description:
-      "Essential immigrant resources and community services in Colorado. Free bilingual support.",
-    images: [`${siteUrl}/logo-rectangular.png`],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+/**
+ * Metadata global. Los valores SEO editables se leen de `seo_settings` (panel
+ * /admin/seo); si la DB no responde se usan los defaults de abajo.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const { getSeoSettings } = await import("@/lib/seo-settings");
+  const s = await getSeoSettings();
+
+  const defaultTitle = "Viva Resource | Community Resources in Rural Colorado";
+  const defaultDescription =
+    "Viva Resource is a 501(c)(3) nonprofit connecting rural Colorado communities with essential resources: food assistance, housing support, healthcare navigation, educational workshops, emergency response, and legal aid referrals. Free bilingual support for all residents of El Paso County, Colorado.";
+
+  const title = s.site_title || defaultTitle;
+  const description = s.site_description || defaultDescription;
+  const canonical = s.canonical_url || siteUrl;
+  const ogImage = s.og_default_image || `${siteUrl}/logo-rectangular.png`;
+  const keywords = s.site_keywords
+    ? s.site_keywords.split(",").map((k) => k.trim()).filter(Boolean)
+    : defaultKeywords;
+
+  return {
+    metadataBase: new URL(canonical),
+    title: {
+      default: title,
+      template: "%s | Viva Resource",
+    },
+    description,
+    alternates: {
+      canonical,
+    },
+    keywords,
+    authors: [{ name: "Viva Resource", url: canonical }],
+    creator: "Viva Resource",
+    publisher: "Viva Resource",
+    icons: {
+      icon: "/favicon-vivaresource.png",
+      apple: "/apple-touch-icon.png",
+    },
+    formatDetection: {
+      email: false,
+      address: false,
+      telephone: false,
+    },
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      alternateLocale: "es_US",
+      url: canonical,
+      siteName: s.og_site_name || "Viva Resource",
+      title,
+      description,
+      images: [
+        {
+          url: ogImage,
+          width: 1400,
+          height: 600,
+          alt: "Viva Resource — Community Resources in Rural Colorado",
+        },
+      ],
+    },
+    twitter: {
+      card: (s.twitter_card_type as "summary_large_image") || "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
+      ...(s.twitter_handle ? { site: s.twitter_handle, creator: s.twitter_handle } : {}),
+    },
+    robots: {
       index: true,
       follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
-  },
-  verification: {
-    // Add Google Search Console verification here when available
-    // google: "your-verification-code",
-  },
-  category: "Nonprofit Organization",
-  // Preconnect y DNS prefetch para mejorar performance
-  other: {
-    'preconnect': [
-      'https://fonts.googleapis.com',
-      'https://fonts.gstatic.com',
-      'https://firestore.googleapis.com',
-      'https://www.google.com',
-      'https://www.gstatic.com',
-    ],
-    'dns-prefetch': 'https://res.cloudinary.com',
-  },
-};
+    verification: {
+      ...(s.google_verification_code ? { google: s.google_verification_code } : {}),
+      ...(s.bing_verification_code ? { other: { "msvalidate.01": s.bing_verification_code } } : {}),
+    },
+    category: "Nonprofit Organization",
+    // Preconnect y DNS prefetch para mejorar performance
+    other: {
+      preconnect: [
+        "https://fonts.googleapis.com",
+        "https://fonts.gstatic.com",
+        "https://firestore.googleapis.com",
+        "https://www.google.com",
+        "https://www.gstatic.com",
+      ],
+      "dns-prefetch": "https://res.cloudinary.com",
+    },
+  };
+}
+
+const defaultKeywords = [
+  "community resources Colorado",
+  "recursos comunitarios Colorado",
+  "food assistance El Paso County",
+  "housing support Peyton CO",
+  "rural Colorado nonprofit",
+  "501c3 nonprofit Colorado",
+  "healthcare navigation Colorado",
+  "ayuda comunitaria Colorado Springs",
+  "emergency assistance rural Colorado",
+  "legal aid referrals Colorado",
+];
 
 export default function RootLayout({
   children,

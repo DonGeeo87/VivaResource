@@ -125,7 +125,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     for (const subscriber of subscribers) {
       try {
         await transporter.sendMail({
-          from: `"Viva Resource Foundation" <${FROM_EMAIL}>`,
+          from: `"Viva Resource" <${FROM_EMAIL}>`,
           to: subscriber.email,
           subject: subject.trim(),
           html: emailHtml,
@@ -192,7 +192,7 @@ function buildEmailHtml(subject: string, content: string): string {
               <!-- Header -->
               <tr>
                 <td style="background-color: #025689; padding: 24px 32px; text-align: center;">
-                  <a href="https://vivaresource.org" style="text-decoration: none;">
+                  <a href="https://www.vivaresource.com" style="text-decoration: none;">
                     <span style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; font-size: 24px; font-weight: 800; color: #ffffff;">VIVA RESOURCE</span>
                   </a>
                 </td>
@@ -208,13 +208,13 @@ function buildEmailHtml(subject: string, content: string): string {
               <tr>
                 <td style="background-color: #f3f3f3; padding: 24px 32px; text-align: center; border-top: 1px solid #e0e0e0;">
                   <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">
-                    Viva Resource Foundation
+                    Viva Resource
                   </p>
                   <p style="margin: 0; color: #999; font-size: 12px;">
                     Building a more resilient community together.
                   </p>
                   <p style="margin: 8px 0 0 0; color: #999; font-size: 12px;">
-                    <a href="https://vivaresource.org" style="color: #025689;">vivaresource.org</a>
+                    <a href="https://www.vivaresource.com" style="color: #025689;">vivaresource.com</a>
                   </p>
                 </td>
               </tr>

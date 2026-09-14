@@ -16,9 +16,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   if (!loc) return { title: "Location Not Found" };
 
   return {
-    title: `${loc.name}, CO | Immigrant Resources & Community Services | Viva Resource`,
+    title: `${loc.name}, CO | Community Resources & Support Services | Viva Resource`,
     description: loc.description,
-    keywords: `${loc.name} Colorado, ${loc.name} immigrant resources, ${loc.name} community services, ${loc.county} nonprofit, ayuda para inmigrantes ${loc.name}, ${loc.name} food assistance, ${loc.name} housing support`,
+    keywords: `${loc.name} Colorado, ${loc.name} community resources, ${loc.name} community services, ${loc.county} nonprofit, ayuda comunitaria ${loc.name}, ${loc.name} food assistance, ${loc.name} housing support`,
     openGraph: {
       title: `${loc.name}, CO | Viva Resource`,
       description: loc.description,
@@ -123,7 +123,7 @@ function LocationSchema({ loc }: { loc: Location }) {
         provider: { "@type": "Organization", name: "Viva Resource", url: siteUrl },
         areaServed: { "@type": "City", name: loc.name },
         serviceType: loc.services.join(", "),
-        audience: { "@type": "Audience", name: "Immigrants and rural community members" },
+        audience: { "@type": "Audience", name: "Rural community members" },
       },
     ],
   };
