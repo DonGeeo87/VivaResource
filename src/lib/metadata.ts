@@ -12,7 +12,8 @@ interface PageMetaProps {
 }
 
 export function generatePageMeta({ title, description, path, keywords = [], image }: PageMetaProps): Metadata {
-  const imageUrl = image ? `${siteUrl}${image}` : `${siteUrl}/logo-rectangular.png`;
+  const imageUrl = image ? `${siteUrl}${image}` : `${siteUrl}/og-viva.jpg`;
+  const [imgW, imgH] = imageUrl.endsWith("logo-rectangular.png") ? [1400, 600] : [1200, 630];
 
   return {
     title,
@@ -35,8 +36,8 @@ export function generatePageMeta({ title, description, path, keywords = [], imag
       images: [
         {
           url: imageUrl,
-          width: 1400,
-          height: 600,
+          width: imgW,
+          height: imgH,
           alt: title,
         },
       ],

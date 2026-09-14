@@ -76,8 +76,8 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [
         {
           url: ogImage,
-          width: 1400,
-          height: 600,
+          width: ogImage.endsWith("logo-rectangular.png") ? 1400 : 1200,
+          height: ogImage.endsWith("logo-rectangular.png") ? 600 : 630,
           alt: ogImageAlt,
         },
       ],

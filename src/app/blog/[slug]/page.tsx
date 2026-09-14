@@ -97,7 +97,7 @@ export async function generateMetadata({
       type: "article",
       images: post.featured_image
         ? [{ url: post.featured_image, width: 1200, height: 630, alt: title }]
-        : [{ url: `${siteUrl}/logo-rectangular.png`, width: 1400, height: 600, alt: "Viva Resource" }],
+        : [{ url: `${siteUrl}/og-viva.jpg`, width: 1200, height: 630, alt: "Viva Resource" }],
     },
   };
 }
