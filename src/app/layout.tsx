@@ -115,9 +115,6 @@ export async function generateMetadata(): Promise<Metadata> {
         "https://www.gstatic.com",
       ],
       "dns-prefetch": "https://res.cloudinary.com",
-      // Facebook exige fb:app_id para el preview de enlaces. Se configura en
-      // /admin/seo; si no hay App ID cargado, la etiqueta no se emite.
-      ...(s.fb_app_id ? { "fb:app_id": s.fb_app_id } : {}),
     },
   };
 }
@@ -142,6 +139,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
+      {/*
+        Facebook exige `property="fb:app_id"`; el objeto metadata de Next solo
+        emite `name=`, que Meta ignora (aviso "Faltan propiedades obligatorias").
+        Se define en build-time porque las paginas son estaticas.
+      */}
+      <head>
+        {process.env.NEXT_PUBLIC_FB_APP_ID ? (
+          <meta property="fb:app_id" content={process.env.NEXT_PUBLIC_FB_APP_ID} />
+        ) : null}
+      </head>
       <body
         className={`${plusJakarta.variable} ${publicSans.variable} font-body antialiased bg-surface text-on-surface`}
       >

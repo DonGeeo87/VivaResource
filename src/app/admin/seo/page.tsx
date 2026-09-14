@@ -477,8 +477,8 @@ export default function AdminSeoPage(): JSX.Element {
               />
               <p className="text-xs text-gray-500 mt-1">
                 {language === "es"
-                  ? "Obligatorio para la vista previa de enlaces en Facebook. Se obtiene en developers.facebook.com"
-                  : "Required for Facebook link previews. Get it at developers.facebook.com"}
+                  ? "Se obtiene en developers.facebook.com. Requiere redeploy (la etiqueta se genera en build)."
+                  : "Get it at developers.facebook.com. Requires a redeploy (the tag is generated at build time)."}
               </p>
             </div>
           </div>
