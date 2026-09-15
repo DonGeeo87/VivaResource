@@ -166,6 +166,31 @@ def main():
         if status != 200:
             fails.append(f"{path}: HTTP {status} (debe resolver 200)")
 
+    # --- 5b. Version en espanol indexable ---
+    for path in ("/es", "/es/about"):
+        status, html = fetch(path)
+        if status != 200:
+            fails.append(f"{path}: HTTP {status} (la version ES debe servir 200)")
+            continue
+        m = re.search(r'<html lang="([a-z-]*)"', html)
+        lang = m.group(1) if m else None
+        if lang != "es":
+            fails.append(f"{path}: html lang={lang} (deberia ser 'es') - "
+                         f"el middleware de idioma dejo de aplicar?")
+        # hreflang debe estar presente en ambas versiones
+        alts = re.findall(r'hrefLang="([a-z-]*)"', html, re.I)
+        for need in ("en", "es", "x-default"):
+            if need not in [a.lower() for a in alts]:
+                fails.append(f"{path}: falta hreflang '{need}'")
+        notes.append(f"{path}: lang={lang}, hreflang ok")
+
+    # Contenido realmente traducido (no solo el atributo lang)
+    _, es_home = fetch("/es")
+    if "Empoderando" in es_home or "Nosotros" in es_home:
+        notes.append("contenido ES: traducido")
+    else:
+        fails.append("/es sirve el TEXTO en ingles (el atributo lang miente)")
+
     # --- 6. robots.txt ---
     status, rb = fetch("/robots.txt")
     if status != 200:
