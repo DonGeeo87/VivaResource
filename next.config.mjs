@@ -63,6 +63,16 @@ const nextConfig = {
   // Redirects 301: slugs de blog renombrados al alinear el posicionamiento.
   // Sin esto, los enlaces y el SEO acumulado de las URLs viejas se pierden.
   async redirects() {
+    // El dominio sin www responde 200 y sirve el canonical correcto, pero un
+    // 301 explicito evita que Google trate ambos como URLs distintas.
+    const apexRedirect = [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "vivaresource.com" }],
+        destination: "https://www.vivaresource.com/:path*",
+        permanent: true,
+      },
+    ];
     // Slugs que antes eran compartidos EN/ES (y por eso daban 404). Ahora cada
     // idioma tiene su URL propia: la vieja redirige al post en ingles.
     const sharedSlug = [
@@ -77,6 +87,7 @@ const nextConfig = {
       ['immigrant-resources-colorado', 'legal-aid-referrals-colorado'],
     ];
     return [
+      ...apexRedirect,
       ...sharedSlug.map((slug) => ({
         source: `/blog/${slug}`,
         destination: `/blog/${slug}-en`,

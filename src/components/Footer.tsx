@@ -84,6 +84,10 @@ export default function Footer(): JSX.Element {
       "Impact Areas": { en: "Impact Areas", es: "Áreas de Impacto" },
       "Resources Hub": { en: "Resources Hub", es: "Centro de Recursos" },
       "Locations": { en: "Locations", es: "Ubicaciones" },
+      "Get Involved": { en: "Get Involved", es: "Involúcrate" },
+      "Get Help": { en: "Get Help", es: "Obtener Ayuda" },
+      "Events": { en: "Events", es: "Eventos" },
+      "Donate": { en: "Donate", es: "Donar" },
       "Volunteer Portal": { en: "Volunteer Portal", es: "Portal de Voluntarios" },
       "Admin Portal": { en: "Admin Portal", es: "Portal de Admin" },
       "Contact Details": { en: "Contact Details", es: "Detalles de Contacto" },
@@ -91,12 +95,21 @@ export default function Footer(): JSX.Element {
     return labels[labelKey]?.[language] || labelKey;
   };
 
+  /**
+   * El footer es el lugar de los destinos secundarios: el Portal de Voluntarios
+   * (area con login) y el de Admin viven aqui, no en el nav publico. Cada label
+   * debe describir SU destino: antes /get-help decia "Impact Areas" y
+   * /get-involved decia "Volunteer Portal".
+   */
   const footerLinks = [
     { href: "/about", label: getLabel("About Us") },
-    { href: "/locations", label: getLabel("Locations") },
-    { href: "/get-help", label: getLabel("Impact Areas") },
+    { href: "/get-help", label: getLabel("Get Help") },
     { href: "/resources", label: getLabel("Resources Hub") },
-    { href: "/get-involved", label: getLabel("Volunteer Portal") },
+    { href: "/locations", label: getLabel("Locations") },
+    { href: "/events", label: getLabel("Events") },
+    { href: "/get-involved", label: getLabel("Get Involved") },
+    { href: "/donate", label: getLabel("Donate") },
+    { href: "/volunteer-portal", label: getLabel("Volunteer Portal") },
     { href: "/admin", label: getLabel("Admin Portal") },
   ];
 

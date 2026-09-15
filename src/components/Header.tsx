@@ -49,7 +49,14 @@ export default function Header(): JSX.Element {
     return pathname === href;
   };
 
-  // Categorías de navegación
+  /**
+   * Navegacion publica: 6 destinos en 3 categorias.
+   *
+   * Antes eran 10 items (3 categorias + 7 sub-items) con "Volunteer Portal"
+   * compitiendo con "Donate". Un portal con login no es un destino publico:
+   * va en el footer. La jerarquia ahora cuenta la historia correcta:
+   * necesito ayuda -> quiero ayudar -> quiero donar.
+   */
   const navCategories = [
     {
       name: language === "es" ? "Nosotros" : "About",
@@ -60,11 +67,11 @@ export default function Header(): JSX.Element {
       ]
     },
     {
-      name: language === "es" ? "Recursos" : "Resources",
+      name: language === "es" ? "Obtener Ayuda" : "Get Help",
       items: [
+        { href: "/get-help", label: language === "es" ? "Solicitar Ayuda" : "Request Help" },
         { href: "/resources", label: language === "es" ? "Recursos" : "Resources" },
         { href: "/locations", label: language === "es" ? "Ubicaciones" : "Locations" },
-        { href: "/get-help", label: language === "es" ? "Obtener Ayuda" : "Get Help" },
         { href: "/events", label: language === "es" ? "Eventos" : "Events" },
       ]
     },
@@ -73,7 +80,6 @@ export default function Header(): JSX.Element {
       items: [
         { href: "/get-involved", label: language === "es" ? "Involúcrate" : "Get Involved" },
         { href: "/donate", label: language === "es" ? "Donar" : "Donate" },
-        { href: "/volunteer-portal", label: language === "es" ? "Portal Voluntarios" : "Volunteer Portal" },
       ]
     },
   ];
