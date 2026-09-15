@@ -34,7 +34,14 @@ function currentPath(): string {
 /** Idioma activo segun la cookie que marca el middleware. */
 function currentLang(): "en" | "es" {
   try {
-    const cookie = headers().get("cookie") || "";
+    const h = headers();
+    // El middleware inyecta x-public-path EN LA REQUEST de esta misma peticion,
+    // asi que es la fuente fiable. La cookie viva-lang se marca en la RESPUESTA
+    // y todavia no existe cuando el layout se renderiza.
+    const path = h.get("x-public-path") || "";
+    if (path === "/es" || path.startsWith("/es/")) return "es";
+    // Peticiones internas sin middleware: caer a la cookie.
+    const cookie = h.get("cookie") || "";
     const m = cookie.match(/(?:^|;\s*)viva-lang=(en|es)/);
     return m && m[1] === "es" ? "es" : "en";
   } catch {
@@ -81,11 +88,6 @@ export async function generateMetadata(): Promise<Metadata> {
     description,
     alternates: {
       canonical: canonicalForLang(canonical, currentPath()),
-      languages: {
-        en: canonical,
-        es: `${canonical}/es`,
-        "x-default": canonical,
-      },
     },
     keywords,
     authors: [{ name: "Viva Resource", url: canonical }],
@@ -188,6 +190,22 @@ export default function RootLayout({
         {process.env.NEXT_PUBLIC_FB_APP_ID ? (
           <meta property="fb:app_id" content={process.env.NEXT_PUBLIC_FB_APP_ID} />
         ) : null}
+        {/* hreflang: Next descarta alternates.languages cuando el canonical es
+            dinamico, asi que se declaran a mano para que Google indexe ambas
+            versiones del sitio. */}
+        {(() => {
+          const base = canonicalForLang(siteUrl, "/");
+          const withoutEs = currentPath().replace(/^\/es(?=\/|$)/, "") || "/";
+          const enUrl = canonicalForLang(siteUrl, withoutEs);
+          const esUrl = canonicalForLang(siteUrl, `/es${withoutEs === "/" ? "" : withoutEs}`);
+          return (
+            <>
+              <link rel="alternate" hrefLang="en" href={enUrl} />
+              <link rel="alternate" hrefLang="es" href={esUrl} />
+              <link rel="alternate" hrefLang="x-default" href={base} />
+            </>
+          );
+        })()}
       </head>
       <body
         className={`${plusJakarta.variable} ${publicSans.variable} font-body antialiased bg-surface text-on-surface`}
