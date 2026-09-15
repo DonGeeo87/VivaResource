@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Plus_Jakarta_Sans, Public_Sans } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -20,6 +21,35 @@ const publicSans = Public_Sans({
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.vivaresource.com";
+
+/** Path publico (con prefijo /es si aplica), inyectado por el middleware. */
+function currentPath(): string {
+  try {
+    return headers().get("x-public-path") || "/";
+  } catch {
+    return "/";
+  }
+}
+
+/** Idioma activo segun la cookie que marca el middleware. */
+function currentLang(): "en" | "es" {
+  try {
+    const cookie = headers().get("cookie") || "";
+    const m = cookie.match(/(?:^|;\s*)viva-lang=(en|es)/);
+    return m && m[1] === "es" ? "es" : "en";
+  } catch {
+    return "en";
+  }
+}
+
+/** El canonical debe incluir el prefijo de idioma cuando la URL lo tiene. */
+function canonicalForLang(canonical: string, path: string): string {
+  const base = canonical.replace(/\/$/, "");
+  if (path === "/" || path === "/es" || path === "/es/") {
+    return path.startsWith("/es") ? `${base}/es` : base;
+  }
+  return `${base}${path}`;
+}
 
 /**
  * Metadata global. Los valores SEO editables se leen de `seo_settings` (panel
@@ -50,7 +80,12 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description,
     alternates: {
-      canonical,
+      canonical: canonicalForLang(canonical, currentPath()),
+      languages: {
+        en: canonical,
+        es: `${canonical}/es`,
+        "x-default": canonical,
+      },
     },
     keywords,
     authors: [{ name: "Viva Resource", url: canonical }],
@@ -137,8 +172,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // El middleware marca la cookie al entrar a /es/*. Leerla aqui hace que el
+  // HTML salga ya en espanol desde el servidor (Google no ejecuta JS ni tiene
+  // localStorage, asi que antes solo veia la version en ingles).
+  const lang = currentLang();
+
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang={lang} className="scroll-smooth">
       {/*
         Facebook exige `property="fb:app_id"`; el objeto metadata de Next solo
         emite `name=`, que Meta ignora (aviso "Faltan propiedades obligatorias").
@@ -153,7 +193,7 @@ export default function RootLayout({
         className={`${plusJakarta.variable} ${publicSans.variable} font-body antialiased bg-surface text-on-surface`}
       >
         <SchemaMarkup />
-          <LanguageProvider>
+          <LanguageProvider initialLanguage={lang}>
           <SiteImageProvider>
           <LanguageDir />
           {/* Skip Link for accessibility */}

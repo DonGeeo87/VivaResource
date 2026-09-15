@@ -3,12 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu, X, Globe, ChevronDown, ChevronRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Header(): JSX.Element {
   const pathname = usePathname();
+  const router = useRouter();
   const { language, setLanguage, translations } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
@@ -17,9 +18,25 @@ export default function Header(): JSX.Element {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  /**
+   * Cambiar idioma navega a la URL de ese idioma (/es/* para espanol), para que
+   * la version quede indexable y el idioma sea consistente entre servidor y
+   * cliente. Solo cambia la cookie como respaldo.
+   */
   const toggleLanguage = (): void => {
-    setLanguage(language === "en" ? "es" : "en");
+    const target: "en" | "es" = language === "en" ? "es" : "en";
+    setLanguage(target);
+
+    const isEs = pathname === "/es" || pathname.startsWith("/es/");
+    let nextPath: string;
+    if (target === "es") {
+      nextPath = isEs ? pathname : `/es${pathname === "/" ? "" : pathname}`;
+    } else {
+      nextPath = isEs ? pathname.replace(/^\/es(?=\/|$)/, "") || "/" : pathname;
+    }
+    router.push(nextPath || "/");
   };
+
 
   const toggleSection = (section: string): void => {
     setExpandedSections(prev => ({

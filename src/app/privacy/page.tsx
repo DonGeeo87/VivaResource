@@ -13,9 +13,10 @@ import {
 } from "lucide-react";
 
 export default function PrivacyPolicyPage(): JSX.Element {
-  const { language, isHydrated } = useLanguage();
-
-  if (!isHydrated) return <></>;
+  // El idioma ya viene resuelto del servidor (cookie que marca el middleware),
+  // asi que no hay que esperar hidratacion: bloquear aqui dejaba la pagina
+  // vacia en el HTML inicial y Google no veia su contenido.
+  const { language } = useLanguage();
 
   const sidebarLinks = [
     { href: "#intro", label: language === "es" ? "Introducción" : "Introduction", active: true },

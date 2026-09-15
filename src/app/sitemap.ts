@@ -21,7 +21,16 @@ const staticRoutes: MetadataRoute.Sitemap = [
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const sitemapData: MetadataRoute.Sitemap = [...staticRoutes];
+  const sitemapData: MetadataRoute.Sitemap = [];
+  // Cada ruta se publica en ambos idiomas: el middleware sirve /es/* y el
+  // layout declara hreflang, asi que ambas versiones son indexables.
+  for (const entry of staticRoutes) {
+    sitemapData.push(entry);
+    sitemapData.push({
+      ...entry,
+      url: entry.url === siteUrl ? `${siteUrl}/es` : `${entry.url.replace(siteUrl, `${siteUrl}/es`)}`,
+    });
+  }
 
   try {
     const { adminDb } = await import("@/lib/admin-db");
