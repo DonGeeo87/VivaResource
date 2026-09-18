@@ -11,6 +11,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { formatMountainDate, formatMountainTime } from "@/lib/timezone";
 import { EventsHeroSkeleton, EventsFilterSkeleton, EventsGridSkeleton } from "@/components/Skeleton";
 import NewsletterForm from "@/components/NewsletterForm";
 
@@ -315,30 +316,43 @@ export default function EventsPage(): JSX.Element {
                       {getTitle(event)}
                     </h3>
                     
-                    {/* Date and Time */}
-                    <div className="flex flex-wrap items-center gap-3 text-sm text-on-surface-variant mb-3">
-                      <span className="flex items-center">
-                        <Calendar className="w-4 h-4 mr-1.5 text-secondary" />
-                        {formatDate(nextUpcoming(event) || event.date)}
-                      </span>
-                      {allDates(event).length > 1 && (
-                        <span className="flex items-center rounded-full bg-secondary/10 px-2.5 py-0.5 text-xs font-semibold text-secondary">
-                          {allDates(event).length} {language === "es" ? "fechas" : "dates"}
+                    {/* Fecha y hora — siempre en hora de Colorado, no la del visitante */}
+                    <div className="mb-3 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 shrink-0 text-secondary" />
+                        <span className="font-semibold text-on-surface">
+                          {formatMountainDate(nextUpcoming(event) || event.date, language)}
                         </span>
-                      )}
-                      {event.time && (
-                        <span className="flex items-center">
-                          <Clock className="w-4 h-4 mr-1.5 text-secondary" />
-                          {event.time} <span className="text-xs text-gray-400 ml-1">(MT)</span>
-                        </span>
-                      )}
+                        {allDates(event).length > 1 && (
+                          <span className="rounded-full bg-secondary/15 px-2.5 py-0.5 text-xs font-semibold text-secondary">
+                            {allDates(event).length} {language === "es" ? "fechas" : "dates"}
+                          </span>
+                        )}
+                      </div>
+                      {(() => {
+                        const next = nextUpcoming(event) || event.date;
+                        const hora = next && allDates(event).length > 1
+                          ? formatMountainTime(next, language)
+                          : event.time;
+                        return hora ? (
+                          <div className="flex items-center gap-2 text-on-surface-variant">
+                            <Clock className="w-4 h-4 shrink-0 text-secondary" />
+                            <span>
+                              {hora}
+                              <span className="ml-1 text-xs text-outline">
+                                {language === "es" ? "(hora de Colorado)" : "(Colorado time)"}
+                              </span>
+                            </span>
+                          </div>
+                        ) : null;
+                      })()}
                     </div>
                     
                     {/* Location */}
                     {event.location && (
-                      <div className="flex items-center text-sm text-on-surface-variant mb-3">
-                        <MapPin className="w-4 h-4 mr-1.5 text-secondary" />
-                        <span className="line-clamp-1">{event.location}</span>
+                      <div className="flex items-start text-sm text-on-surface-variant mb-3">
+                        <MapPin className="w-4 h-4 mr-1.5 mt-0.5 shrink-0 text-secondary" />
+                        <span className="line-clamp-2">{event.location}</span>
                       </div>
                     )}
                     
@@ -444,7 +458,7 @@ export default function EventsPage(): JSX.Element {
                       <div className="flex flex-wrap items-center gap-3 text-sm text-gray-400 mb-3">
                         <span className="flex items-center">
                           <Calendar className="w-4 h-4 mr-1.5" />
-                          {formatDate(event.date)}
+                          {formatMountainDate(event.date, language)}
                         </span>
                         {event.location && (
                           <span className="flex items-center">

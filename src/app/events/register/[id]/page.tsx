@@ -13,7 +13,13 @@ import { db, addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, w
 
 const safeFormatDate = (date: string | Date | Timestamp | { toDate: () => Date } | undefined, lang: string): string => {
   if (!date) return "-";
-  if (typeof date === "string") return date;
+  // OJO: la BD migrada entrega strings ISO. Antes se devolvia el string tal
+  // cual, asi que en el selector se veia "2026-09-28T15:00:00.000Z" en vez de
+  // la fecha formateada en hora de Colorado.
+  if (typeof date === "string") {
+    const parsed = new Date(date);
+    return isNaN(parsed.getTime()) ? date : formatMountainDate(parsed, lang);
+  }
   if (typeof (date as { toDate?: () => Date }).toDate === "function") {
     return formatMountainDate(date, lang);
   }
@@ -696,7 +702,10 @@ export default function EventRegisterPage(): JSX.Element {
                                 {opt.time && (
                                   <span className="inline-flex items-center gap-1 text-sm text-on-surface-variant">
                                     <Clock className="h-3.5 w-3.5" />
-                                    {opt.time} (MT)
+                                    {opt.time}
+                                    <span className="text-xs text-outline">
+                                      {isES ? "(hora de Colorado)" : "(Colorado time)"}
+                                    </span>
                                   </span>
                                 )}
                                 {opt.past && (
