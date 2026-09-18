@@ -10,7 +10,7 @@ import { getCurrentUserId, getToken } from "@/lib/auth/client";
 import ImageUpload from "@/components/ImageUpload";
 import { formTemplates } from "@/data/formTemplates";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { FileText, Check, ChevronRight, ChevronLeft, Plus, Copy, Send, Eye } from "lucide-react";
+import { FileText, Check, ChevronRight, ChevronLeft, Plus, Copy, Send, Eye, Trash2 } from "lucide-react";
 
 // Validación schema
 export const eventSchema = z.object({
@@ -22,6 +22,17 @@ export const eventSchema = z.object({
   date: z.string().min(1, "La fecha es requerida"),
   time: z.string().optional(),
   location: z.string().min(3, "Ubicación requerida").max(200),
+  // Fechas adicionales de realizacion. Si viene vacio, el evento se comporta
+  // como siempre (una sola fecha en `date`/`time`/`location`).
+  dates: z.array(z.object({
+    id: z.string(),
+    date: z.string().min(1),
+    time: z.string().optional(),
+    location: z.string().optional(),
+    capacity: z.number().optional().nullable(),
+    note_en: z.string().max(120).optional(),
+    note_es: z.string().max(120).optional(),
+  })).optional(),
   category: z.enum(["workshop", "community", "fundraiser"]),
   registration_required: z.boolean(),
   status: z.enum(["draft", "published", "cancelled"]),
@@ -173,7 +184,56 @@ export default function EventForm({ initialData, onSubmit, template, formTemplat
   const [currentStep, setCurrentStep] = useState(1);
   const registrationRequired = watch("registration_required");
   const selectedFormTemplate = watch("formTemplate");
-  
+
+  // --- Fechas adicionales ---------------------------------------------------
+  // La primera fecha vive en date/time/location (compatibilidad total con los
+  // eventos existentes). Las adicionales van en `dates`. Si no hay ninguna, el
+  // evento se comporta exactamente como antes.
+  const watchDates = watch("dates") || [];
+  const mainDate = watch("date");
+  const mainTime = watch("time");
+  const mainLocation = watch("location");
+
+  /** Fechas efectivas (principal + adicionales) para mostrar y guardar. */
+  const effectiveSchedules = [
+    { id: "main", date: mainDate || "", time: mainTime || "", location: mainLocation || "" },
+    ...watchDates.map((d) => ({
+      id: d.id,
+      date: d.date || "",
+      time: d.time || "",
+      location: d.location || mainLocation || "",
+    })),
+  ].filter((s) => s.date);
+
+  const addDate = (): void => {
+    setValue("dates", [
+      ...watchDates,
+      {
+        id: `d_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+        date: "",
+        time: "",
+        location: "",
+        capacity: null,
+        note_en: "",
+        note_es: "",
+      },
+    ]);
+  };
+
+  const updateDate = (
+    id: string,
+    patch: Partial<NonNullable<EventFormData["dates"]>[number]>
+  ): void => {
+    setValue(
+      "dates",
+      watchDates.map((d) => (d.id === id ? { ...d, ...patch } : d))
+    );
+  };
+
+  const removeDate = (id: string): void => {
+    setValue("dates", watchDates.filter((d) => d.id !== id));
+  };
+
   // Apply pre-selected form template from event creation flow
   useEffect(() => {
     if (formTemplate && !skipForm) {
@@ -505,6 +565,148 @@ export default function EventForm({ initialData, onSubmit, template, formTemplat
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
               {errors.location && <p className="text-red-600 text-sm mt-1">{errors.location.message}</p>}
+            </div>
+
+            {/* Fechas adicionales: el evento puede repetirse en varias fechas */}
+            <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <div className="flex items-start justify-between gap-4 mb-3">
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-800">
+                    {isES ? "Fechas de realización" : "Event dates"}
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {isES
+                      ? "¿El evento se repite? Agrega más fechas. Al inscribirse, cada persona elige a cuál asistir."
+                      : "Does this event repeat? Add more dates. Each person picks which one to attend."}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={addDate}
+                  disabled={registrationRequired && currentStep !== 1}
+                  className="shrink-0 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-white hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                >
+                  <Plus className="h-4 w-4" />
+                  {isES ? "Agregar fecha" : "Add date"}
+                </button>
+              </div>
+
+              {watchDates.length === 0 ? (
+                <p className="text-xs text-gray-500 italic">
+                  {isES
+                    ? "Una sola fecha (la de arriba). El evento se comporta como siempre."
+                    : "Single date (the one above). The event behaves as usual."}
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {watchDates.map((d, idx) => (
+                    <div key={d.id} className="rounded-md border border-gray-200 bg-white p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                          {isES ? `Fecha ${idx + 2}` : `Date ${idx + 2}`}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeDate(d.id)}
+                          className="inline-flex items-center gap-1 text-xs text-red-600 hover:underline"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          {isES ? "Quitar" : "Remove"}
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            {isES ? "Fecha" : "Date"}
+                          </label>
+                          <input
+                            type="date"
+                            value={d.date || ""}
+                            onChange={(e) => updateDate(d.id, { date: e.target.value })}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            {isES ? "Hora" : "Time"}
+                          </label>
+                          <input
+                            type="time"
+                            value={d.time || ""}
+                            onChange={(e) => updateDate(d.id, { time: e.target.value })}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                          />
+                        </div>
+                      </div>
+                      <div className="mt-3">
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          {isES ? "Ubicación (opcional)" : "Location (optional)"}
+                        </label>
+                        <input
+                          value={d.location || ""}
+                          onChange={(e) => updateDate(d.id, { location: e.target.value })}
+                          placeholder={mainLocation || (isES ? "Misma que la principal" : "Same as main")}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                        />
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            {isES ? "Nota EN (opcional)" : "Note EN (optional)"}
+                          </label>
+                          <input
+                            value={d.note_en || ""}
+                            onChange={(e) => updateDate(d.id, { note_en: e.target.value })}
+                            placeholder={isES ? "Ej: Nivel principiante" : "e.g. Beginner level"}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            {isES ? "Nota ES (opcional)" : "Note ES (optional)"}
+                          </label>
+                          <input
+                            value={d.note_es || ""}
+                            onChange={(e) => updateDate(d.id, { note_es: e.target.value })}
+                            placeholder={isES ? "Ej: Nivel principiante" : "e.g. Nivel principiante"}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                          />
+                        </div>
+                      </div>
+                      <div className="mt-3">
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          {isES ? "Cupo de esta fecha (opcional)" : "Capacity for this date (optional)"}
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          value={d.capacity ?? ""}
+                          onChange={(e) =>
+                            updateDate(d.id, {
+                              capacity: e.target.value === "" ? null : Number(e.target.value),
+                            })
+                          }
+                          placeholder={isES ? "Sin límite" : "No limit"}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                        />
+                        <p className="text-xs text-gray-400 mt-1">
+                          {isES
+                            ? "Si lo dejas vacío, usa el cupo general del evento."
+                            : "If empty, the event-wide limit is used."}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {effectiveSchedules.length > 1 && (
+                <p className="mt-3 text-xs font-medium text-primary">
+                  {isES
+                    ? `${effectiveSchedules.length} fechas configuradas. Los asistentes elegirán una al inscribirse.`
+                    : `${effectiveSchedules.length} dates configured. Attendees will choose one when registering.`}
+                </p>
+              )}
             </div>
 
             {/* Categoría */}

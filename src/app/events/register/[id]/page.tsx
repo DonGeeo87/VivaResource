@@ -53,6 +53,30 @@ interface EventData {
   location?: string;
   image_url?: string;
   formId?: string;
+  maxParticipants?: number | null;
+  /** Fechas adicionales. Vacio = evento de una sola fecha. */
+  dates?: Array<{
+    id: string;
+    date?: string | Date | Timestamp | { toDate: () => Date };
+    time?: string;
+    location?: string;
+    capacity?: number | null;
+    note_en?: string;
+    note_es?: string;
+  }>;
+}
+
+/** Una opcion de fecha seleccionable al inscribirse. */
+interface DateOption {
+  id: string;
+  date: string | Date | Timestamp | { toDate: () => Date } | undefined;
+  time?: string;
+  location?: string;
+  note_en?: string;
+  note_es?: string;
+  capacity?: number | null;
+  /** true si la fecha ya paso (se muestra deshabilitada). */
+  past: boolean;
 }
 
 export default function EventRegisterPage(): JSX.Element {
@@ -71,6 +95,61 @@ export default function EventRegisterPage(): JSX.Element {
   const { showToast, Toast: EventToast } = useToast();
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formValues, setFormValues] = useState<Record<string, string>>({});
+  const [selectedDateId, setSelectedDateId] = useState<string>("");
+  const [dateError, setDateError] = useState<string>("");
+
+  /**
+   * Fechas seleccionables: la principal (date/time/location) + las adicionales.
+   * Las ya pasadas se marcan para mostrarlas deshabilitadas en vez de ocultarlas
+   * (ocultarlas confunde: el visitante ve menos opciones que las anunciadas).
+   */
+  const dateOptions: DateOption[] = (() => {
+    if (!event) return [];
+    const now = Date.now();
+    const isPast = (d: unknown): boolean => {
+      if (!d) return false;
+      try {
+        const t = typeof (d as { toDate?: () => Date }).toDate === "function"
+          ? (d as { toDate: () => Date }).toDate().getTime()
+          : new Date(d as string).getTime();
+        return !isNaN(t) && t < now;
+      } catch {
+        return false;
+      }
+    };
+    const main: DateOption = {
+      id: "main",
+      date: event.date,
+      time: event.time,
+      location: event.location,
+      capacity: event.maxParticipants ?? null,
+      past: isPast(event.date),
+    };
+    const extra: DateOption[] = (event.dates || [])
+      .filter((d) => d && d.date)
+      .map((d) => ({
+        id: d.id,
+        date: d.date,
+        time: d.time,
+        location: d.location || event.location,
+        note_en: d.note_en,
+        note_es: d.note_es,
+        capacity: d.capacity ?? event.maxParticipants ?? null,
+        past: isPast(d.date),
+      }));
+    return [main, ...extra];
+  })();
+
+  /** Con mas de una fecha hay que elegir; con una sola, se selecciona sola. */
+  const needsDateChoice = dateOptions.length > 1;
+
+  useEffect(() => {
+    // Con una sola fecha no hay nada que elegir.
+    if (dateOptions.length === 1 && !selectedDateId) {
+      setSelectedDateId(dateOptions[0].id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateOptions.length]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -186,6 +265,18 @@ export default function EventRegisterPage(): JSX.Element {
       return;
     }
 
+    // Con varias fechas, hay que elegir una antes de enviar.
+    if (needsDateChoice && !selectedDateId) {
+      setDateError(isES ? "Elige a cuál fecha asistirás" : "Please choose which date you will attend");
+      return;
+    }
+    const chosen = dateOptions.find((d) => d.id === selectedDateId);
+    if (needsDateChoice && chosen?.past) {
+      setDateError(isES ? "Esa fecha ya pasó. Elige otra." : "That date has already passed. Please pick another.");
+      return;
+    }
+    setDateError("");
+
     setIsSubmitting(true);
     try {
       const registrationData: Record<string, unknown> = {
@@ -194,11 +285,39 @@ export default function EventRegisterPage(): JSX.Element {
         status: "registered",
         created_at: serverTimestamp(),
       };
+      // A que fecha asiste. Solo se guarda si el evento ofrece varias, para no
+      // ensuciar las inscripciones de eventos de una sola fecha.
+      if (needsDateChoice && chosen) {
+        registrationData.date_id = chosen.id;
+        registrationData.date_label = safeFormatDate(chosen.date, language);
+        if (chosen.time) registrationData.date_time = chosen.time;
+      }
       if (registrationData.email && typeof registrationData.email === "string") {
         registrationData.email = registrationData.email.trim().toLowerCase();
       }
 
-      await addDoc(collection(db, "event_registrations"), registrationData);
+      // Alta via endpoint publico: valida cupo y estado del evento en el
+      // servidor (antes se escribia directo desde el navegador, sin control).
+      const response = await fetch(`/api/events/${eventId}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(registrationData),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        if (errData.code === "FULL") {
+          showToast(
+            isES
+              ? "El cupo para esta fecha está completo. Elige otra fecha."
+              : "This date is full. Please choose another date.",
+            "error"
+          );
+          setIsSubmitting(false);
+          return;
+        }
+        throw new Error(errData.error || "No se pudo completar la inscripción");
+      }
 
       try {
         fetch("/api/email/notify", {
@@ -525,6 +644,87 @@ export default function EventRegisterPage(): JSX.Element {
                 {error && (
                   <div className="p-4 rounded-lg bg-error-container text-error text-sm">
                     {error}
+                  </div>
+                )}
+
+                {/* Selector de fecha: solo aparece si el evento tiene varias */}
+                {needsDateChoice && (
+                  <div className="rounded-xl border border-outline-variant bg-surface-container-low p-5">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Calendar className="h-5 w-5 text-primary" />
+                      <h3 className="font-headline text-lg font-bold text-on-surface">
+                        {isES ? "¿A cuál fecha asistirás?" : "Which date will you attend?"}
+                      </h3>
+                    </div>
+                    <p className="text-sm text-on-surface-variant mb-4">
+                      {isES
+                        ? "Este evento se realiza en varias fechas. Elige la que prefieras."
+                        : "This event takes place on several dates. Choose the one that works for you."}
+                    </p>
+
+                    <div className="space-y-3">
+                      {dateOptions.map((opt) => {
+                        const checked = selectedDateId === opt.id;
+                        return (
+                          <label
+                            key={opt.id}
+                            className={`flex items-start gap-3 rounded-lg border p-4 transition-all ${
+                              opt.past
+                                ? "border-outline-variant bg-surface-container opacity-60 cursor-not-allowed"
+                                : checked
+                                  ? "border-primary bg-primary/5 cursor-pointer"
+                                  : "border-outline-variant bg-surface cursor-pointer hover:border-primary/50"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="event_date_option"
+                              value={opt.id}
+                              checked={checked}
+                              disabled={opt.past}
+                              onChange={() => {
+                                setSelectedDateId(opt.id);
+                                setDateError("");
+                              }}
+                              className="mt-1 h-4 w-4 text-primary focus:ring-primary"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="font-semibold text-on-surface">
+                                  {safeFormatDate(opt.date, language)}
+                                </span>
+                                {opt.time && (
+                                  <span className="inline-flex items-center gap-1 text-sm text-on-surface-variant">
+                                    <Clock className="h-3.5 w-3.5" />
+                                    {opt.time} (MT)
+                                  </span>
+                                )}
+                                {opt.past && (
+                                  <span className="rounded-full bg-outline-variant px-2 py-0.5 text-xs font-medium text-on-surface-variant">
+                                    {isES ? "Ya pasó" : "Past"}
+                                  </span>
+                                )}
+                              </div>
+                              {opt.location && (
+                                <p className="mt-1 flex items-start gap-1 text-sm text-on-surface-variant">
+                                  <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                                  <span>{opt.location}</span>
+                                </p>
+                              )}
+                              {(isES ? opt.note_es : opt.note_en) && (
+                                <p className="mt-1 text-sm italic text-primary">
+                                  {isES ? opt.note_es : opt.note_en}
+                                </p>
+                              )}
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+
+                    {dateError && (
+                      <p className="mt-3 text-sm font-medium text-error">{dateError}</p>
+                    )}
                   </div>
                 )}
 

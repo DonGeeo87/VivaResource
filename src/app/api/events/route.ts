@@ -119,6 +119,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       maxParticipants: body.maxParticipants || null,
       generateQR: body.generateQR || false,
       showQROnPage: body.showQROnPage || false,
+      // Fechas adicionales del evento (vacio = evento de una sola fecha)
+      dates: Array.isArray(body.dates)
+        ? body.dates
+            .filter((d: { date?: string }) => d && d.date)
+            .map((d: { id?: string; date: string; time?: string; location?: string; capacity?: number | null; note_en?: string; note_es?: string }) => ({
+              id: d.id || `d_${Date.now()}`,
+              // Se guarda como texto ISO: la hora se interpreta en America/Denver
+              // al mostrarla, igual que la fecha principal.
+              date: parseEventDateTime(d.date, d.time || ""),
+              time: d.time || "",
+              location: d.location || body.location?.trim() || "",
+              capacity: d.capacity ?? null,
+              note_en: d.note_en || "",
+              note_es: d.note_es || "",
+            }))
+        : [],
       created_at: new Date(),
       updated_at: new Date(),
     };

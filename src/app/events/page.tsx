@@ -21,6 +21,15 @@ interface Event {
   description_en: string;
   description_es: string;
   date: string | Date | { toDate: () => Date };
+  /** Fechas adicionales. Vacio o ausente = evento de una sola fecha. */
+  dates?: Array<{
+    id?: string;
+    date?: string | Date | { toDate: () => Date };
+    time?: string;
+    location?: string;
+    note_en?: string;
+    note_es?: string;
+  }>;
   time: string;
   location: string;
   image: string;
@@ -40,6 +49,35 @@ const parseDate = (date: string | Date | { toDate: () => Date } | undefined): Da
   if (date instanceof Date) return date;
   if (typeof date === 'object' && 'toDate' in date) return date.toDate();
   return new Date(date);
+};
+
+/**
+ * Todas las fechas del evento (principal + adicionales), ordenadas.
+ */
+const allDates = (
+  event: {
+    date: string | Date | { toDate: () => Date };
+    dates?: Array<{ date?: string | Date | { toDate: () => Date } }>;
+  }
+): Date[] => {
+  const list = [event.date, ...((event.dates || []).map((d) => d.date))];
+  return list
+    .map((d) => parseDate(d as string | Date | { toDate: () => Date } | undefined))
+    .filter((d) => d.getTime() > 0)
+    .sort((a, b) => a.getTime() - b.getTime());
+};
+
+/** Proxima fecha futura (o la ultima si todas ya pasaron). */
+const nextUpcoming = (
+  event: {
+    date: string | Date | { toDate: () => Date };
+    dates?: Array<{ date?: string | Date | { toDate: () => Date } }>;
+  }
+): Date | undefined => {
+  const ds = allDates(event);
+  if (ds.length === 0) return undefined;
+  const now = Date.now();
+  return ds.find((d) => d.getTime() >= now) || ds[ds.length - 1];
 };
 
 // Helper function to format date for display
@@ -281,8 +319,13 @@ export default function EventsPage(): JSX.Element {
                     <div className="flex flex-wrap items-center gap-3 text-sm text-on-surface-variant mb-3">
                       <span className="flex items-center">
                         <Calendar className="w-4 h-4 mr-1.5 text-secondary" />
-                        {formatDate(event.date)}
+                        {formatDate(nextUpcoming(event) || event.date)}
                       </span>
+                      {allDates(event).length > 1 && (
+                        <span className="flex items-center rounded-full bg-secondary/10 px-2.5 py-0.5 text-xs font-semibold text-secondary">
+                          {allDates(event).length} {language === "es" ? "fechas" : "dates"}
+                        </span>
+                      )}
                       {event.time && (
                         <span className="flex items-center">
                           <Clock className="w-4 h-4 mr-1.5 text-secondary" />

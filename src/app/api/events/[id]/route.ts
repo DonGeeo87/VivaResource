@@ -141,6 +141,22 @@ export async function PUT(
     if ("maxParticipants" in body) updateData.maxParticipants = body.maxParticipants || null;
     if ("generateQR" in body) updateData.generateQR = body.generateQR ?? false;
     if ("showQROnPage" in body) updateData.showQROnPage = body.showQROnPage ?? false;
+    // Fechas adicionales (vacio = evento de una sola fecha)
+    if ("dates" in body) {
+      updateData.dates = Array.isArray(body.dates)
+        ? body.dates
+            .filter((d: { date?: string }) => d && d.date)
+            .map((d: { id?: string; date: string; time?: string; location?: string; capacity?: number | null; note_en?: string; note_es?: string }) => ({
+              id: d.id || `d_${Date.now()}`,
+              date: parseEventDateTime(d.date, d.time || ""),
+              time: d.time || "",
+              location: d.location || body.location || "",
+              capacity: d.capacity ?? null,
+              note_en: d.note_en || "",
+              note_es: d.note_es || "",
+            }))
+        : [];
+    }
 
     // Only update image_url if explicitly provided (even if empty)
     if ("image_url" in body) {
