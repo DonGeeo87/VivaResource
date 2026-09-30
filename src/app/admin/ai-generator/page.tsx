@@ -15,6 +15,7 @@ import {
   Check,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { authFetch } from "@/lib/auth/client";
 
 function sanitizeHtml(html: string): string {
   return html
@@ -103,7 +104,7 @@ export default function AIGeneratorPage(): JSX.Element {
     setSaveSuccess(false);
 
     try {
-      const response = await fetch("/api/ai/generate", {
+      const response = await authFetch("/api/ai/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

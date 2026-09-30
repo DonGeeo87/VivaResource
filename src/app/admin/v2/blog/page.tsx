@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Search, Edit, Trash2, Eye, Sparkles, Check, X } from "lucide-react";
 import { blogTemplates } from "@/data/blog-templates";
+import { authFetch } from "@/lib/auth/client";
 
 interface BlogPost {
   id: number;
@@ -45,7 +46,7 @@ export default function AdminV2BlogPage() {
     setPublishing(slug);
     setPublishResult(null);
     try {
-      const res = await fetch("/api/blog/publish-template", {
+      const res = await authFetch("/api/blog/publish-template", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slug }),
@@ -64,7 +65,7 @@ export default function AdminV2BlogPage() {
     if (!confirm("Are you sure you want to delete this post?")) return;
     setDeleting(id);
     try {
-      const res = await fetch(`/api/v2/blog/update?id=${id}`, { method: "DELETE" });
+      const res = await authFetch(`/api/v2/blog/update?id=${id}`, { method: "DELETE" });
       const data = await res.json();
       if (data.success) {
         setPosts(posts.filter(p => p.id !== id));

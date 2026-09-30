@@ -1,3 +1,5 @@
+import { authFetch, getToken } from "@/lib/auth/client";
+
 export interface UploadProgress {
   bytesTransferred: number;
   totalBytes: number;
@@ -61,6 +63,7 @@ export async function uploadFile(
     });
 
     xhr.open("POST", "/api/upload");
+    xhr.setRequestHeader("Authorization", `Bearer ${getToken() ?? ""}`);
     xhr.send(formData);
   });
 }
@@ -75,7 +78,7 @@ export async function deleteFile(url: string): Promise<{ success: boolean; error
       return { success: false, error: "Invalid Cloudinary URL" };
     }
 
-    const res = await fetch("/api/upload", {
+    const res = await authFetch("/api/upload", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ publicId }),

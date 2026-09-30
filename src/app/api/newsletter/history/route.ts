@@ -1,54 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { adminDb } from "@/lib/admin-db";
-import { db, query, orderBy, getDocs, deleteDoc, Timestamp } from "@/lib/db-client";
+import { authorize } from "@/lib/auth/guard";
 
 interface NewsletterHistory {
   id: string;
   subject: string;
   content: string;
-  sent_at: Timestamp | Date;
+  sent_at: string | Date;
   total_sent: number;
   total_failed: number;
   total_subscribers: number;
   status: string;
 }
 
-function getTimestamp(date: Timestamp | Date): number {
-  if (date instanceof Timestamp) return date.toDate().getTime();
-  if (date instanceof Date) return date.getTime();
-  return 0;
-}
-
-export async function GET(): Promise<NextResponse> {
+/**
+ * Antes estas dos funciones leían/escribían a través de `@/lib/db-client`, que
+ * hace `fetch` a una URL relativa (`/api/db/...`). Del lado servidor eso no
+ * existe (Node exige URL absoluta), así que la ruta devolvía 500 siempre. Ahora
+ * hablan directo con PostgreSQL vía adminDb y exigen sesión de admin.
+ */
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    // Try with orderBy first
-    try {
-      const q = query(
-        db.collection("newsletter_history"),
-        orderBy("sent_at", "desc")
-      );
-      const snapshot = await q.get();
-      const history = snapshot.docs.map((d) => ({
-        id: d.id,
-        ...d.data(),
-      })) as NewsletterHistory[];
+    const access = authorize(request, "newsletter_history", "GET");
+    if (!access.ok) return access.response;
 
-      return NextResponse.json({ success: true, history });
-    } catch {
-      // Fallback: fetch without ordering and sort client-side
-      console.log("[Newsletter History] Index not found, fetching without orderBy");
-      const snapshot = await getDocs(db.collection("newsletter_history"));
-      const history = snapshot.docs.map((d) => ({
-        id: d.id,
-        ...d.data(),
-      })) as NewsletterHistory[];
-
-      // Sort client-side
-      history.sort((a, b) => getTimestamp(b.sent_at) - getTimestamp(a.sent_at));
-
-      return NextResponse.json({ success: true, history });
+    const db = await adminDb();
+    if (!db) {
+      return NextResponse.json({ error: "Database not configured" }, { status: 500 });
     }
+
+    const snapshot = await db
+      .collection("newsletter_history")
+      .orderBy("sent_at", "desc")
+      .get();
+
+    const history = snapshot.docs.map((d) => ({
+      id: d.id,
+      ...d.data(),
+    })) as NewsletterHistory[];
+
+    return NextResponse.json({ success: true, history });
   } catch (error) {
     console.error("Error fetching newsletter history:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
@@ -61,6 +53,9 @@ export async function GET(): Promise<NextResponse> {
 
 export async function DELETE(request: NextRequest): Promise<NextResponse> {
   try {
+    const access = authorize(request, "newsletter_history", "DELETE");
+    if (!access.ok) return access.response;
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
@@ -71,7 +66,12 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    await deleteDoc(db.collection("newsletter_history").doc(id));
+    const db = await adminDb();
+    if (!db) {
+      return NextResponse.json({ error: "Database not configured" }, { status: 500 });
+    }
+
+    await db.collection("newsletter_history").doc(id).delete();
 
     return NextResponse.json({ success: true, message: "Entry deleted" });
   } catch (error) {

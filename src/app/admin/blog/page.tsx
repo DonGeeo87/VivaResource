@@ -7,6 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { blogTemplates } from "@/data/blog-templates";
 
 import { db, collection, deleteDoc, doc, getDocs, orderBy, query } from "@/lib/db-client";
+import { authFetch } from "@/lib/auth/client";
 
 interface BlogPost {
   id: string;
@@ -71,7 +72,7 @@ export default function AdminBlogPage(): JSX.Element {
     setPublishing(slug);
     setPublishResult(null);
     try {
-      const res = await fetch("/api/blog/publish-template", {
+      const res = await authFetch("/api/blog/publish-template", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slug }),

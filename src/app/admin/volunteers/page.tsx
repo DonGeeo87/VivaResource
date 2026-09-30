@@ -8,6 +8,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { db, collection, doc, getDocs, onSnapshot, orderBy, query, updateDoc, writeBatch } from "@/lib/db-client";
 import { toDate } from "@/lib/timezone";
 import { AdminButton, PageHeader, Pagination } from "@/components/admin";
+import { authFetch } from "@/lib/auth/client";
 
 interface Volunteer {
   id: string;
@@ -101,7 +102,7 @@ export default function AdminVolunteersPage(): JSX.Element {
           ? `Estimado/a ${volunteer.firstName} ${volunteer.lastName},\n\nGracias por su interés en ser voluntario/a de Viva Resource.\n\nDespués de revisar su solicitud, lamentamos informarle que en este momento no podemos aceptar su solicitud. Esto no refleja negativamente sobre usted, y le animamos a que vuelva a aplicar en el futuro.\n\nAgradecemos su interés en nuestra misión.\n\nSaludos cordiales,\nEquipo de Viva Resource`
           : `Dear ${volunteer.firstName} ${volunteer.lastName},\n\nThank you for your interest in volunteering with Viva Resource.\n\nAfter reviewing your application, we regret to inform you that we cannot accept your application at this time. This does not reflect negatively on you, and we encourage you to apply again in the future.\n\nWe appreciate your interest in our mission.\n\nBest regards,\nViva Resource Team`;
 
-      await fetch("/api/email/send", {
+      await authFetch("/api/email/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

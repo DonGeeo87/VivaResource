@@ -60,7 +60,14 @@ jobs:
 
           # PostgreSQL
           PGPASSWORD=${{ secrets.PGPASSWORD }}
+
+          # Sesiones del panel (JWT). Sin esto la app rechaza todos los tokens.
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
           EOF
+          if [ -z "${{ secrets.JWT_SECRET }}" ]; then
+            echo "❌ Falta el secret JWT_SECRET en GitHub: el panel quedaría sin sesiones. Abortando."
+            exit 1
+          fi
           echo "✅ .env created from secrets"
 
       - name: SCP files to VPS

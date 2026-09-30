@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { authorizeStaff } from "@/lib/auth/guard";
 import { createPost } from "@/lib/db";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const access = authorizeStaff(request, "editor");
+    if (!access.ok) return access.response;
+
     const body = await request.json();
     const { title, slug, excerpt, content, category, featured_image, author, language, published, tags } = body;
 

@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { authorizeStaff } from "@/lib/auth/guard";
 import { blogTemplates } from "@/data/blog-templates";
 import { adminDb } from "@/lib/admin-db";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const access = authorizeStaff(request, "editor");
+    if (!access.ok) return access.response;
+
     const body = await request.json();
     const { slug, language } = body;
 

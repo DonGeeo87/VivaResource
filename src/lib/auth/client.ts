@@ -64,3 +64,15 @@ export function getCurrentUserId(): string | null {
   const user = getUser();
   return user?.uid || null;
 }
+
+/**
+ * fetch que adjunta el token de admin automaticamente. Los endpoints que no
+ * operan sobre una coleccion (email, upload, IA, publicar plantilla) exigen
+ * sesion de staff: sin esto devolverian 401.
+ */
+export function authFetch(input: string, init: RequestInit = {}): Promise<Response> {
+  const token = getToken();
+  const headers = new Headers(init.headers);
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  return fetch(input, { ...init, headers });
+}

@@ -20,6 +20,7 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { FormField } from "@/types/forms";
 import ConfirmModal from "@/components/ConfirmModal";
+import { authFetch } from "@/lib/auth/client";
 
 interface FormSubmission {
   id: string;
@@ -148,7 +149,7 @@ export default function FormResponsesPage(): JSX.Element {
     setShowConfirmModal(false);
     setSendingSummary(true);
     try {
-      const response = await fetch("/api/email/send-summary", {
+      const response = await authFetch("/api/email/send-summary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

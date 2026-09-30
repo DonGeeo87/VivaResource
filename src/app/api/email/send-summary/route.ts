@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { authorizeStaff } from "@/lib/auth/guard";
 import nodemailer from "nodemailer";
 import { adminDb } from "@/lib/admin-db";
 
@@ -16,6 +17,9 @@ const transporter = nodemailer.createTransport({
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const access = authorizeStaff(request, "editor");
+    if (!access.ok) return access.response;
+
     if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
       console.warn("[Summary Email] Gmail SMTP credentials not configured");
       return NextResponse.json(

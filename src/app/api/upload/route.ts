@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { authorizeStaff } from "@/lib/auth/guard";
 import { v2 as cloudinary } from "cloudinary";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
@@ -10,6 +11,10 @@ cloudinary.config({
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    // ImageUpload solo vive en los editores del panel: exige sesión de staff.
+    const access = authorizeStaff(request, "editor");
+    if (!access.ok) return access.response;
+
     // Rate limiting: 10 uploads per 15 minutes per IP
     const ip = getClientIp(request);
     const rateCheck = checkRateLimit(ip, RATE_LIMITS.upload);

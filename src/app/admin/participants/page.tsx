@@ -5,6 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Search, Filter, Download, User, Upload, Plus, X, Save, Loader2 } from "lucide-react";
 
 import { db, addDoc, collection, getDocs, orderBy, query, serverTimestamp } from "@/lib/db-client";
+import { getToken } from "@/lib/auth/client";
 
 interface Participant {
   id?: string;
@@ -155,6 +156,7 @@ export default function ParticipantsPage(): JSX.Element {
 
       const res = await fetch("/api/participants/import", {
         method: "POST",
+        headers: { Authorization: `Bearer ${getToken() ?? ""}` },
         body: formData,
       });
 

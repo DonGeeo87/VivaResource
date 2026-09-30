@@ -142,15 +142,17 @@ export default function PublicFormPage() {
         return;
       }
 
-      // Check for duplicate submissions
+      // Check for duplicate submissions (endpoint acotado: no expone los envíos)
       if (form.settings?.allowMultipleSubmissions === false) {
         const emailToCheck = form.settings?.requireEmail ? email : undefined;
         if (emailToCheck) {
-          const dupSnapshot = await db.collection("form_submissions")
-            .where("formId", "==", formId)
-            .where("email", "==", emailToCheck)
-            .get();
-          if (dupSnapshot.size > 0) {
+          const dupRes = await fetch("/api/forms/check-duplicate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ formId, email: emailToCheck }),
+          });
+          const dupData = dupRes.ok ? await dupRes.json() : { duplicate: false };
+          if (dupData.duplicate) {
             setErrors({ __form: language === "es"
               ? "Ya has enviado una respuesta a este formulario."
               : "You have already submitted a response to this form." });

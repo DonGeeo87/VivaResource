@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { db, doc, getDoc, collection, query, where, getDocs, deleteDoc } from "@/lib/db-client";
-import { getCurrentUserId, getToken } from "@/lib/auth/client";
+import { getCurrentUserId, getToken, authFetch } from "@/lib/auth/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatMountainDate } from "@/lib/timezone";
 import {
@@ -277,7 +277,7 @@ export default function EventDetailsPage(): JSX.Element {
     setShowConfirmModal(false);
     setSendingSummary(true);
     try {
-      const response = await fetch("/api/email/send-summary", {
+      const response = await authFetch("/api/email/send-summary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

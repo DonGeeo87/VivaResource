@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { authorizeStaff } from "@/lib/auth/guard";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
@@ -67,6 +68,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 }
 
 async function handleGenerate(request: NextRequest): Promise<NextResponse> {
+  // El generador lo usan componentes del panel (BlogEditor, NewsletterBuilder):
+  // sin sesión de staff cualquiera quemaba la cuota de OpenRouter.
+  const access = authorizeStaff(request, "editor");
+  if (!access.ok) return access.response;
+
   if (!OPENROUTER_API_KEY) {
     return NextResponse.json(
       { error: "OpenRouter API key not configured" },

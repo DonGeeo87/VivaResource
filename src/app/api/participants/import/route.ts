@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { adminDb } from "@/lib/admin-db";
+import { authorize } from "@/lib/auth/guard";
 import * as XLSX from "xlsx";
-import { db, addDoc } from "@/lib/db-client";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    // Importar participantes es una acción de admin (antes estaba abierta).
+    const access = authorize(request, "participants", "POST");
+    if (!access.ok) return access.response;
+
+    const db = await adminDb();
+    if (!db) {
+      return NextResponse.json({ error: "Database not configured" }, { status: 500 });
+    }
+
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
 
@@ -29,7 +38,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const workshopField = columns.find(c => c.toLowerCase().includes("taller") || c.toLowerCase().includes("workshop") || c.toLowerCase().includes("event") || c.toLowerCase().includes("conferencia") || c.toLowerCase().includes("asistir"));
 
     let imported = 0;
-    const batch: unknown[] = [];
+    const batch: Record<string, unknown>[] = [];
 
     for (const row of data) {
       const nombre = String(row[nameField] || "").trim();
@@ -57,7 +66,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (batch.length > 0) {
       for (const participant of batch) {
-        await addDoc(db.collection("participants"), participant);
+        await db.collection("participants").add(participant);
         imported++;
       }
     }

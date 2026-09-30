@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { adminDb } from "@/lib/admin-db";
-import { db, query, where, getDocs, addDoc } from "@/lib/db-client";
+import { authorize } from "@/lib/auth/guard";
 import nodemailer from "nodemailer";
 
 // Configurar transporte de Gmail SMTP
@@ -24,12 +24,21 @@ interface Subscriber {
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    // Mandar un correo a toda la lista es acción de admin, no pública.
+    const access = authorize(request, "newsletter_subscribers", "POST");
+    if (!access.ok) return access.response;
+
     if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
       console.warn("[Newsletter Send] Gmail SMTP credentials not configured");
       return NextResponse.json(
         { error: "Gmail SMTP credentials not configured" },
         { status: 500 }
       );
+    }
+
+    const admin = await adminDb();
+    if (!admin) {
+      return NextResponse.json({ error: "Database not configured" }, { status: 500 });
     }
 
     const body = await request.json();
@@ -62,30 +71,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         status: "active",
       }));
     } else {
-      // Fetch all active subscribers
-      try {
-        const q = query(
-          db.collection("newsletter_subscribers"),
-          where("status", "==", "active")
-        );
-        const snapshot = await q.get();
-        subscribers = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          email: doc.data()?.email,
-          name: doc.data()?.name || "",
-          status: doc.data()?.status || "active",
-        })) as Subscriber[];
-      } catch (queryError) {
-        console.error("Error fetching subscribers for newsletter:", queryError);
-        // Fallback: fetch all and filter client-side
-        const snapshot = await getDocs(db.collection("newsletter_subscribers"));
-        subscribers = snapshot.docs
-          .map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          })) as Subscriber[];
-        subscribers = subscribers.filter((s) => s.status === "active");
-      }
+      // Suscriptores activos, directo contra PostgreSQL (antes este fetch
+      // relativo a /api/db fallaba en el servidor: la ruta devolvía 500)
+      const snapshot = await admin
+        .collection("newsletter_subscribers")
+        .where("status", "==", "active")
+        .get();
+      subscribers = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        email: doc.data()?.email,
+        name: doc.data()?.name || "",
+        status: doc.data()?.status || "active",
+      })) as Subscriber[];
     }
 
     if (subscribers.length === 0) {
@@ -101,7 +98,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Save to newsletter history BEFORE sending (so it exists even if send fails)
     let historyId: string | null = null;
     try {
-      const historyRef = await addDoc(db.collection("newsletter_history"), {
+      const historyRef = await admin.collection("newsletter_history").add({
         subject: subject.trim(),
         content,
         sent_at: new Date().toISOString(),
@@ -147,7 +144,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (historyId) {
       try {
         
-        await db.collection("newsletter_history").doc(historyId).update({
+        await admin.collection("newsletter_history").doc(historyId).update({
           total_sent: results.success,
           total_failed: results.failed,
           status: results.failed === 0 ? "completed" : "completed_with_errors",

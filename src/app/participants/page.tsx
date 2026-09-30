@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Search, Filter, Download, Users } from "lucide-react";
 import Link from "next/link";
 
 import { db, collection, getDocs, orderBy, query } from "@/lib/db-client";
+import { getToken } from "@/lib/auth/client";
 
 interface Participant {
   id: string;
@@ -20,6 +22,7 @@ interface Participant {
 
 export default function PublicParticipantsPage(): JSX.Element {
   const { language, isHydrated } = useLanguage();
+  const router = useRouter();
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -49,6 +52,13 @@ export default function PublicParticipantsPage(): JSX.Element {
   };
 
   useEffect(() => {
+    // Este directorio lista nombre, email y teléfono de 125 participantes: es
+    // material interno. Sin sesión de admin se manda al login.
+    if (!getToken()) {
+      router.replace("/admin/login?next=/participants");
+      return;
+    }
+
     const fetchParticipants = async () => {
       try {
         const q = query(collection(db, "participants"), orderBy("apellido"));
@@ -60,13 +70,14 @@ export default function PublicParticipantsPage(): JSX.Element {
         setParticipants(data);
       } catch (error) {
         console.error("Error fetching participants:", error);
+        router.replace("/admin/login?next=/participants");
       } finally {
         setLoading(false);
       }
     };
 
     fetchParticipants();
-  }, []);
+  }, [router]);
 
   const talleres = Array.from(
     new Set(participants.map((p) => p.taller).filter((t) => t && t !== "Información no disponible"))

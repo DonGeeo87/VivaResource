@@ -7,6 +7,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.6.0] - 2026-09-30 - Seguridad de las APIs y despliegue en VPS
+
+### Seguridad (critico)
+
+- **`/api/db/[collection]` no tenia autenticacion** — CRUD anonimo sobre 14 colecciones.
+  En produccion, `GET /api/db/admin_users` devolvia 200 con los emails de los 2 admins.
+  Ahora todo pasa por `authorize()` (`src/lib/auth/guard.ts`): rol `viewer < editor < admin`,
+  con `PUBLIC_READ_COLLECTIONS` (events, forms, seo_settings, site_images, site_settings) y
+  `PUBLIC_CREATE_COLLECTIONS` (event_registrations, form_submissions, help_requests,
+  volunteer_registrations) explicitas en vez de dejar todo abierto.
+- **Ocho endpoints mas sin ningun control** — todos cerrados con `authorizeStaff()`
+  (endpoints que no operan sobre una coleccion): `/api/email/send` era un **relay abierto**
+  (sin `name`/`email` el destinatario `to` del cliente se respetaba: cualquiera mandaba
+  correo a cualquier direccion como la fundacion), `/api/forms/notify` aceptaba
+  `recipientEmails` del body, y `/api/email/send-summary`, `/api/ai/generate` (quemaba la
+  cuota de OpenRouter), `/api/upload` (Cloudinary de la fundacion),
+  `/api/blog/publish-template`, `/api/v2/blog/create` y `/api/v2/blog/update`
+  (crear/editar/borrar posts sin sesion; borrar exige admin). Los dos relays se cerraron
+  **sin romper los flujos publicos**: el formulario de contacto no manda `to` y el de forms
+  no manda `recipientEmails`, asi que sin sesion de staff el destinatario se fuerza al
+  buzon de la organizacion.
+- **Portal del voluntario con scoping server-side** — token propio (`type: "volunteer"`) que
+  solo alcanza `volunteer_tasks` / `volunteer_messages` con `volunteerId == uid`.
+- **`/participants` deja de ser publica** — exponia nombre, email y telefono de 125
+  participantes; sin sesion redirige a `/admin/login`.
+- **`JWT_SECRET` obligatorio** — `src/lib/auth/jwt.ts` ya no cae al secreto por defecto del
+  repo en produccion: sin la variable se rechazan todos los tokens (antes cualquiera podia
+  fabricarse un token de admin con el default publicado).
+- Endpoints acotados en vez de exponer colecciones: `/api/forms/check-duplicate` (sin
+  filtrado arbitrario) y `/api/volunteer/registration-status`.
+
+### Agregado
+
+- `src/lib/auth/guard.ts` — `authorize()` / `authorizeStaff()` / `isVolunteerScoped()`.
+- `src/lib/auth/client.ts` — `authFetch(input, init)`, que adjunta el Bearer desde
+  `localStorage['viva_admin_token']`.
+- `src/lib/db-client.ts` — envia el token de admin en cada request.
+
+### Corregido
+
+- **Rutas de servidor rotas de fabrica**: `newsletter/history`, `newsletter/send`,
+  `participants/import` y `email/notify` hacian `fetch("/api/...")` con URL relativa desde
+  Node (excepcion garantizada) → migradas a `adminDb()` directo, y ademas ahora exigen auth.
+- **`admin/newsletter` y `admin/participants`** llamaban rutas con auth sin mandar el token
+  (habrian dado 401) → usan `authFetch` / header Bearer.
+- **Relay de correo del formulario publico** (`/api/forms/notify`) y **relay directo**
+  (`/api/email/send`) cerrados como se describe arriba.
+
+### Infraestructura
+
+- **Deploy manual** documentado (la cuota de GitHub Actions esta agotada): `DEPLOYMENT.md`
+  con la receta validada, la verificacion post-deploy y el rollback. El `.env` y el
+  `docker-compose.migracion.yml` del VPS nunca se sobreescriben.
+- `docker-compose.migracion.yml` — se agrega `JWT_SECRET` al `environment`; el workflow
+  aborta si falta el secret.
+- **TLS**: el cert de Viva estaba vencido (reto ACME apuntando al work-dir de certbot en vez
+  del webroot) → corregido y automatizado con `viva-cert-guard.sh` (cron diario, avisa por
+  Telegram).
+
 ## [0.5.1] - 2026-04-19 - Participants Directory Fix
 
 ### Bug Fix 🐛

@@ -43,28 +43,51 @@ export async function POST(request: Request) {
     }
 
     const adminSnap = await db.collection("admin_users").where("email", "==", authEmail).get();
-    if (adminSnap.size === 0) {
+
+    if (adminSnap.size > 0) {
+      const userData = adminSnap.docs[0].data();
+      const role = userData?.role || "viewer";
+
+      const token = signToken({
+        uid,
+        email: authEmail,
+        role,
+        type: "admin",
+      });
+
+      return NextResponse.json({
+        success: true,
+        token,
+        user: { uid, email: authEmail, role, type: "admin" },
+      });
+    }
+
+    // No es admin: puede ser un voluntario con cuenta activada (volunteer_users).
+    // Antes esto devolvía 403 y el portal del voluntario no podía iniciar sesión.
+    const volunteerSnap = await db
+      .collection("volunteer_users")
+      .where("email", "==", authEmail)
+      .get();
+
+    if (volunteerSnap.size === 0) {
       return NextResponse.json(
-        { error: "No tienes acceso de administrador" },
+        { error: "No tienes acceso" },
         { status: 403 }
       );
     }
 
-    const userData = adminSnap.docs[0].data();
-    const role = userData?.role || "viewer";
-
-    // Generate JWT
-    const token = signToken({
-      uid,
-      email: authData.email || email,
-      role,
-      type: "admin",
+    const volunteerId = volunteerSnap.docs[0].id;
+    const volunteerToken = signToken({
+      uid: volunteerId,
+      email: authEmail,
+      role: "viewer",
+      type: "volunteer",
     });
 
     return NextResponse.json({
       success: true,
-      token,
-      user: { uid, email: authData.email, role },
+      token: volunteerToken,
+      user: { uid: volunteerId, email: authEmail, role: "viewer", type: "volunteer" },
     });
   } catch (error: unknown) {
     console.error("Login error:", error);

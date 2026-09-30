@@ -155,15 +155,33 @@ Colecciones migradas (313 documentos, 16 colecciones):
 
 | Branch | Workflow | Destino |
 |--------|----------|---------|
-| `master` | Deploy Viva Resource | `vivaresource.com` (producción) |
-| `migracion-vps` | Deploy Viva Migracion | `viva.codigoguerrero.dev` (staging) |
+| `migracion-vps` | Deploy Viva Migracion to VPS | `www.vivaresource.com` (producción, contenedor `viva-migracion`) |
+| `master` | Deploy Viva Resource | legado (infra anterior, ya no es lo que sirve el sitio) |
+
+Verificado 30/09/2026: `www.vivaresource.com` lo sirve el contenedor `viva-migracion`
+(rama `migracion-vps`); el único contenedor legado que sigue arriba es `vivaresource-db`.
+
+Cada deploy **exige `JWT_SECRET`** (en el `.env` del VPS, en el compose y como secret de
+GitHub): sin esa variable la app rechaza todos los tokens y el panel no deja iniciar sesión.
+Cambiar el secreto invalida las sesiones activas.
 
 ### Manual (VPS)
 
+Cuando la cuota de GitHub Actions está agotada (o para un hotfix). **Nunca** sobreescribir
+el `.env` ni el `docker-compose.migracion.yml` del VPS: se excluyen del paquete.
+
 ```bash
+# desde la raíz del repo
+tar -czf "$TMPDIR/viva-code.tar.gz" --exclude=node_modules --exclude=.next \
+  --exclude=.git --exclude='.env*' --exclude=docker-compose.migracion.yml .
+scp "$TMPDIR/viva-code.tar.gz" root@62.146.227.146:/tmp/
+ssh root@62.146.227.146
+cd /opt/codigo-guerrero/viva-migracion && tar -xzf /tmp/viva-code.tar.gz
 docker compose -f docker-compose.migracion.yml build --no-cache
 docker compose -f docker-compose.migracion.yml up -d
 ```
+
+Ver [DEPLOYMENT.md](DEPLOYMENT.md) para el detalle, la verificación y el rollback.
 
 ## 🔄 Historial de Migración
 

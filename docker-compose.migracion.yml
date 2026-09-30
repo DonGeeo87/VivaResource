@@ -64,6 +64,7 @@ services:
       - PGDATABASE=vivaresource_blog
       - PGUSER=vivaresource
       - PGPASSWORD=${PGPASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
     networks:
       - proxy-network
     depends_on:

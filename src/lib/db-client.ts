@@ -6,13 +6,32 @@
 
 const API_BASE = "/api/db";
 
+/** Mismo storage que usan el panel de admin y el portal del voluntario. */
+const TOKEN_KEY = "viva_admin_token";
+
+/**
+ * El API /api/db exige JWT desde que se cerró el hueco de acceso anónimo
+ * (src/lib/auth/guard.ts). Sin token solo quedan abiertas las colecciones que
+ * las páginas públicas leen/crean de verdad.
+ */
+function authHeader(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  const token = window.localStorage.getItem(TOKEN_KEY);
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 async function request<T = any>(
   path: string,
   options?: RequestInit
 ): Promise<T> {
+  const { headers, ...rest } = options ?? {};
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
+    ...rest,
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeader(),
+      ...(headers as Record<string, string> | undefined),
+    },
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));

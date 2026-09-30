@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { authorizeStaff } from "@/lib/auth/guard";
 import { updatePost, deletePost, getPostById } from "@/lib/db";
 
 export async function PUT(request: NextRequest): Promise<NextResponse> {
   try {
+    const access = authorizeStaff(request, "editor");
+    if (!access.ok) return access.response;
+
     const body = await request.json();
     const { id, ...data } = body;
 
@@ -25,6 +29,10 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
 
 export async function DELETE(request: NextRequest): Promise<NextResponse> {
   try {
+    // Borrar un post es destructivo: admin (igual que en /api/db).
+    const access = authorizeStaff(request, "admin");
+    if (!access.ok) return access.response;
+
     const { searchParams } = new URL(request.url);
     const id = parseInt(searchParams.get("id") || "");
 

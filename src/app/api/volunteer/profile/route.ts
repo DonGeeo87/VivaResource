@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 
 import { adminDb } from "@/lib/admin-db";
 import { verifyToken, getTokenFromHeader } from "@/lib/auth/jwt";
-import { db, doc, getDoc } from "@/lib/db-client";
 
 export async function GET(request: Request) {
   try {
@@ -16,8 +15,18 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Token inválido" }, { status: 401 });
     }
 
-    // Fetch volunteer profile from Firestore (temporal — will migrate to PostgreSQL)
-    const userDoc = await getDoc(doc(db, "volunteer_users", payload.uid));
+    // Este endpoint es del portal del voluntario: un token de admin no sirve.
+    if (payload.type !== "volunteer") {
+      return NextResponse.json(
+        { error: "Solo para cuentas de voluntario" },
+        { status: 403 }
+      );
+    }
+
+    // Perfil directo contra PostgreSQL. Antes usaba db-client, que del lado
+    // servidor hace fetch a una URL relativa y siempre lanzaba excepción.
+    const db = await adminDb();
+    const userDoc = await db.collection("volunteer_users").doc(payload.uid).get();
     if (!userDoc.exists) {
       return NextResponse.json({ error: "Voluntario no encontrado" }, { status: 404 });
     }

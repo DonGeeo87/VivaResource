@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { authorizeStaff } from "@/lib/auth/guard";
 import nodemailer from "nodemailer";
 
 // Configurar transporte de Gmail SMTP
@@ -45,6 +46,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
       }
     } else {
+      // Envío directo: SOLO con sesión de staff. Antes este camino era un relay
+      // abierto — sin name/email, el `to` que mandaba el cliente se respetaba
+      // tal cual y cualquiera mandaba correo a quien quisiera como Viva.
+      const access = authorizeStaff(request, "editor");
+      if (!access.ok) return access.response;
+
       // Original API validation
       if (!to || !subject || !message) {
         return NextResponse.json(

@@ -6,6 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import NewsletterBuilder, { newsletterTemplates, NewsletterBlock, NewsletterTemplate } from "@/components/forms/NewsletterBuilder";
 
 import { db, Timestamp, collection, deleteDoc, doc, getDocs, orderBy, query } from "@/lib/db-client";
+import { getToken } from "@/lib/auth/client";
 
 interface Subscriber {
   id: string;
@@ -104,7 +105,9 @@ export default function AdminNewsletterPage(): JSX.Element {
   const fetchHistory = async () => {
     setLoadingHistory(true);
     try {
-      const response = await fetch("/api/newsletter/history");
+      const response = await fetch("/api/newsletter/history", {
+        headers: { Authorization: `Bearer ${getToken() ?? ""}` },
+      });
       if (!response.ok) {
         console.warn("[Newsletter] History fetch failed, using empty array");
         setHistory([]);
@@ -138,7 +141,10 @@ export default function AdminNewsletterPage(): JSX.Element {
   const handleDeleteHistory = async (id: string) => {
     if (confirm(language === "es" ? "¿Estás seguro de eliminar este registro del historial?" : "Are you sure you want to delete this history entry?")) {
       try {
-        const response = await fetch(`/api/newsletter/history?id=${id}`, { method: "DELETE" });
+        const response = await fetch(`/api/newsletter/history?id=${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${getToken() ?? ""}` },
+        });
         const data = await response.json();
         if (data.success) {
           setHistory(history.filter(h => h.id !== id));
@@ -230,7 +236,10 @@ export default function AdminNewsletterPage(): JSX.Element {
 
       const response = await fetch("/api/newsletter/send", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken() ?? ""}`,
+        },
         body: JSON.stringify({
           subject,
           content: htmlContent,

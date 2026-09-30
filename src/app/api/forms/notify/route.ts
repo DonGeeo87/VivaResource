@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { adminDb } from "@/lib/admin-db";
+import { authPayload } from "@/lib/auth/guard";
 
 // Configurar transporte de Gmail SMTP
 const transporter = nodemailer.createTransport({
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     const body = await request.json();
-    const { formId, formTitle, submissionId, submissionData, recipientEmails } = body;
+    const { formId, formTitle, submissionId, submissionData } = body;
 
     if (!formId || !submissionData) {
       return NextResponse.json(
@@ -56,7 +57,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     `;
 
     // Send email to all recipients
-    const emails = recipientEmails || [process.env.EMAIL_USER];
+    // Los destinatarios NO se toman del cliente sin sesión de staff: el
+    // formulario público dispara este endpoint, así que de forma anónima solo
+    // puede ir al buzón de la organización (antes `recipientEmails` del body
+    // permitía usar la cuenta de la fundación como relay).
+    const staff = authPayload(request);
+    const emails: string[] =
+      staff?.type === "admin" && Array.isArray(body.recipientEmails)
+        ? (body.recipientEmails as string[])
+        : [process.env.EMAIL_USER as string];
     const mailPromises = emails.map((to: string) =>
       transporter.sendMail({
         from: process.env.EMAIL_USER,

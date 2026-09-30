@@ -1,5 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/admin-db";
+import { authPayload, authorize, isVolunteerScoped } from "@/lib/auth/guard";
+
+/**
+ * uid del voluntario cuando la request viene de un voluntario sobre su propia
+ * colección (volunteer_tasks / volunteer_messages). En ese caso nunca se confía
+ * en lo que mande el cliente: el filtro y el campo volunteerId se fuerzan acá.
+ */
+function scopedVolunteerId(request: NextRequest, collection: string): string | null {
+  const payload = authPayload(request);
+  return isVolunteerScoped(payload, collection) ? payload.uid : null;
+}
 
 // GET /api/db/[collection] — Listar documentos
 // GET /api/db/[collection]/[id] — Obtener un documento
@@ -8,6 +19,11 @@ export async function GET(
   { params }: { params: { collection: string } }
 ) {
   try {
+    const access = authorize(request, params.collection, "GET");
+    if (!access.ok) return access.response;
+
+    const volunteerId = scopedVolunteerId(request, params.collection);
+
     const db = await adminDb();
     if (!db) {
       return NextResponse.json({ error: "Database not configured" }, { status: 500 });
@@ -22,7 +38,11 @@ export async function GET(
       if (!doc.exists) {
         return NextResponse.json({ error: "Not found" }, { status: 404 });
       }
-      return NextResponse.json({ id: doc.id, ...doc.data() });
+      const scopedData = doc.data();
+      if (volunteerId && scopedData?.volunteerId !== volunteerId) {
+        return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+      }
+      return NextResponse.json({ id: doc.id, ...scopedData });
     }
 
     // GET /api/db/[collection] — listar todos
@@ -42,6 +62,13 @@ export async function GET(
       } catch { wheres = []; }
     } else if (legacyField && legacyValue) {
       wheres = [{ field: legacyField, op: legacyOp, value: legacyValue }];
+    }
+
+    if (volunteerId) {
+      // Se descarta cualquier filtro que el cliente haya puesto sobre
+      // volunteerId y se reemplaza por el uid del token: solo ve lo suyo.
+      wheres = wheres.filter((w) => w.field !== "volunteerId");
+      wheres.push({ field: "volunteerId", op: "==", value: volunteerId });
     }
 
     let snapshot;
@@ -79,12 +106,18 @@ export async function POST(
   { params }: { params: { collection: string } }
 ) {
   try {
+    const access = authorize(request, params.collection, "POST");
+    if (!access.ok) return access.response;
+
+    const volunteerId = scopedVolunteerId(request, params.collection);
+
     const db = await adminDb();
     if (!db) {
       return NextResponse.json({ error: "Database not configured" }, { status: 500 });
     }
 
     const body = await request.json();
+    if (volunteerId) body.volunteerId = volunteerId;
     const docRef = await db.collection(params.collection).add(body);
     return NextResponse.json({ id: docRef.id, ...body }, { status: 201 });
   } catch (error) {
@@ -99,6 +132,11 @@ export async function PUT(
   { params }: { params: { collection: string } }
 ) {
   try {
+    const access = authorize(request, params.collection, "PUT");
+    if (!access.ok) return access.response;
+
+    const volunteerId = scopedVolunteerId(request, params.collection);
+
     const db = await adminDb();
     if (!db) {
       return NextResponse.json({ error: "Database not configured" }, { status: 500 });
@@ -111,6 +149,15 @@ export async function PUT(
     }
 
     const { id: _, ...data } = body;
+
+    if (volunteerId) {
+      const existing = await db.collection(params.collection).doc(id).get();
+      if (!existing.exists || existing.data()?.volunteerId !== volunteerId) {
+        return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+      }
+      data.volunteerId = volunteerId;
+    }
+
     await db.collection(params.collection).doc(id).set(data, { merge: true });
     return NextResponse.json({ id, ...data });
   } catch (error) {
@@ -125,6 +172,9 @@ export async function DELETE(
   { params }: { params: { collection: string } }
 ) {
   try {
+    const access = authorize(request, params.collection, "DELETE");
+    if (!access.ok) return access.response;
+
     const db = await adminDb();
     if (!db) {
       return NextResponse.json({ error: "Database not configured" }, { status: 500 });

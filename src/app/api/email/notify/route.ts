@@ -25,7 +25,17 @@ import {
 
 import { adminDb } from "@/lib/admin-db";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
-import { db, doc, getDoc } from "@/lib/db-client";
+
+/**
+ * Lee un flag de `site_settings` ("true"/"false"). Se consulta directo contra
+ * PostgreSQL: antes usaba db-client, que del lado servidor hace fetch a una URL
+ * relativa y lanzaba excepción → la ruta devolvía 500 y el correo no salía.
+ */
+async function settingEnabled(key: string, fallback: boolean): Promise<boolean> {
+  const db = await adminDb();
+  const snap = await db.collection("site_settings").doc(key).get();
+  return snap.exists ? snap.data()?.value === "true" : fallback;
+}
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
@@ -52,17 +62,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Check notification settings for admin notifications
     let shouldNotify = true;
     if (type === "event-registration") {
-      const setting = await getDoc(doc(db, "site_settings", "notify_on_event_registration"));
-      shouldNotify = setting.exists ? setting.data()?.value === "true" : true;
+      shouldNotify = await settingEnabled("notify_on_event_registration", true);
     } else if (type === "new-volunteer") {
-      const setting = await getDoc(doc(db, "site_settings", "notify_on_volunteer_signup"));
-      shouldNotify = setting.exists ? setting.data()?.value === "true" : true;
+      shouldNotify = await settingEnabled("notify_on_volunteer_signup", true);
     } else if (type === "form-submission") {
-      const setting = await getDoc(doc(db, "site_settings", "notify_on_form_submission"));
-      shouldNotify = setting.exists ? setting.data()?.value === "true" : true;
+      shouldNotify = await settingEnabled("notify_on_form_submission", true);
     } else if (type === "help-request") {
-      const setting = await getDoc(doc(db, "site_settings", "notify_on_help_request"));
-      shouldNotify = setting.exists ? setting.data()?.value === "true" : false;
+      shouldNotify = await settingEnabled("notify_on_help_request", false);
     }
 
     if (!shouldNotify) {

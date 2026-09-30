@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
+import { authFetch } from "@/lib/auth/client";
+import {
   Sparkles, 
   Loader2, 
   Copy,
@@ -64,7 +65,7 @@ export default function EmbeddedAIGenerator({ onApply, onApplySeparate, compact 
     setGeneratedContentEs(null);
 
     try {
-      const response = await fetch("/api/ai/generate", {
+      const response = await authFetch("/api/ai/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

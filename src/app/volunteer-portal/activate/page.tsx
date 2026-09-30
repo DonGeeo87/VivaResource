@@ -8,8 +8,6 @@ import { Mail, Lock, User, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { Suspense } from "react";
 
-import { db, doc, getDoc } from "@/lib/db-client";
-
 function ActivateForm() {
   const { language } = useLanguage();
   const isES = language === "es";
@@ -40,27 +38,22 @@ function ActivateForm() {
       }
 
       try {
-        // Verify the activation token matches the registration
-        const regDoc = await getDoc(doc(db, "volunteer_registrations", regId));
-        if (!regDoc.exists) {
+        // Valida el token de activación contra el registro, sin poder listar
+        // la colección volunteer_registrations (tiene datos personales).
+        const res = await fetch("/api/volunteer/registration-status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ regId, token }),
+        });
+        const data = res.ok ? await res.json() : { valid: false };
+        if (!data.valid) {
           setValidating(false);
           return;
         }
 
-        const data = regDoc.data();
-        if (data?.activation_token !== token) {
-          setValidating(false);
-          return;
-        }
-
-        if (data?.status !== "approved") {
-          setValidating(false);
-          return;
-        }
-
-        setEmailState(data?.email || email || "");
-        setFirstName(data?.firstName || "");
-        setLastName(data?.lastName || "");
+        setEmailState(data.email || email || "");
+        setFirstName(data.firstName || "");
+        setLastName(data.lastName || "");
         setValid(true);
       } catch (err) {
         console.error("Error validating token:", err);
