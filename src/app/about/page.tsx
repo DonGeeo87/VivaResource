@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteImages } from "@/contexts/SiteImageContext";
+import SchemaMarkup from "@/components/SchemaMarkup";
+import { SITE_URL } from "@/lib/site-url";
 
 interface TimelineItemProps {
   year: string;
@@ -114,6 +116,10 @@ export default function AboutPage(): JSX.Element {
 
   return (
     <main className="bg-surface text-on-surface font-body pt-20">
+      <SchemaMarkup type="breadcrumb" data={{ items: [
+        { name: "Home", url: SITE_URL },
+        { name: language === "es" ? "Nosotros" : "About", url: `${SITE_URL}/about` },
+      ] }} />
       {/* Hero Section */}
       <section className="relative pt-20 md:pt-24 pb-16 md:pb-32 px-6 bg-gradient-to-br from-primary to-primary-container overflow-hidden">
         <div className="max-w-7xl mx-auto relative z-10 grid md:grid-cols-2 gap-8 md:gap-12 items-center">

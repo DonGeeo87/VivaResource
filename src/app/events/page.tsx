@@ -15,6 +15,8 @@ import { useSiteImages } from "@/contexts/SiteImageContext";
 import { formatMountainDate, formatMountainTime } from "@/lib/timezone";
 import { EventsHeroSkeleton, EventsFilterSkeleton, EventsGridSkeleton } from "@/components/Skeleton";
 import NewsletterForm from "@/components/NewsletterForm";
+import SchemaMarkup from "@/components/SchemaMarkup";
+import { SITE_URL } from "@/lib/site-url";
 
 interface Event {
   id: string;
@@ -178,6 +180,20 @@ export default function EventsPage(): JSX.Element {
 
   return (
     <main className="pt-20">
+        {/* Structured data: lista de eventos para buscadores y motores de respuesta */}
+        <SchemaMarkup
+          type="eventList"
+          data={{
+            events: displayEvents.map((event: Event) => ({
+              name: getTitle(event),
+              description: getDescription(event),
+              startDate: (nextUpcoming(event) || parseDate(event.date)).toISOString(),
+              location: event.location,
+              url: `${SITE_URL}/events/register/${event.id}`,
+              image: event.image || undefined,
+            })),
+          }}
+        />
         {/* Hero Section */}
         <section className="relative h-[400px] md:h-[500px] min-h-[400px] md:min-h-[500px] flex items-center overflow-hidden bg-primary-container">
           <div className="absolute inset-0 z-0 opacity-40">

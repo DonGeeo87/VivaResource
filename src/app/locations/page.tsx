@@ -2,7 +2,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { MapPin, ArrowRight, HeartHandshake } from "lucide-react";
 import { locations } from "@/data/locations";
-import { generatePageMeta, langContext } from "@/lib/metadata";
+import SchemaMarkup from "@/components/SchemaMarkup";
+import { generatePageMeta, langContext, SITE_URL } from "@/lib/metadata";
 
 export function generateMetadata(): Metadata {
   return generatePageMeta({
@@ -21,6 +22,10 @@ export default function LocationsIndexPage() {
   const isEs = lang === "es";
   return (
     <main className="bg-surface text-on-surface font-body">
+      <SchemaMarkup type="breadcrumb" data={{ items: [
+        { name: "Home", url: SITE_URL },
+        { name: isEs ? "Ubicaciones" : "Locations", url: `${SITE_URL}/locations` },
+      ] }} />
       {/* Hero */}
       <section className="relative min-h-[350px] flex items-center py-20 px-6 overflow-hidden bg-gradient-to-br from-primary to-primary-container">
         <div className="max-w-7xl mx-auto w-full relative z-10">

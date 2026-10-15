@@ -99,6 +99,9 @@ export async function generateMetadata(): Promise<Metadata> {
     description,
     alternates: {
       canonical: canonicalForLang(canonical, currentPath()),
+      types: {
+        "application/rss+xml": `${siteUrl}/feed.xml`,
+      },
     },
     keywords,
     authors: [{ name: "Viva Resource", url: canonical }],

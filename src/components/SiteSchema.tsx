@@ -1,5 +1,6 @@
 import { SITE_URL } from "@/lib/metadata";
 import { getSeoSettings } from "@/lib/seo-settings";
+import { VIVA_SOCIALS } from "@/components/SocialIcons";
 
 /**
  * Structured data del sitio, renderizado en el SERVIDOR.
@@ -83,6 +84,9 @@ export default async function SiteSchema(): Promise<JSX.Element> {
     settings.youtube_url,
     settings.tiktok_url,
   ].filter((url): url is string => typeof url === "string" && url.startsWith("http"));
+  // Fallback a las redes reales si la coleccion seo_settings esta vacia.
+  const sameAsFinal =
+    sameAs.length > 0 ? sameAs : [VIVA_SOCIALS.facebook, VIVA_SOCIALS.instagram];
 
   const organization = {
     "@context": "https://schema.org",
@@ -97,6 +101,8 @@ export default async function SiteSchema(): Promise<JSX.Element> {
     description:
       "Viva Resource is a 501(c)(3) nonprofit that connects rural Colorado communities with essential resources: food assistance, housing support, healthcare navigation, educational workshops, emergency response and legal aid referrals. Free and bilingual.",
     nonprofitStatus: "Nonprofit501c3",
+    foundingDate: "2008",
+    taxID: "99-3552160",
     slogan: "Recursos comunitarios para el Colorado rural",
     knowsLanguage: ["en", "es"],
     address: {
@@ -144,7 +150,7 @@ export default async function SiteSchema(): Promise<JSX.Element> {
         },
       })),
     },
-    ...(sameAs.length > 0 ? { sameAs } : {}),
+    sameAs: sameAsFinal,
   };
 
   const website = {

@@ -13,6 +13,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteImages } from "@/contexts/SiteImageContext";
 import { useToast } from "@/components/Toast";
 import { FacebookIcon, InstagramIcon, VIVA_SOCIALS } from "@/components/SocialIcons";
+import SchemaMarkup from "@/components/SchemaMarkup";
+import { SITE_URL } from "@/lib/site-url";
 
 const faqs = [
   {
@@ -145,6 +147,10 @@ export default function ContactPage(): JSX.Element {
 
   return (
     <main className="bg-surface font-body text-on-surface pt-24">
+      <SchemaMarkup type="breadcrumb" data={{ items: [
+        { name: "Home", url: SITE_URL },
+        { name: language === "es" ? "Contacto" : "Contact Us", url: `${SITE_URL}/contact` },
+      ] }} />
       <ToastComponent />
       {/* Hero Section */}
       <section className="relative min-h-[400px] flex items-center overflow-hidden bg-gradient-to-br from-primary to-primary-container py-24 px-6">

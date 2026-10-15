@@ -6,6 +6,7 @@ import Image from "next/image";
 import { ArrowRight, CheckCircle, Calendar, MapPin, Clock, AlertCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/components/Toast";
+import SchemaMarkup from "@/components/SchemaMarkup";
 import { formatMountainDate } from "@/lib/timezone";
 import type { Timestamp } from "@/lib/db-client";
 
@@ -384,6 +385,19 @@ export default function EventRegisterPage(): JSX.Element {
     ? (isES && event.description_es ? event.description_es : event.description_en) || ""
     : "";
 
+  const eventStartDate = ((): string => {
+    const d = event?.date as string | Date | { toDate: () => Date } | undefined;
+    if (!d) return new Date().toISOString();
+    try {
+      if (d instanceof Date) return d.toISOString();
+      if (typeof d === "object" && "toDate" in d) return d.toDate().toISOString();
+      const parsed = new Date(d as string);
+      return isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
+    } catch {
+      return new Date().toISOString();
+    }
+  })();
+
   const renderField = (field: FormFieldDef): JSX.Element => {
     const label = isES ? field.labelEs : field.label;
     const value = formValues[field.id] || "";
@@ -588,6 +602,18 @@ export default function EventRegisterPage(): JSX.Element {
     <>
       <EventToast />
       <main className="pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto min-h-screen">
+        {event && (
+          <SchemaMarkup
+            type="event"
+            data={{
+              title: eventTitle,
+              description: eventDescription,
+              date: eventStartDate,
+              location: event.location,
+              image: event.image_url,
+            }}
+          />
+        )}
         <div className="bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden">
           {event?.image_url && (
             <div className="relative w-full bg-primary-container overflow-hidden">

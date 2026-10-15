@@ -7,6 +7,8 @@ import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteImages } from "@/contexts/SiteImageContext";
 import { PayPalScriptProvider, PayPalButtons, FUNDING } from "@paypal/react-paypal-js";
+import SchemaMarkup from "@/components/SchemaMarkup";
+import { SITE_URL } from "@/lib/site-url";
 
 const donationAmounts = [
   { amount: 25, description: "Provides a hygiene kit", descriptionEs: "Proporciona un kit de higiene" },
@@ -314,6 +316,10 @@ export default function DonatePage(): JSX.Element {
 
   return (
     <main className="bg-surface text-on-surface">
+      <SchemaMarkup type="breadcrumb" data={{ items: [
+        { name: "Home", url: SITE_URL },
+        { name: language === "es" ? "Donar" : "Donate", url: `${SITE_URL}/donate` },
+      ] }} />
       <div className="pt-24">
         {/* Hero Section */}
         <section className="relative overflow-hidden py-16 md:py-24 px-6">

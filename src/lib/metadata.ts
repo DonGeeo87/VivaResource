@@ -8,9 +8,8 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 
-export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL || "https://www.vivaresource.com"
-).replace(/\/+$/, "");
+import { SITE_URL } from "./site-url";
+export { SITE_URL };
 
 export interface LangContext {
   /** Idioma que se esta sirviendo en esta request. */

@@ -1,4 +1,4 @@
-import { SITE_URL } from "@/lib/metadata";
+import { SITE_URL } from "@/lib/site-url";
 
 /**
  * Structured data por pagina (article, breadcrumb, event, faq, service).
@@ -15,7 +15,7 @@ import { SITE_URL } from "@/lib/metadata";
  */
 
 interface SchemaMarkupProps {
-  type?: "event" | "article" | "breadcrumb" | "faq" | "service" | "webpage";
+  type?: "event" | "eventList" | "article" | "breadcrumb" | "faq" | "service" | "webpage";
   data?: Record<string, unknown>;
 }
 
@@ -68,11 +68,53 @@ function EventSchema({ data }: { data: Record<string, unknown> }): JSX.Element {
   return scriptTag("schema-event", schema);
 }
 
+function EventListSchema({ data }: { data?: { events?: Record<string, unknown>[] } }): JSX.Element {
+  const events = data?.events || [];
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: events.map((event, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "Event",
+        name: (event.name as string) || "",
+        ...(event.description ? { description: event.description as string } : {}),
+        startDate: (event.startDate as string) || "",
+        ...(event.endDate ? { endDate: event.endDate as string } : {}),
+        eventStatus: "https://schema.org/EventScheduled",
+        eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+        location: {
+          "@type": "Place",
+          name: (event.location as string) || "Viva Resource",
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: "Peyton",
+            addressRegion: "CO",
+            addressCountry: "US",
+          },
+        },
+        organizer: { "@id": `${SITE_URL}#organization` },
+        isAccessibleForFree: true,
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: "USD",
+          availability: "https://schema.org/InStock",
+        },
+        ...(event.url ? { url: event.url as string } : {}),
+        ...(event.image ? { image: event.image as string } : {}),
+      },
+    })),
+  };
+  return scriptTag("schema-event-list", schema);
+}
+
 function ArticleSchema({ data }: { data: Record<string, unknown> }): JSX.Element {
   const lang = (data.language as string) === "es" ? "es" : "en";
   const schema = {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": ["Article", "BlogPosting"],
     headline: (data.title as string) || "",
     description: (data.excerpt as string) || "",
     image: (data.featured_image as string) || `${SITE_URL}/logo-rectangular.png`,
@@ -160,6 +202,8 @@ export default function SchemaMarkup({ type, data }: SchemaMarkupProps): JSX.Ele
   switch (type) {
     case "event":
       return <EventSchema data={data || {}} />;
+    case "eventList":
+      return <EventListSchema data={data as { events: Record<string, unknown>[] } | undefined} />;
     case "article":
       return <ArticleSchema data={data || {}} />;
     case "breadcrumb":

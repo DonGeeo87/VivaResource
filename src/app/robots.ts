@@ -51,6 +51,22 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     };
   }
 
+  // Crawlers de motores de respuesta (AEO/GEO): se permite explicitamente que
+  // indexen el contenido publico. No es una puerta abierta — heredan el mismo
+  // disallow que el resto — pero deja constancia de la intencion.
+  const AI_CRAWLERS = [
+    "GPTBot",
+    "ChatGPT-User",
+    "OAI-SearchBot",
+    "Google-Extended",
+    "ClaudeBot",
+    "anthropic-ai",
+    "PerplexityBot",
+    "CCBot",
+    "Applebot-Extended",
+    "Bytespider",
+  ];
+
   const rules: MetadataRoute.Robots["rules"] = [
     {
       userAgent: "*",
@@ -59,15 +75,22 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     },
   ];
 
+  const seenAgents = new Set<string>(["*"]);
+  for (const bot of AI_CRAWLERS) {
+    rules.push({ userAgent: bot, allow: "/", disallow: noindexPaths });
+    seenAgents.add(bot);
+  }
+
   for (const rule of customRules) {
     const trimmed = rule.trim();
     if (trimmed.startsWith("User-agent:")) {
       const ua = trimmed.split(":")[1].trim();
-      if (ua && ua !== "*") {
+      if (ua && ua !== "*" && !seenAgents.has(ua)) {
         rules.push({
           userAgent: ua,
           disallow: "/",
         });
+        seenAgents.add(ua);
       }
     }
   }

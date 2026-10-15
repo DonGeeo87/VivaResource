@@ -12,6 +12,8 @@ import { useToast } from "@/components/Toast";
 import { FormField, Input, Textarea, Select, Checkbox } from "@/components/ui/FormField";
 import SuccessMessage from "@/components/ui/SuccessMessage";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import SchemaMarkup from "@/components/SchemaMarkup";
+import { SITE_URL } from "@/lib/site-url";
 
 import { db, addDoc, collection, serverTimestamp } from "@/lib/db-client";
 
@@ -250,6 +252,10 @@ export default function GetInvolvedPage(): JSX.Element {
     <>
       <VolunteerToast />
       <main className="pt-0">
+        <SchemaMarkup type="breadcrumb" data={{ items: [
+          { name: "Home", url: SITE_URL },
+          { name: isES ? "Involúcrate" : "Get Involved", url: `${SITE_URL}/get-involved` },
+        ] }} />
         {/* Hero Section */}
         <header className="relative overflow-hidden px-6 lg:px-12 py-16 md:py-20 lg:py-32 bg-gradient-to-br from-primary to-primary-container text-on-primary">
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-8 md:gap-12 items-center">

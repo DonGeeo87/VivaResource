@@ -100,13 +100,13 @@ function LocationSchema({ loc }: { loc: Location }) {
         name: `Viva Resource — ${loc.name}`,
         image: `${siteUrl}/logo-rectangular.png`,
         url: `${siteUrl}/locations/${loc.slug}`,
-        telephone: "",
+        parentOrganization: { "@id": `${siteUrl}#organization` },
         address: {
           "@type": "PostalAddress",
-          streetAddress: loc.slug === "peyton" ? "13055 Bradshaw Drive #301" : `Serving ${loc.name} area`,
+          ...(loc.slug === "peyton" ? { streetAddress: "13055 Bradshaw Drive #301" } : {}),
           addressLocality: loc.name,
           addressRegion: "CO",
-          postalCode: loc.slug === "peyton" ? "80831" : "",
+          ...(loc.slug === "peyton" ? { postalCode: "80831" } : {}),
           addressCountry: "US",
         },
         geo: {

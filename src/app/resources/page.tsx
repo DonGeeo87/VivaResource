@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import resourcesData from "@/data/resources.json";
+import SchemaMarkup from "@/components/SchemaMarkup";
+import { SITE_URL } from "@/lib/site-url";
 
 interface Resource {
   name: string;
@@ -254,6 +256,10 @@ export default function ResourcesPage() {
 
   return (
     <main className="bg-surface text-on-surface font-body pt-20">
+      <SchemaMarkup type="breadcrumb" data={{ items: [
+        { name: "Home", url: SITE_URL },
+        { name: isES ? "Recursos" : "Resources", url: `${SITE_URL}/resources` },
+      ] }} />
       {/* Hero Section */}
       <section className="relative min-h-[300px] md:min-h-[400px] flex items-center py-16 md:py-20 px-6 overflow-hidden bg-gradient-to-br from-primary to-primary-container">
         <div className="max-w-7xl mx-auto w-full grid md:grid-cols-2 gap-8 md:gap-12 items-center relative z-10">
