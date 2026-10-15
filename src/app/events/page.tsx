@@ -11,6 +11,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSiteImages } from "@/contexts/SiteImageContext";
 import { formatMountainDate, formatMountainTime } from "@/lib/timezone";
 import { EventsHeroSkeleton, EventsFilterSkeleton, EventsGridSkeleton } from "@/components/Skeleton";
 import NewsletterForm from "@/components/NewsletterForm";
@@ -83,6 +84,7 @@ const nextUpcoming = (
 
 export default function EventsPage(): JSX.Element {
   const { translations, language } = useLanguage();
+  const siteImages = useSiteImages();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(0);
@@ -184,7 +186,7 @@ export default function EventsPage(): JSX.Element {
               fill
               sizes="100vw"
               style={{ objectFit: 'cover' }}
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDviyMaJX02LZ9Ba55WlNjs85RirUbGfuvJTNuJra4dxuGVv8ax834dQy9wy2draDRL3BRjBJAYpIcWoybX_Ff2ghIhZuFfmmZaVSJd88SrhwUPlrAHAwwzXRds1IwO3kE5vo6D1Z6SPPmjwwJChjxbeQDqIucv2mbK7aTulSZBkzjYHHT1YKQ-A_7COiBglupwTPy8J63IN-yAYnTNJ0ZLLmOOiT-ZN4liJpTr8hOzja-I73xe-pBoByAtgzlu0nPPenyYkKiE9bA"
+              src={siteImages['events-hero']}
             />
           </div>
           <div className="absolute inset-0 bg-gradient-to-tr from-primary via-primary/80 to-transparent z-10"></div>

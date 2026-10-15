@@ -1,6 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSiteImages } from "@/contexts/SiteImageContext";
 import Image from "next/image";
 import {
   Database,
@@ -17,6 +18,7 @@ export default function PrivacyPolicyPage(): JSX.Element {
   // asi que no hay que esperar hidratacion: bloquear aqui dejaba la pagina
   // vacia en el HTML inicial y Google no veia su contenido.
   const { language } = useLanguage();
+  const siteImages = useSiteImages();
 
   const sidebarLinks = [
     { href: "#intro", label: language === "es" ? "Introducción" : "Introduction", active: true },
@@ -65,7 +67,7 @@ export default function PrivacyPolicyPage(): JSX.Element {
           </div>
           <div className="hidden lg:block w-1/3 aspect-[4/3] bg-[#f3f3f3] rounded-xl overflow-hidden relative">
             <Image
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2XPGM5MojMsPUlBiUsGKtUp3BN42FCcTbJDYhN000WXHdr5lGV5J6ylTZpfCG5OdU0yJcGaaxLSjEe7LosipRnVSU6aRm7gRPi-EwHJeIT6HxbWW81UyrDsiNy9xBHtBTdjSS23ZVEt8bZ0Y4Ur4uFmRxM8ou27DCoSyT54U8XTSSAMmIMmRpSloRCBESZLMNMw4wEkb8xKDlLAD-XfH3ec7uMvHJk4oS1FuDzE_h_JukfiHwBTknTG58I2n4jI2i07kvNNlnJQc"
+              src={siteImages['privacy-hero']}
               alt={language === "es" ? "Privacidad y seguridad" : "Privacy and security"}
               fill
               className="object-cover opacity-80 mix-blend-multiply"

@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CheckCircle, Calendar, FileText, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSiteImages } from "@/contexts/SiteImageContext";
 
 import { db, addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from "@/lib/db-client";
 
@@ -35,6 +36,7 @@ interface FormData {
 export default function EventRegistrationPage(): JSX.Element {
   const params = useParams();
   const { language } = useLanguage();
+  const siteImages = useSiteImages();
   const isES = language === "es";
   const eventId = params.id as string;
 
@@ -189,7 +191,7 @@ export default function EventRegistrationPage(): JSX.Element {
               style={{ objectFit: 'cover' }}
               className="opacity-40 mix-blend-overlay"
               alt="diverse group of community members laughing together"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBD3WzpAJgsApG7ISMaQZY3gRsI6-MpHz_sAqXCVedBaCH5jhmp20vsB03E3G7GSol80b7XG3K4_6DgjbT2afaWLZfrwDZBSG3p2dnshGcLOlqIWZskwk1Oo_o3H3I4RTe2Naub4H4BCsacR0yGLCYmPhoWIjShQZBAeVpJIr_dPFCIZzcgirTqUDHg4HTPV0bRzamp3BPL6aZweuNdDIq9quQ4Na-1_B0CN-E0MGDN_RUN4RYGuW7ynxGi_OIANppvBiBUbrwTDxM"
+              src={siteImages['events-register']}
             />
             <div className="absolute inset-0 flex flex-col justify-center px-8 sm:px-12">
               <h1 className="font-headline text-3xl sm:text-4xl font-extrabold text-on-primary-container tracking-tight leading-tight">

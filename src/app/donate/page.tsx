@@ -409,7 +409,7 @@ export default function DonatePage(): JSX.Element {
                       <span className="block mt-2 font-body text-sm not-italic opacity-70">&mdash; Maria & Family, Alamosa CO</span>
                     </p>
                     <Image
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvuH0wH7x2E_yjDdqx7VCF-NcTPVesWtSRrCB8m5oM6HI8UJFM_OEJZv9m4x42zZzuGCyOiKAgpCHmN44XHmljk6sf5pVsfgXa2aXXUezWhPfkvbtdlic3IbgVfAyormFPy4TkC4tFu0KvlmPHoTA63MhnusVqtOCgJbkfQPOWJ8ZZrC6CWqSkYt2JU6mk-FPQ8sgWy0wAWdbPH5ukLqUMq1IdpU9n1Zb23Toy-w5lZ_HI3Eo9CYcr8WjCasmasscBKMP3N2Y2nAA"
+                      src={siteImages['donate-card']}
                       alt="Maria"
                       width={64}
                       height={64}
