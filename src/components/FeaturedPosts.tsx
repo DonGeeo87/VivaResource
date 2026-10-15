@@ -6,8 +6,8 @@ import Link from "next/link";
 import { ArrowRight, ChevronRight, Calendar } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-interface BlogPost {
-  id: number;
+export interface FeaturedPost {
+  id: number | string;
   title: string;
   slug: string;
   excerpt: string;
@@ -17,21 +17,40 @@ interface BlogPost {
   featured_image?: string;
 }
 
-export default function FeaturedPosts() {
+/**
+ * Posts destacados. Los datos llegan renderizados del servidor (SSR), asi el
+ * HTML de la home ya incluye los enlaces a los articulos. Solo se vuelve a
+ * pedir a la API si el visitante cambia de idioma en la misma sesion.
+ */
+export default function FeaturedPosts({
+  initialPosts = [],
+  initialLang,
+}: {
+  initialPosts?: FeaturedPost[];
+  initialLang?: "en" | "es";
+}) {
   const { language } = useLanguage();
   const isES = language === "es";
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState<FeaturedPost[]>(initialPosts);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (initialPosts.length > 0 && language === initialLang) return;
+    let cancelled = false;
+    setLoading(true);
     fetch("/api/v2/blog/list?lang=" + language + "&limit=3")
       .then((r) => r.json())
       .then((data) => {
-        if (data.posts) setPosts(data.posts.slice(0, 3));
+        if (!cancelled && data.posts) setPosts(data.posts.slice(0, 3));
       })
       .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [language]);
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [language, initialLang, initialPosts.length]);
 
   if (loading) {
     return (
