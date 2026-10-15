@@ -250,10 +250,10 @@ export default function PrivacyPolicyPage(): JSX.Element {
                     : "If you have concerns about your data or wish to exercise your rights, please reach out to our privacy officer."}
                 </p>
                 <a
-                  href="mailto:privacy@vivafoundation.org"
+                  href="mailto:vivaresourcefoundation@gmail.com"
                   className="inline-flex items-center gap-3 bg-[#025689] text-white px-8 py-4 rounded-full font-bold hover:shadow-lg transition-all group"
                 >
-                  privacy@vivafoundation.org
+                  vivaresourcefoundation@gmail.com
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </a>
               </div>

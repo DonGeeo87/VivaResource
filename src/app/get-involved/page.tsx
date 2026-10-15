@@ -161,15 +161,15 @@ export default function GetInvolvedPage(): JSX.Element {
     // Validate all required fields
     const errors: Record<string, string> = {};
     if (!formData.firstName.trim()) {
-      errors.firstName = isES ? "First name is required" : "El nombre es requerido";
+      errors.firstName = isES ? "El nombre es requerido" : "First name is required";
     }
     if (!formData.lastName.trim()) {
-      errors.lastName = isES ? "Last name is required" : "El apellido es requerido";
+      errors.lastName = isES ? "El apellido es requerido" : "Last name is required";
     }
     if (!formData.email.trim()) {
-      errors.email = isES ? "Email is required" : "El correo es requerido";
+      errors.email = isES ? "El correo es requerido" : "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = isES ? "Please enter a valid email" : "Ingrese un correo válido";
+      errors.email = isES ? "Ingrese un correo válido" : "Please enter a valid email";
     }
 
     if (Object.keys(errors).length > 0) {
@@ -240,7 +240,7 @@ export default function GetInvolvedPage(): JSX.Element {
     } catch (error) {
       console.error("Error submitting volunteer registration:", error);
       setSubmitStatus("error");
-      setErrorMessage(isES ? "Something went wrong. Please try again." : "Algo salió mal. Por favor intente de nuevo.");
+      setErrorMessage(isES ? "Algo salió mal. Por favor intente de nuevo." : "Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

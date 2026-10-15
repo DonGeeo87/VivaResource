@@ -182,7 +182,7 @@ export default function EventsPage(): JSX.Element {
         <section className="relative h-[400px] md:h-[500px] min-h-[400px] md:min-h-[500px] flex items-center overflow-hidden bg-primary-container">
           <div className="absolute inset-0 z-0 opacity-40">
             <Image
-              alt="Community gathering"
+              alt={language === "es" ? "Reunión comunitaria" : "Community gathering"}
               fill
               sizes="100vw"
               style={{ objectFit: 'cover' }}
@@ -196,13 +196,12 @@ export default function EventsPage(): JSX.Element {
                 {translations.events?.title || "Upcoming / Próximos"}
               </span>
               <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight tracking-tighter mb-4 md:mb-6">
-                Community Events / <br />
-                <span className="text-secondary-container">Eventos Comunitarios</span>
+                {language === "es" ? "Eventos Comunitarios" : "Community Events"}
               </h1>
               <p className="text-white/90 text-base md:text-lg leading-relaxed max-w-xl">
-                Join us in building a stronger, more connected community. Discover
-                workshops, resources, and gatherings designed for you. / Únase a
-                nosotros para construir una comunidad más fuerte y conectada.
+                {language === "es"
+                  ? "Únase a nosotros para construir una comunidad más fuerte y conectada. Descubra talleres, recursos y encuentros diseñados para usted."
+                  : "Join us in building a stronger, more connected community. Discover workshops, resources, and gatherings designed for you."}
               </p>
             </div>
           </div>
@@ -213,7 +212,7 @@ export default function EventsPage(): JSX.Element {
           <div className="max-w-7xl mx-auto px-8">
             <div className="flex flex-wrap gap-4 items-center">
               <span className="font-headline font-bold text-on-surface-variant mr-4">
-                Filter by / Filtrar por:
+                {language === "es" ? "Filtrar por:" : "Filter by:"}
               </span>
               <button 
                 onClick={() => setSelectedCategory(0)}
@@ -223,7 +222,7 @@ export default function EventsPage(): JSX.Element {
                     : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
                 }`}
               >
-                All / Todos
+                {language === "es" ? "Todos" : "All"}
               </button>
               <button 
                 onClick={() => setSelectedCategory(1)}
@@ -233,7 +232,7 @@ export default function EventsPage(): JSX.Element {
                     : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
                 }`}
               >
-                Workshops / Talleres
+                {language === "es" ? "Talleres" : "Workshops"}
               </button>
               <button 
                 onClick={() => setSelectedCategory(2)}
@@ -243,7 +242,7 @@ export default function EventsPage(): JSX.Element {
                     : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
                 }`}
               >
-                Food Distribution / Distribución
+                {language === "es" ? "Distribución de Alimentos" : "Food Distribution"}
               </button>
               <button 
                 onClick={() => setSelectedCategory(3)}
@@ -253,7 +252,7 @@ export default function EventsPage(): JSX.Element {
                     : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
                 }`}
               >
-                Community Meetings / Reuniones
+                {language === "es" ? "Reuniones Comunitarias" : "Community Meetings"}
               </button>
             </div>
           </div>

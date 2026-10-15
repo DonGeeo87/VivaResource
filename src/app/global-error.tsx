@@ -39,7 +39,7 @@ export default function GlobalError({
             padding: 24,
           }}
         >
-          <div style={{ maxWidth: 560, width: "100%", textAlign: "center" }}>
+          <main style={{ maxWidth: 560, width: "100%", textAlign: "center" }}>
             <h1
               style={{
                 fontSize: 96,
@@ -104,7 +104,7 @@ export default function GlobalError({
                 Ref: {error.digest}
               </p>
             ) : null}
-          </div>
+          </main>
         </div>
       </body>
     </html>

@@ -141,7 +141,10 @@ export default function AdminLoginPage(): JSX.Element {
                     <input type="checkbox" className="rounded border-gray-300 text-primary focus:ring-primary" />
                     <span className="text-gray-600">{language === "es" ? "Recordarme" : "Remember me"}</span>
                   </label>
-                  <a href="#" className="text-primary hover:text-primary-hover transition-colors font-medium">
+                  <a
+                    href="mailto:vivaresourcefoundation@gmail.com?subject=Admin%20password%20reset"
+                    className="text-primary hover:text-primary-hover transition-colors font-medium"
+                  >
                     {t?.forgotPassword}
                   </a>
                 </div>

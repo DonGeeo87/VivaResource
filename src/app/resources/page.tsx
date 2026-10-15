@@ -19,6 +19,7 @@ import {
   Bus,
   PartyPopper,
   Zap,
+  MapPin,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import resourcesData from "@/data/resources.json";
@@ -233,16 +234,13 @@ function ResourceCard({ resource, category, language }: { resource: Resource; ca
           rel="noopener noreferrer"
           className="mt-4 flex items-center gap-2 text-primary font-bold text-sm hover:underline"
         >
-          Visit Website / Visitar
+          {isES ? "Visitar sitio web" : "Visit Website"}
           <ExternalLink className="w-4 h-4" />
         </a>
       )}
     </div>
   );
 }
-
-// Import MapPin for county icon
-import { MapPin } from "lucide-react";
 
 export default function ResourcesPage() {
   const { language } = useLanguage();

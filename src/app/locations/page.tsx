@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { MapPin, ArrowRight, HeartHandshake } from "lucide-react";
 import { locations } from "@/data/locations";
-import { generatePageMeta } from "@/lib/metadata";
+import { generatePageMeta, langContext } from "@/lib/metadata";
 
 export function generateMetadata(): Metadata {
   return generatePageMeta({
@@ -17,6 +17,8 @@ export function generateMetadata(): Metadata {
 }
 
 export default function LocationsIndexPage() {
+  const { lang } = langContext();
+  const isEs = lang === "es";
   return (
     <main className="bg-surface text-on-surface font-body">
       {/* Hero */}
@@ -30,10 +32,12 @@ export default function LocationsIndexPage() {
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-extrabold text-white leading-tight tracking-tighter mb-4">
-              Our Locations / Nuestras Ubicaciones
+              {isEs ? "Nuestras Ubicaciones" : "Our Locations"}
             </h1>
             <p className="text-xl text-on-primary-container font-body leading-relaxed max-w-2xl">
-              Serving rural communities across Colorado. Find the services and support you need near you.
+              {isEs
+                ? "Sirviendo a comunidades rurales en todo Colorado. Encuentra los servicios y el apoyo que necesitas cerca de ti."
+                : "Serving rural communities across Colorado. Find the services and support you need near you."}
             </p>
           </div>
         </div>
@@ -44,10 +48,12 @@ export default function LocationsIndexPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-headline font-extrabold text-primary mb-4">
-              Communities We Serve / Comunidades que Servimos
+              {isEs ? "Comunidades que Servimos" : "Communities We Serve"}
             </h2>
             <p className="text-on-surface-variant max-w-2xl mx-auto">
-              From our headquarters in Peyton, we extend services across El Paso County and beyond.
+              {isEs
+                ? "Desde nuestra sede en Peyton, extendemos servicios por todo el Condado de El Paso y más allá."
+                : "From our headquarters in Peyton, we extend services across El Paso County and beyond."}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -66,14 +72,14 @@ export default function LocationsIndexPage() {
                   </span>
                 </div>
                 <h3 className="font-headline text-xl font-bold text-on-surface mb-1 group-hover:text-primary transition-colors">
-                  {loc.name}
+                  {isEs ? loc.nameEs : loc.name}
                 </h3>
-                <p className="text-sm text-on-surface-variant mb-3">{loc.county}</p>
+                <p className="text-sm text-on-surface-variant mb-3">{isEs ? loc.countyEs : loc.county}</p>
                 <p className="text-sm text-on-surface-variant mb-4 line-clamp-2">
-                  {loc.description}
+                  {isEs ? loc.descriptionEs : loc.description}
                 </p>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {loc.services.slice(0, 3).map((service) => (
+                  {(isEs ? loc.servicesEs : loc.services).slice(0, 3).map((service) => (
                     <span
                       key={service}
                       className="text-xs bg-primary/5 text-primary px-2 py-1 rounded-full"
@@ -81,14 +87,14 @@ export default function LocationsIndexPage() {
                       {service}
                     </span>
                   ))}
-                  {loc.services.length > 3 && (
+                  {(isEs ? loc.servicesEs : loc.services).length > 3 && (
                     <span className="text-xs text-on-surface-variant px-2 py-1">
-                      +{loc.services.length - 3} more
+                      +{(isEs ? loc.servicesEs : loc.services).length - 3} {isEs ? "más" : "more"}
                     </span>
                   )}
                 </div>
                 <div className="flex items-center gap-2 text-primary font-bold text-sm group-hover:gap-3 transition-all">
-                  View Services / Ver Servicios
+                  {isEs ? "Ver Servicios" : "View Services"}
                   <ArrowRight className="w-4 h-4" />
                 </div>
               </Link>
@@ -102,16 +108,18 @@ export default function LocationsIndexPage() {
         <div className="max-w-4xl mx-auto text-center">
           <HeartHandshake className="w-16 h-16 text-primary mx-auto mb-6" />
           <h2 className="text-3xl md:text-4xl font-headline font-extrabold text-primary mb-4">
-            Don&apos;t See Your Area?
+            {isEs ? "¿No ves tu zona?" : "Don't See Your Area?"}
           </h2>
           <p className="text-on-surface-variant text-lg mb-8 max-w-2xl mx-auto">
-            We serve the entire El Paso County region. Contact us to find services near you.
+            {isEs
+              ? "Servimos a toda la región del Condado de El Paso. Contáctanos para encontrar servicios cerca de ti."
+              : "We serve the entire El Paso County region. Contact us to find services near you."}
           </p>
           <a
             href="/contact"
             className="inline-flex items-center gap-2 bg-secondary text-on-secondary px-8 py-4 rounded-full font-bold text-lg hover:opacity-90 transition-all"
           >
-            Contact Us / Contáctenos
+            {isEs ? "Contáctenos" : "Contact Us"}
             <ArrowRight className="w-5 h-5" />
           </a>
         </div>

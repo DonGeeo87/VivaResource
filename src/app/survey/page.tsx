@@ -10,7 +10,6 @@ const INTERESTS = {
     { value: "job_training", label: "Job Training & Employment" },
     { value: "health_wellness", label: "Health & Wellness Workshops" },
     { value: "education", label: "Educational Programs (GED, College Prep)" },
-    { value: "immigration", label: "Immigration Legal Help" },
     { value: "financial", label: "Financial Literacy & Savings" },
     { value: "housing", label: "Housing & Rental Assistance" },
     { value: "food", label: "Food Distribution & Nutrition" },
@@ -22,7 +21,6 @@ const INTERESTS = {
     { value: "job_training", label: "Capacitación Laboral y Empleo" },
     { value: "health_wellness", label: "Talleres de Salud y Bienestar" },
     { value: "education", label: "Programas Educativos (GED, Preparación Universitaria)" },
-    { value: "immigration", label: "Ayuda Legal de Inmigración" },
     { value: "financial", label: "Educación Financiera y Ahorros" },
     { value: "housing", label: "Asistencia de Vivienda y Alquiler" },
     { value: "food", label: "Distribución de Alimentos y Nutrición" },
@@ -351,7 +349,7 @@ export default function SurveyPage() {
   // ---------- SUBMITTED STATE ----------
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
+      <main className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
         <div className="max-w-lg w-full bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 md:p-12 text-center border border-green-100">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="w-12 h-12 text-green-500" />
@@ -373,7 +371,7 @@ export default function SurveyPage() {
             {t("Back to Home", "Volver al Inicio")}
           </Link>
         </div>
-      </div>
+      </main>
     );
   }
 

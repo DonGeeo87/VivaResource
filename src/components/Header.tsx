@@ -140,7 +140,7 @@ export default function Header(): JSX.Element {
               <button
                 onClick={toggleLanguage}
                 className="hidden lg:flex items-center gap-1 text-on-surface-variant px-3 py-1 rounded-full hover:bg-surface-low transition-all"
-                aria-label="Toggle language"
+                aria-label={language === "es" ? "Cambiar idioma" : "Toggle language"}
               >
                 <Globe className="w-5 h-5" />
                 <span className="text-sm font-medium uppercase">
@@ -160,7 +160,7 @@ export default function Header(): JSX.Element {
               <button
                 onClick={toggleMobileMenu}
                 className="md:hidden text-on-surface p-2 hover:bg-surface-low rounded-lg transition-colors"
-                aria-label="Toggle mobile menu"
+                aria-label={language === "es" ? "Abrir menú de navegación" : "Toggle mobile menu"}
                 aria-expanded={isMobileMenuOpen}
               >
                 {isMobileMenuOpen ? (

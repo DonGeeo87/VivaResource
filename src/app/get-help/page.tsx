@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import FaqBlock from "@/components/FaqBlock";
 import Image from "next/image";
 import { db, addDoc, collection, doc, getDoc, serverTimestamp } from "@/lib/db-client";
@@ -601,9 +602,9 @@ export default function GetHelpPage() {
                 </button>
                 <p className="text-center mt-4 text-sm text-on-surface-variant">
                   {t.privacyPolicyNote}{" "}
-                  <a className="underline" href="/privacy">
+                  <Link className="underline" href="/privacy">
                     {t.privacyPolicy}
-                  </a>
+                  </Link>
                   .
                 </p>
               </div>
@@ -617,38 +618,39 @@ export default function GetHelpPage() {
               <div className="flex items-center gap-3 mb-6">
                 <FileText className="text-secondary w-8 h-8" />
                 <h3 className="font-headline text-xl font-bold">
-                  Checklist / Lista
+                  {language === "es" ? "Lista" : "Checklist"}
                 </h3>
               </div>
               <p className="text-sm mb-6 text-on-surface-variant leading-relaxed">
-                Having these ready will speed up your request / Tenga estos
-                listos para acelerar su solicitud:
+                {language === "es"
+                  ? "Tener esto listo acelerará tu solicitud:"
+                  : "Having these ready will speed up your request:"}
               </p>
               <ul className="space-y-4">
-                <ChecklistItem text="Photo ID / Identificación con foto" />
-                <ChecklistItem text="Proof of Address / Comprobante de domicilio" />
-                <ChecklistItem text="Basic Household Info / Información básica del hogar" />
-                <ChecklistItem text="Current Utility Bill / Factura de servicios públicos" />
+                <ChecklistItem text={language === "es" ? "Identificación con foto" : "Photo ID"} />
+                <ChecklistItem text={language === "es" ? "Comprobante de domicilio" : "Proof of Address"} />
+                <ChecklistItem text={language === "es" ? "Información básica del hogar" : "Basic Household Info"} />
+                <ChecklistItem text={language === "es" ? "Factura de servicios públicos" : "Current Utility Bill"} />
               </ul>
             </div>
 
             {/* What to Expect Card */}
             <div className="bg-primary-container text-on-primary-container p-8 rounded-3xl shadow-lg">
               <h3 className="font-headline text-xl font-bold mb-4">
-                What to Expect / Qué Esperar
+                {language === "es" ? "Qué Esperar" : "What to Expect"}
               </h3>
               <div className="space-y-6">
                 <FeatureItem
                   icon={<Clock className="w-5 h-5" />}
-                  text="Response within 24–48 hours. / Respuesta en 24–48 horas."
+                  text={language === "es" ? "Respuesta en 24–48 horas." : "Response within 24–48 hours."}
                 />
                 <FeatureItem
                   icon={<Lock className="w-5 h-5" />}
-                  text="100% Secure & Confidential. / 100% Seguro y Confidencial."
+                  text={language === "es" ? "100% Seguro y Confidencial." : "100% Secure & Confidential."}
                 />
                 <FeatureItem
                   icon={<HeartHandshake className="w-5 h-5" />}
-                  text="Compassionate, bilingual case workers. / Trabajadores compasivos y bilingües."
+                  text={language === "es" ? "Trabajadores compasivos y bilingües." : "Compassionate, bilingual case workers."}
                 />
               </div>
             </div>
@@ -656,7 +658,7 @@ export default function GetHelpPage() {
             {/* Image Accent */}
             <div className="rounded-3xl overflow-hidden h-64 shadow-lg relative">
               <Image
-                alt="Compassion"
+                alt={language === "es" ? "Compasión" : "Compassion"}
                 fill
                 sizes="(max-width: 768px) 100vw, 30vw"
                 style={{ objectFit: "cover" }}
@@ -673,20 +675,21 @@ export default function GetHelpPage() {
         <div className="bg-surface-high py-16 px-8 rounded-[3rem] relative overflow-hidden">
           <div className="relative z-10">
             <h2 className="font-headline text-2xl md:text-3xl font-extrabold text-primary mb-4">
-              We Are Here For You / Estamos Aquí Para Usted
+              {language === "es" ? "Estamos Aquí Para Usted" : "We Are Here For You"}
             </h2>
             <p className="text-base md:text-lg text-on-surface-variant mb-8">
-              No matter the situation, our goal is to provide empathy and
-              actionable solutions.
+              {language === "es"
+                ? "Sin importar la situación, nuestra meta es ofrecer empatía y soluciones concretas."
+                : "No matter the situation, our goal is to provide empathy and actionable solutions."}
             </p>
             <div className="flex flex-wrap justify-center gap-8">
               <FeatureItem
                 icon={<Verified className="text-secondary w-5 h-5" />}
-                text="Free Service"
+                text={language === "es" ? "Servicio Gratuito" : "Free Service"}
               />
               <FeatureItem
                 icon={<Verified className="text-secondary w-5 h-5" />}
-                text="Bilingual Support"
+                text={language === "es" ? "Atención Bilingüe" : "Bilingual Support"}
               />
             </div>
           </div>

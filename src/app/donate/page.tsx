@@ -9,12 +9,12 @@ import { useSiteImages } from "@/contexts/SiteImageContext";
 import { PayPalScriptProvider, PayPalButtons, FUNDING } from "@paypal/react-paypal-js";
 
 const donationAmounts = [
-  { amount: 25, description: "Provides a hygiene kit / Proporciona un kit de higiene" },
-  { amount: 50, amountKey: "amount50", description: "A week of food / Una semana de alimentos" },
-  { amount: 100, amountKey: "amount100", description: "Utility assistance / Asistencia de servicios" },
-  { amount: 250, amountKey: "amount250", description: "Rental support / Apoyo para el alquiler" },
-  { amount: 500, amountKey: "amount500", description: "Emergency grant / Beca de emergencia" },
-  { amount: 0, amountKey: "customAmount", description: "Any amount helps / Cualquier cantidad ayuda", custom: true },
+  { amount: 25, description: "Provides a hygiene kit", descriptionEs: "Proporciona un kit de higiene" },
+  { amount: 50, amountKey: "amount50", description: "A week of food", descriptionEs: "Una semana de alimentos" },
+  { amount: 100, amountKey: "amount100", description: "Utility assistance", descriptionEs: "Asistencia de servicios" },
+  { amount: 250, amountKey: "amount250", description: "Rental support", descriptionEs: "Apoyo para el alquiler" },
+  { amount: 500, amountKey: "amount500", description: "Emergency grant", descriptionEs: "Beca de emergencia" },
+  { amount: 0, amountKey: "customAmount", description: "Any amount helps", descriptionEs: "Cualquier cantidad ayuda", custom: true },
 ];
 
 interface DonationFormState {
@@ -23,7 +23,7 @@ interface DonationFormState {
 }
 
 function DonateForm(): JSX.Element {
-  const { translations } = useLanguage();
+  const { translations, language } = useLanguage();
   const { donate: t } = translations;
 
   const [frequency, setFrequency] = useState<"one-time" | "monthly">("one-time");
@@ -53,11 +53,11 @@ function DonateForm(): JSX.Element {
   const createOrder = async (): Promise<string> => {
     const amount = getFinalAmount();
     if (!amount || amount <= 0) {
-      setErrorMessage("Please select or enter a valid amount");
+      setErrorMessage(language === "es" ? "Selecciona o ingresa un monto válido" : "Please select or enter a valid amount");
       return Promise.reject("Invalid amount");
     }
     if (!donorInfo.donorName || !donorInfo.donorEmail) {
-      setErrorMessage("Please enter your name and email");
+      setErrorMessage(language === "es" ? "Ingresa tu nombre y correo" : "Please enter your name and email");
       return Promise.reject("Missing donor info");
     }
 
@@ -78,7 +78,7 @@ function DonateForm(): JSX.Element {
 
     if (!response.ok) {
       const error = await response.json();
-      setErrorMessage(error.error || "Failed to create order");
+      setErrorMessage(error.error || (language === "es" ? "No se pudo crear la orden" : "Failed to create order"));
       setDonationStatus("error");
       throw new Error(error.error);
     }
@@ -104,17 +104,17 @@ function DonateForm(): JSX.Element {
         setDonationStatus("success");
       } else {
         setDonationStatus("error");
-        setErrorMessage("Payment processing failed");
+        setErrorMessage(language === "es" ? "Falló el procesamiento del pago" : "Payment processing failed");
       }
     } catch {
       setDonationStatus("error");
-      setErrorMessage("An error occurred while processing your donation");
+      setErrorMessage(language === "es" ? "Ocurrió un error al procesar tu donación" : "An error occurred while processing your donation");
     }
   };
 
   const onError = (): void => {
     setDonationStatus("error");
-    setErrorMessage("Payment was not completed");
+    setErrorMessage(language === "es" ? "El pago no se completó" : "Payment was not completed");
   };
 
   const onCancel = (): void => {
@@ -170,7 +170,7 @@ function DonateForm(): JSX.Element {
 
   return (
     <div className="bg-surface-lowest p-8 md:p-12 rounded-xl shadow-sm">
-      <h2 className="text-3xl font-bold text-primary mb-8">Make an Impact / Hacer un Impacto</h2>
+      <h2 className="text-3xl font-bold text-primary mb-8">{language === "es" ? "Hacer un Impacto" : "Make an Impact"}</h2>
 
       {/* Frequency Toggle */}
       <div className="flex p-1 bg-surface-high rounded-full w-fit mb-10">
@@ -225,7 +225,7 @@ function DonateForm(): JSX.Element {
                 {option.amountKey ? t[option.amountKey as keyof typeof t] : `$${option.amount}`}
               </div>
             )}
-            <div className="text-xs text-on-surface-variant leading-tight">{option.description}</div>
+            <div className="text-xs text-on-surface-variant leading-tight">{language === "es" ? option.descriptionEs : option.description}</div>
           </button>
         ))}
       </div>
@@ -235,7 +235,7 @@ function DonateForm(): JSX.Element {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-xs font-bold text-on-surface-variant mb-2 uppercase tracking-wider">
-              Full Name / Nombre Completo
+              {language === "es" ? "Nombre Completo" : "Full Name"}
             </label>
             <input
               type="text"
@@ -247,7 +247,7 @@ function DonateForm(): JSX.Element {
           </div>
           <div>
             <label className="block text-xs font-bold text-on-surface-variant mb-2 uppercase tracking-wider">
-              Email / Correo Electrónico
+              {language === "es" ? "Correo Electrónico" : "Email"}
             </label>
             <input
               type="email"
@@ -271,13 +271,13 @@ function DonateForm(): JSX.Element {
         {donationStatus === "processing" && (
           <div className="flex items-center justify-center gap-3 p-4 bg-blue-50 rounded-lg">
             <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
-            <span className="text-sm text-blue-700">Processing your donation...</span>
+            <span className="text-sm text-blue-700">{language === "es" ? "Procesando tu donación..." : "Processing your donation..."}</span>
           </div>
         )}
 
         <div className="flex items-center space-x-3 text-sm text-on-surface-variant">
           <Lock className="text-secondary w-4 h-4" />
-          <span>Secure payment powered by PayPal / Pago seguro con PayPal</span>
+          <span>{language === "es" ? "Pago seguro con PayPal" : "Secure payment powered by PayPal"}</span>
         </div>
 
         {/* PayPal Button */}
@@ -296,7 +296,7 @@ function DonateForm(): JSX.Element {
 }
 
 export default function DonatePage(): JSX.Element {
-  const { translations } = useLanguage();
+  const { translations, language } = useLanguage();
   const { donate: t } = translations;
   const [paypalReady, setPaypalReady] = useState(false);
   const siteImages = useSiteImages();
@@ -376,7 +376,7 @@ export default function DonatePage(): JSX.Element {
                 {/* Transparency Card */}
                 <div className="bg-primary p-8 rounded-xl text-on-primary relative overflow-hidden">
                   <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full"></div>
-                  <h3 className="text-2xl font-bold mb-6">Where Your Money Goes / Adónde Va Su Dinero</h3>
+                  <h3 className="text-2xl font-bold mb-6">{language === "es" ? "Adónde Va Su Dinero" : "Where Your Money Goes"}</h3>
                   <div className="flex items-end space-x-4 mb-6">
                     <div className="flex-1 bg-white/20 h-32 rounded-t-lg relative group">
                       <div className="absolute bottom-0 w-full bg-secondary-container h-[92%] rounded-t-lg transition-all"></div>
@@ -390,11 +390,11 @@ export default function DonatePage(): JSX.Element {
                   <div className="grid grid-cols-2 gap-4 text-xs font-medium">
                     <div className="flex items-center space-x-2">
                       <span className="w-3 h-3 bg-secondary-container rounded-full"></span>
-                      <span>Direct Programs / Programas</span>
+                      <span>{language === "es" ? "Programas Directos" : "Direct Programs"}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <span className="w-3 h-3 bg-white/40 rounded-full"></span>
-                      <span>Admin & Ops / Administración</span>
+                      <span>{language === "es" ? "Administración y Operaciones" : "Admin & Ops"}</span>
                     </div>
                   </div>
                 </div>
@@ -406,7 +406,7 @@ export default function DonatePage(): JSX.Element {
                     <p className="text-xl italic text-on-surface-variant mb-6 leading-relaxed">
                       &ldquo;Viva Resource didn&apos;t just give us food; they gave us hope when our car broke down and we couldn&apos;t get to
                       work. They are family.&rdquo;
-                      <span className="block mt-2 font-body text-sm not-italic opacity-70">&mdash; Maria & Family, Alamosa CO</span>
+                      <span className="block mt-2 font-body text-sm not-italic opacity-70">&mdash; Maria & Family, El Paso County, CO</span>
                     </p>
                     <Image
                       src={siteImages['donate-card']}
@@ -420,7 +420,7 @@ export default function DonatePage(): JSX.Element {
 
                 {/* Tax Info */}
                 <div className="p-6 bg-surface-high rounded-xl border-l-4 border-primary">
-                  <h4 className="font-bold text-primary mb-2">Tax-Deductibility / Deductibilidad de Impuestos</h4>
+                  <h4 className="font-bold text-primary mb-2">{language === "es" ? "Deductibilidad de Impuestos" : "Tax-Deductibility"}</h4>
                   <p className="text-sm text-on-surface-variant leading-relaxed">
                     Viva Resource is a registered 501(c)(3) non-profit organization. All donations are tax-deductible to the extent allowed by
                     law.
@@ -450,7 +450,7 @@ export default function DonatePage(): JSX.Element {
               <p className="text-on-surface-variant text-sm leading-relaxed mb-6">
                 Donate food, winter clothing, or household essentials directly to our rural distribution centers.
               </p>
-              <Link href="#" className="text-primary font-bold text-sm hover:underline decoration-2 underline-offset-4">
+              <Link href="/contact" className="text-primary font-bold text-sm hover:underline decoration-2 underline-offset-4">
                 Learn More / Leer Más →
               </Link>
             </div>
@@ -478,7 +478,7 @@ export default function DonatePage(): JSX.Element {
               <p className="text-on-surface-variant text-sm leading-relaxed mb-6">
                 Double your impact. Check if your employer offers a donation matching program.
               </p>
-              <Link href="#" className="text-primary font-bold text-sm hover:underline decoration-2 underline-offset-4">
+              <Link href="/contact" className="text-primary font-bold text-sm hover:underline decoration-2 underline-offset-4">
                 Check Eligibility / Ver Elegibilidad →
               </Link>
             </div>

@@ -20,7 +20,9 @@ export default function ClientLayout({ children }: ClientLayoutProps): JSX.Eleme
   const content = (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main id="main-content" className="flex-1">{children}</main>
+      {/* El landmark <main> lo aporta cada pagina; aca solo va el contenedor
+          que apunta el skip-link, para no duplicar <main> en el documento. */}
+      <div id="main-content" tabIndex={-1} className="flex-1">{children}</div>
       <Footer />
       <CookieBanner />
     </div>

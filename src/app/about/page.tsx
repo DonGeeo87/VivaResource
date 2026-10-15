@@ -65,7 +65,7 @@ function TeamMember({ name, role, imageSrc }: TeamMemberProps) {
 }
 
 export default function AboutPage(): JSX.Element {
-  const { translations } = useLanguage();
+  const { translations, language } = useLanguage();
 
   const siteImages = useSiteImages();
 
@@ -89,8 +89,8 @@ export default function AboutPage(): JSX.Element {
     },
     {
       year: "2018",
-      title: translations.about.year2016,
-      description: translations.about.year2016Desc,
+      title: translations.about.year2018,
+      description: translations.about.year2018Desc,
     },
     {
       year: "2024",
@@ -102,12 +102,12 @@ export default function AboutPage(): JSX.Element {
   const teamMembers = [
     {
       name: "Eva Leon",
-      role: "Co-Founder & Executive Director",
+      role: language === "es" ? "Co-Fundadora y Directora Ejecutiva" : "Co-Founder & Executive Director",
       imageSrc: siteImages['team-eva'],
     },
     {
       name: "Monserrat Mendoza",
-      role: "Co-Founder & Director of Operations",
+      role: language === "es" ? "Co-Fundadora y Directora de Operaciones" : "Co-Founder & Director of Operations",
       imageSrc: siteImages['team-monserrat'],
     },
   ];

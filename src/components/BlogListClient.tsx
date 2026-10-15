@@ -98,13 +98,14 @@ export default function BlogListClient({ initialPosts, initialLang }: BlogListCl
   }, [language, initialLang]);
 
   const getCategory = (post: BlogListPost) => {
+    const isEs = language === "es";
     const cats: Record<string, string> = {
-      news: "News / Noticias",
-      impact: "Impact / Impacto",
-      resources: "Resources / Recursos",
-      events: "Events / Eventos",
+      news: isEs ? "Noticias" : "News",
+      impact: isEs ? "Impacto" : "Impact",
+      resources: isEs ? "Recursos" : "Resources",
+      events: isEs ? "Eventos" : "Events",
     };
-    return cats[post.category] || post.category || "Uncategorized";
+    return cats[post.category] || post.category || (isEs ? "Sin categoría" : "Uncategorized");
   };
 
   const filteredPosts = posts.filter((post) => {
@@ -136,7 +137,7 @@ export default function BlogListClient({ initialPosts, initialLang }: BlogListCl
       <section className="relative py-16 md:py-24 px-6 overflow-hidden bg-gradient-to-br from-primary to-primary-container">
         <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
           <span className="inline-block px-4 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label text-xs font-bold mb-4 md:mb-6">
-            OUR STORIES / NUESTRAS HISTORIAS
+            {language === "es" ? "NUESTRAS HISTORIAS" : "OUR STORIES"}
           </span>
           <h1 className="font-headline font-extrabold text-3xl md:text-5xl lg:text-7xl text-on-primary tracking-tighter mb-6 md:mb-8 max-w-4xl">
             {t.title}
@@ -228,7 +229,7 @@ export default function BlogListClient({ initialPosts, initialLang }: BlogListCl
                 onClick={() => setSelectedCategory("all")}
                 className="mt-4 text-primary font-bold text-sm hover:underline"
               >
-                View all categories / Ver todas las categorías
+                {language === "es" ? "Ver todas las categorías" : "View all categories"}
               </button>
             )}
           </div>

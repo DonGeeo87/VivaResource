@@ -39,7 +39,7 @@ export default function Error({
   const t = translations[language] || translations.en;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-6">
+    <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-6">
       <div className="max-w-lg w-full text-center">
         {/* Error icon */}
         <div className="mb-8">
@@ -82,6 +82,6 @@ export default function Error({
           </p>
         )}
       </div>
-    </div>
+    </main>
   );
 }

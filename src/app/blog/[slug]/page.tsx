@@ -110,11 +110,11 @@ export async function generateMetadata({
   };
 }
 
-function formatDate(timestamp: unknown): string {
+function formatDate(timestamp: unknown, locale = "en-US"): string {
   if (!timestamp) return "";
   try {
     const date = new Date(timestamp as string | number);
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString(locale, {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -124,12 +124,12 @@ function formatDate(timestamp: unknown): string {
   }
 }
 
-function getCategoryLabel(category: string): string {
+function getCategoryLabel(category: string, isEs = false): string {
   const categories: Record<string, string> = {
-    news: "News / Noticias",
-    impact: "Impact / Impacto",
-    resources: "Resources / Recursos",
-    events: "Events / Eventos",
+    news: isEs ? "Noticias" : "News",
+    impact: isEs ? "Impacto" : "Impact",
+    resources: isEs ? "Recursos" : "Resources",
+    events: isEs ? "Eventos" : "Events",
   };
   return categories[category] || category;
 }
@@ -176,7 +176,7 @@ export default async function BlogPostPage({
   const title = post.title;
   const content = post.content;
   const excerpt = post.excerpt;
-  const dateStr = formatDate(post.published_at || post.created_at);
+  const dateStr = formatDate(post.published_at || post.created_at, userLang === "es" ? "es-US" : "en-US");
 
   const isEs = userLang === "es";
   const blogBase = isEs ? "/es/blog" : "/blog";
@@ -248,7 +248,7 @@ export default async function BlogPostPage({
           className="inline-flex items-center gap-2 text-primary font-bold text-sm hover:underline"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Blog / Volver al Blog
+          {userLang === "es" ? "Volver al Blog" : "Back to Blog"}
         </Link>
       </div>
 
@@ -257,7 +257,7 @@ export default async function BlogPostPage({
         {/* Category Badge */}
         <div className="mb-6">
           <span className="inline-block px-4 py-1 rounded-full bg-primary-container text-on-primary-container font-label text-xs font-bold">
-            {getCategoryLabel(post.category)}
+            {getCategoryLabel(post.category, userLang === "es")}
           </span>
         </div>
 
@@ -326,7 +326,7 @@ export default async function BlogPostPage({
                 className="block p-6 rounded-xl bg-surface-low hover:bg-primary-container transition-colors"
               >
                 <span className="text-secondary font-bold uppercase tracking-widest text-[10px]">
-                  {getCategoryLabel(item.category)}
+                  {getCategoryLabel(item.category, userLang === "es")}
                 </span>
                 <h3 className="font-headline text-lg font-bold text-on-surface mt-2 mb-2">
                   {item.title}

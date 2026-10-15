@@ -7,12 +7,12 @@ import {
   MapPin,
   Clock,
   ChevronDown,
-  Globe,
   Loader2,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteImages } from "@/contexts/SiteImageContext";
 import { useToast } from "@/components/Toast";
+import { FacebookIcon, InstagramIcon, VIVA_SOCIALS } from "@/components/SocialIcons";
 
 const faqs = [
   {
@@ -162,8 +162,9 @@ export default function ContactPage(): JSX.Element {
               {t.title} / <span className="block">{language === "en" ? "Get in Touch" : "Póngase en Contacto"}</span>
             </h1>
             <p className="text-xl text-on-primary/90 font-medium leading-relaxed max-w-2xl">
-              We&apos;re here to support our rural communities. Reach out for
-              assistance, partnerships, or more information.
+              {language === "es"
+                ? "Estamos aquí para apoyar a nuestras comunidades rurales. Escríbenos para ayuda, alianzas o más información."
+                : "We're here to support our rural communities. Reach out for assistance, partnerships, or more information."}
             </p>
           </div>
         </div>
@@ -355,18 +356,22 @@ export default function ContactPage(): JSX.Element {
                 </h3>
                 <div className="flex gap-4">
                   <a
-                    href="#"
+                    href={VIVA_SOCIALS.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-white transition-all duration-300"
                     aria-label="Instagram"
                   >
-                    <Globe className="w-6 h-6" />
+                    <InstagramIcon className="w-6 h-6" />
                   </a>
                   <a
-                    href="#"
+                    href={VIVA_SOCIALS.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-white transition-all duration-300"
                     aria-label="Facebook"
                   >
-                    <Mail className="w-6 h-6" />
+                    <FacebookIcon className="w-6 h-6" />
                   </a>
                 </div>
               </div>
@@ -381,7 +386,7 @@ export default function ContactPage(): JSX.Element {
               />
               <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
                 <span className="bg-white/90 backdrop-blur px-6 py-2 rounded-full font-headline font-bold text-primary text-sm">
-                  Empowering Communities
+                  {language === "es" ? "Impulsando Comunidades" : "Empowering Communities"}
                 </span>
               </div>
             </div>

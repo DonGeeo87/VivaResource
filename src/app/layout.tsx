@@ -237,7 +237,7 @@ export default function RootLayout({
             href="#main-content"
             className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-6 focus:py-3 focus:bg-primary focus:text-white focus:rounded-full focus:font-bold focus:outline-none focus:ring-4 focus:ring-primary/50"
           >
-            Skip to main content
+            {lang === "es" ? "Saltar al contenido principal" : "Skip to main content"}
           </a>
           <ClientLayout>
             {children}

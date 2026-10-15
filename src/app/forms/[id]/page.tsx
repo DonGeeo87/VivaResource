@@ -73,7 +73,7 @@ export default function PublicFormPage() {
                 setEventInfo({
                   id: data?.linkedEventId,
                   title: eventData?.title_es || eventData?.title_en || '',
-                  date: eventData?.date ? new Date((eventData.date as { toDate?: () => Date }).toDate?.() || eventData.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : undefined,
+                  date: eventData?.date ? new Date((eventData.date as { toDate?: () => Date }).toDate?.() || eventData.date).toLocaleDateString(language === "es" ? 'es-ES' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : undefined,
                   time: eventData?.time,
                   location: eventData?.location,
                 });
@@ -109,19 +109,19 @@ export default function PublicFormPage() {
       for (const field of form.fields) {
         if (field.required) {
           if (field.type === 'checkbox') {
-            schemaShape[field.id] = z.array(z.string()).min(1, "Required");
+            schemaShape[field.id] = z.array(z.string()).min(1, language === "es" ? "Requerido" : "Required");
           } else if (field.type === 'number') {
-            schemaShape[field.id] = z.string().min(1, "Required");
+            schemaShape[field.id] = z.string().min(1, language === "es" ? "Requerido" : "Required");
           } else if (field.type === 'email') {
-            schemaShape[field.id] = z.string().email("Invalid email");
+            schemaShape[field.id] = z.string().email(language === "es" ? "Correo inválido" : "Invalid email");
           } else {
-            schemaShape[field.id] = z.string().min(1, "Required");
+            schemaShape[field.id] = z.string().min(1, language === "es" ? "Requerido" : "Required");
           }
         }
       }
 
       if (form.settings?.requireEmail) {
-        schemaShape['__email'] = z.string().email("Invalid email");
+        schemaShape['__email'] = z.string().email(language === "es" ? "Correo inválido" : "Invalid email");
       }
 
       const schema = z.object(schemaShape);
@@ -197,7 +197,7 @@ export default function PublicFormPage() {
       }
     } catch (error: unknown) {
       console.error("Error submitting form:", error);
-      setErrors({ __form: "Error submitting form. Please try again." });
+      setErrors({ __form: language === "es" ? "Error al enviar el formulario. Inténtalo de nuevo." : "Error submitting form. Please try again." });
     } finally {
       setSubmitting(false);
     }
@@ -290,12 +290,12 @@ export default function PublicFormPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4" />
           <p className="text-gray-600">{language === "es" ? "Cargando..." : "Loading..."}</p>
         </div>
-      </div>
+      </main>
     );
   }
 
@@ -303,19 +303,19 @@ export default function PublicFormPage() {
 
   if (!form) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <main className="min-h-screen flex items-center justify-center">
         <div className="text-center max-w-md">
           <AlertCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{language === "es" ? "Formulario no encontrado" : "Form Not Found"}</h1>
           <p className="text-gray-600">{language === "es" ? "Este formulario puede haber sido eliminado o no está publicado." : "This form may have been deleted or is not published."}</p>
         </div>
-      </div>
+      </main>
     );
   }
 
   if (expired) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <main className="min-h-screen flex items-center justify-center">
         <div className="text-center max-w-md">
           <AlertCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
@@ -327,13 +327,13 @@ export default function PublicFormPage() {
               : "This form is no longer accepting responses."}
           </p>
         </div>
-      </div>
+      </main>
     );
   }
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <main className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center max-w-md p-8">
           <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-6" />
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
@@ -343,12 +343,12 @@ export default function PublicFormPage() {
             {form.settings?.thankYouMessageEs || (language === "es" ? "Tu respuesta ha sido registrada." : "Your response has been recorded.")}
           </p>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary to-primary-container py-12 px-4">
+    <main className="min-h-screen bg-gradient-to-br from-primary to-primary-container py-12 px-4">
       <div className="max-w-3xl mx-auto">
         {/* Event Info Banner (si está asociado a un evento) */}
         {eventInfo && (
@@ -494,6 +494,6 @@ export default function PublicFormPage() {
           <p>© {new Date().getFullYear()} Viva Resource</p>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

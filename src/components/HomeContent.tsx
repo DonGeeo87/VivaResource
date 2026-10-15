@@ -10,13 +10,9 @@ import {
   Star,
   Flower2,
   Heart,
-  Share2,
-  AtSign,
   ChevronRight,
-  Trophy,
   Mail,
   MapPin,
-  Camera,
   Sparkles,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -25,6 +21,7 @@ import { useInView } from "@/hooks/useInView";
 import { useSiteImages } from "@/contexts/SiteImageContext";
 import SurveyPopup from "@/components/SurveyPopup";
 import FeaturedPosts, { type FeaturedPost } from "@/components/FeaturedPosts";
+import { FacebookIcon, InstagramIcon, VIVA_SOCIALS } from "@/components/SocialIcons";
 
 function useReducedMotion(): boolean {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -43,8 +40,76 @@ function useReducedMotion(): boolean {
 
 export default function HomeContent({ featuredPosts, initialLang }: { featuredPosts: FeaturedPost[]; initialLang: "en" | "es" }): JSX.Element {
   const { translations, language } = useLanguage();
+  const alt = (en: string, es: string): string => (language === "es" ? es : en);
     const [heroAnimationsComplete, setHeroAnimationsComplete] = useState(false);
     const prefersReducedMotion = useReducedMotion();
+
+  // Formulario de contacto de la home: envia a /api/email/send (mismo endpoint que /contact)
+  const [contactForm, setContactForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    organization: "",
+    message: "",
+    newsletter: false,
+  });
+  const [contactStatus, setContactStatus] = useState<
+    "idle" | "sending" | "sent" | "invalid" | "error"
+  >("idle");
+
+  const handleContactChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value, type } = e.target;
+    const isCheckbox = type === "checkbox";
+    setContactForm((prev) => ({
+      ...prev,
+      [name]: isCheckbox ? (e.target as HTMLInputElement).checked : value,
+    }));
+  };
+
+  const handleContactSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const isEs = language === "es";
+    if (
+      !contactForm.firstName.trim() ||
+      !contactForm.email.trim() ||
+      !contactForm.message.trim()
+    ) {
+      setContactStatus("invalid");
+      return;
+    }
+    setContactStatus("sending");
+    try {
+      const res = await fetch("/api/email/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: `${contactForm.firstName} ${contactForm.lastName}`.trim(),
+          email: contactForm.email,
+          phone: contactForm.phone,
+          subject: isEs ? "Mensaje desde el sitio web" : "Website Contact Form",
+          message: contactForm.organization
+            ? `${contactForm.message}\n\n${isEs ? "Organizacion" : "Organization"}: ${contactForm.organization}`
+            : contactForm.message,
+        }),
+      });
+      if (!res.ok) throw new Error("send failed");
+      setContactStatus("sent");
+      setContactForm({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        organization: "",
+        message: "",
+        newsletter: false,
+      });
+    } catch {
+      setContactStatus("error");
+    }
+  };
 
   // Intersection Observer hooks for each section
   const heroRef = useRef<HTMLDivElement | null>(null);
@@ -156,7 +221,7 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
             <div className="lg:hidden relative w-full h-full rounded-3xl overflow-hidden shadow-2xl">
               <Image
                 src={siteImages['hero-01']}
-                alt="VIVA volunteers team together"
+                alt={alt("VIVA volunteers team together", "Equipo de voluntarios de VIVA")}
                 fill
                 sizes="(max-width: 1024px) 100vw, 600px"
                 style={{ objectFit: 'cover' }}
@@ -168,7 +233,7 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
               <div className="absolute top-0 right-0 w-64 h-64 rounded-full overflow-hidden border-8 border-surface-lowest shadow-2xl z-10">
                 <Image
                   src={siteImages['hero-01']}
-                  alt="VIVA volunteers team together"
+                  alt={alt("VIVA volunteers team together", "Equipo de voluntarios de VIVA")}
                   fill
                   sizes="256px"
                   style={{ objectFit: 'cover' }}
@@ -178,7 +243,7 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
               <div className="absolute bottom-10 left-0 w-80 h-80 rounded-[100px] overflow-hidden border-8 border-surface-lowest shadow-2xl z-20">
                 <Image
                 src={siteImages['hero-02']}
-                alt="community meeting outdoors"
+                alt={alt("community meeting outdoors", "Reunión comunitaria al aire libre")}
                 fill
                 sizes="320px"
                 style={{ objectFit: 'cover' }}
@@ -188,7 +253,7 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
               <div className="absolute top-10 left-10 w-56 h-72 rounded-full overflow-hidden border-8 border-surface-lowest shadow-2xl rotate-12 z-10">
                 <Image
                   src={siteImages['hero-03']}
-                  alt="volunteer helping community member"
+                  alt={alt("volunteer helping community member", "Voluntario ayudando a un miembro de la comunidad")}
                   fill
                   sizes="224px"
                   style={{ objectFit: 'cover' }}
@@ -222,7 +287,7 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
               <div className="rounded-3xl overflow-hidden shadow-2xl rotate-3">
                 <Image
                   src={siteImages['home-get-help']}
-                  alt="social workers helping community members"
+                  alt={alt("social workers helping community members", "Trabajadores sociales ayudando a la comunidad")}
                   width={600}
                   height={400}
                   sizes="(max-width: 1024px) 100vw, 600px"
@@ -372,7 +437,7 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
             <div className="absolute -inset-4 bg-primary-container rounded-3xl opacity-20 group-hover:opacity-30 transition-opacity"></div>
             <Image
               src={siteImages['about-section']}
-              alt="vibrant photo of students in a community workshop laughing and learning together"
+              alt={alt("vibrant photo of students in a community workshop laughing and learning together", "Foto de estudiantes en un taller comunitario riendo y aprendiendo juntos")}
               width={600}
               height={500}
               sizes="(max-width: 1024px) 100vw, 600px"
@@ -395,7 +460,7 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
             <div className="order-2 lg:order-1 relative">
               <Image
                 src={siteImages['team-eva']}
-                alt="portrait of Eva Leon, co-founder of Viva Resource, a warm smile sitting in a brightly lit modern office"
+                alt={alt("portrait of Eva Leon, co-founder of Viva Resource", "Retrato de Eva Leon, cofundadora de Viva Resource")}
                 width={400}
                 height={600}
                 className="rounded-[4rem] rounded-tl-none shadow-2xl h-[500px] w-full object-cover object-center"
@@ -409,8 +474,12 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
                 {translations.home.evaBio}
               </p>
               <div className="flex gap-4">
-                <Share2 className="w-6 h-6 text-primary cursor-pointer hover:scale-110 transition-transform" />
-                <AtSign className="w-6 h-6 text-primary cursor-pointer hover:scale-110 transition-transform" />
+                <a href={VIVA_SOCIALS.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-primary hover:scale-110 transition-transform">
+                  <FacebookIcon className="w-6 h-6" />
+                </a>
+                <a href={VIVA_SOCIALS.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-primary hover:scale-110 transition-transform">
+                  <InstagramIcon className="w-6 h-6" />
+                </a>
               </div>
             </div>
           </div>
@@ -423,14 +492,18 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
                 {translations.home.monserratBio}
               </p>
               <div className="flex gap-4">
-                <Share2 className="w-6 h-6 text-primary cursor-pointer hover:scale-110 transition-transform" />
-                <AtSign className="w-6 h-6 text-primary cursor-pointer hover:scale-110 transition-transform" />
+                <a href={VIVA_SOCIALS.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-primary hover:scale-110 transition-transform">
+                  <FacebookIcon className="w-6 h-6" />
+                </a>
+                <a href={VIVA_SOCIALS.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-primary hover:scale-110 transition-transform">
+                  <InstagramIcon className="w-6 h-6" />
+                </a>
               </div>
             </div>
             <div ref={parallaxRef2} className="parallax-container relative">
               <Image
                 src={siteImages['team-monserrat']}
-                alt="portrait of Monserrat Mendoza, co-founder of Viva Resource, a confident woman in a casual but professional outfit standing in front of a neutral background"
+                alt={alt("portrait of Monserrat Mendoza, co-founder of Viva Resource", "Retrato de Monserrat Mendoza, cofundadora de Viva Resource")}
                 width={400}
                 height={600}
                 className="parallax-image rounded-[4rem] rounded-br-none shadow-2xl h-[500px] w-full object-cover object-center"
@@ -484,7 +557,7 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
               <div className="relative h-60 md:h-80 rounded-2xl md:rounded-3xl overflow-hidden mb-4 md:mb-6">
                 <Image
                   src={siteImages['pathway-food']}
-                  alt="community workshop training session"
+                  alt={alt("community workshop training session", "Sesión de capacitación en taller comunitario")}
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
                   style={{ objectFit: 'cover' }}
@@ -494,7 +567,7 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
               </div>
               <h3 className="text-xl md:text-2xl font-headline font-bold mb-2 md:mb-3 group-hover:text-primary transition-colors">{translations.home.pathway01Title}</h3>
               <p className="text-on-surface-variant line-clamp-3 text-sm md:text-base">{translations.home.pathway01Desc}</p>
-              <Link href="/get-involved" className="mt-3 md:mt-4 flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all" aria-label={`Más información sobre ${translations.home.pathway01Title}`}>
+              <Link href="/get-involved" className="mt-3 md:mt-4 flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all" aria-label={language === "es" ? `Más información sobre ${translations.home.pathway01Title}` : `More about ${translations.home.pathway01Title}`}>
                 {translations.home.learnMore} <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
               </Link>
             </div>
@@ -503,7 +576,7 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
               <div className="relative h-60 md:h-80 rounded-2xl md:rounded-3xl overflow-hidden mb-4 md:mb-6">
                 <Image
                   src={siteImages['pathway-education']}
-                  alt="volunteers organizing food donations"
+                  alt={alt("volunteers organizing food donations", "Voluntarios organizando donaciones de alimentos")}
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
                   style={{ objectFit: 'cover' }}
@@ -513,7 +586,7 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
               </div>
               <h3 className="text-xl md:text-2xl font-headline font-bold mb-2 md:mb-3 group-hover:text-primary transition-colors">{translations.home.pathway02Title}</h3>
               <p className="text-on-surface-variant line-clamp-3 text-sm md:text-base">{translations.home.pathway02Desc}</p>
-              <Link href="/get-help" className="mt-3 md:mt-4 flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all" aria-label={`Más información sobre ${translations.home.pathway02Title}`}>
+              <Link href="/get-help" className="mt-3 md:mt-4 flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all" aria-label={language === "es" ? `Más información sobre ${translations.home.pathway02Title}` : `More about ${translations.home.pathway02Title}`}>
                 {translations.home.learnMore} <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
               </Link>
             </div>
@@ -522,7 +595,7 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
               <div className="relative h-60 md:h-80 rounded-2xl md:rounded-3xl overflow-hidden mb-4 md:mb-6">
                 <Image
                   src={siteImages['pathway-community']}
-                  alt="community collaboration meeting"
+                  alt={alt("community collaboration meeting", "Reunión de colaboración comunitaria")}
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
                   style={{ objectFit: 'cover' }}
@@ -532,7 +605,7 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
               </div>
               <h3 className="text-xl md:text-2xl font-headline font-bold mb-2 md:mb-3 group-hover:text-primary transition-colors">{translations.home.pathway03Title}</h3>
               <p className="text-on-surface-variant line-clamp-3 text-sm md:text-base">{translations.home.pathway03Desc}</p>
-              <Link href="/resources" className="mt-3 md:mt-4 flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all" aria-label={`Más información sobre ${translations.home.pathway03Title}`}>
+              <Link href="/resources" className="mt-3 md:mt-4 flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all" aria-label={language === "es" ? `Más información sobre ${translations.home.pathway03Title}` : `More about ${translations.home.pathway03Title}`}>
                 {translations.home.learnMore} <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
               </Link>
             </div>
@@ -575,22 +648,26 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
             <div className="pt-4 md:pt-8">
               <p className="text-xs uppercase font-bold tracking-widest text-on-primary/90 mb-4">{translations.home.followJourney}</p>
               <div className="flex gap-4">
-                <div className="w-10 h-10 md:w-12 md:h-12 bg-primary-container rounded-full flex items-center justify-center cursor-pointer hover:bg-white hover:text-primary transition-colors">
-                  <Trophy className="w-5 h-5 md:w-6 md:h-6" />
-                </div>
-                <div className="w-10 h-10 md:w-12 md:h-12 bg-primary-container rounded-full flex items-center justify-center cursor-pointer hover:bg-white hover:text-primary transition-colors">
-                  <Camera className="w-5 h-5 md:w-6 md:h-6" />
-                </div>
+                <a href={VIVA_SOCIALS.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="w-10 h-10 md:w-12 md:h-12 bg-primary-container rounded-full flex items-center justify-center hover:bg-white hover:text-primary transition-colors">
+                  <FacebookIcon className="w-5 h-5 md:w-6 md:h-6" />
+                </a>
+                <a href={VIVA_SOCIALS.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="w-10 h-10 md:w-12 md:h-12 bg-primary-container rounded-full flex items-center justify-center hover:bg-white hover:text-primary transition-colors">
+                  <InstagramIcon className="w-5 h-5 md:w-6 md:h-6" />
+                </a>
               </div>
             </div>
           </div>
           {/* Form */}
           <div className="lg:col-span-7 p-8 md:p-12 lg:p-20 bg-surface">
-            <form className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <form className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6" onSubmit={handleContactSubmit}>
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase text-on-surface-variant">{translations.home.labelFirstName}</label>
                 <input
                   type="text"
+                  name="firstName"
+                  value={contactForm.firstName}
+                  onChange={handleContactChange}
+                  required
                   className="w-full bg-surface-highest border-none rounded-xl p-3 md:p-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
                 />
               </div>
@@ -598,6 +675,9 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
                 <label className="text-xs font-bold uppercase text-on-surface-variant">{translations.home.labelLastName}</label>
                 <input
                   type="text"
+                  name="lastName"
+                  value={contactForm.lastName}
+                  onChange={handleContactChange}
                   className="w-full bg-surface-highest border-none rounded-xl p-3 md:p-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
                 />
               </div>
@@ -605,6 +685,10 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
                 <label className="text-xs font-bold uppercase text-on-surface-variant">{translations.home.labelEmail}</label>
                 <input
                   type="email"
+                  name="email"
+                  value={contactForm.email}
+                  onChange={handleContactChange}
+                  required
                   className="w-full bg-surface-highest border-none rounded-xl p-3 md:p-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
                 />
               </div>
@@ -612,6 +696,9 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
                 <label className="text-xs font-bold uppercase text-on-surface-variant">{translations.home.labelPhone}</label>
                 <input
                   type="tel"
+                  name="phone"
+                  value={contactForm.phone}
+                  onChange={handleContactChange}
                   className="w-full bg-surface-highest border-none rounded-xl p-3 md:p-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
                 />
               </div>
@@ -619,13 +706,20 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
                 <label className="text-xs font-bold uppercase text-on-surface-variant">{translations.home.labelOrganization}</label>
                 <input
                   type="text"
+                  name="organization"
+                  value={contactForm.organization}
+                  onChange={handleContactChange}
                   className="w-full bg-surface-highest border-none rounded-xl p-3 md:p-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
                 />
               </div>
               <div className="md:col-span-2 space-y-2">
                 <label className="text-xs font-bold uppercase text-on-surface-variant">{translations.home.labelMessage}</label>
                 <textarea
+                  name="message"
+                  value={contactForm.message}
+                  onChange={handleContactChange}
                   rows={4}
+                  required
                   className="w-full bg-surface-highest border-none rounded-xl p-3 md:p-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all resize-none"
                 />
               </div>
@@ -633,18 +727,44 @@ export default function HomeContent({ featuredPosts, initialLang }: { featuredPo
                 <input
                   type="checkbox"
                   id="news"
+                  name="newsletter"
+                  checked={contactForm.newsletter}
+                  onChange={handleContactChange}
                   className="rounded text-primary focus:ring-primary"
                 />
                 <label htmlFor="news" className="text-sm text-on-surface-variant">
                   {translations.home.subscribeNewsletter}
                 </label>
               </div>
+              {contactStatus === "sent" && (
+                <p className="md:col-span-2 text-sm font-medium text-green-700">
+                  {language === "es"
+                    ? "¡Mensaje enviado! Te responderemos pronto."
+                    : "Message sent! We'll get back to you soon."}
+                </p>
+              )}
+              {(contactStatus === "invalid" || contactStatus === "error") && (
+                <p className="md:col-span-2 text-sm font-medium text-red-600">
+                  {contactStatus === "invalid"
+                    ? language === "es"
+                      ? "Completa nombre, correo y mensaje."
+                      : "Please fill in name, email and message."
+                    : language === "es"
+                      ? "No se pudo enviar. Intenta de nuevo."
+                      : "Could not send. Please try again."}
+                </p>
+              )}
               <div className="md:col-span-2 pt-2 md:pt-4">
                 <button
                   type="submit"
-                  className="w-full bg-primary text-on-primary py-4 md:py-5 rounded-xl font-bold text-base md:text-lg hover:shadow-xl transition-all"
+                  disabled={contactStatus === "sending"}
+                  className="w-full bg-primary text-on-primary py-4 md:py-5 rounded-xl font-bold text-base md:text-lg hover:shadow-xl transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {translations.home.sendMessage}
+                  {contactStatus === "sending"
+                    ? language === "es"
+                      ? "Enviando..."
+                      : "Sending..."
+                    : translations.home.sendMessage}
                 </button>
               </div>
             </form>
