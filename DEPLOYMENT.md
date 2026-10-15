@@ -50,6 +50,22 @@ Proyecto: `NEXT_PUBLIC_FIREBASE_*`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_PAYPAL_
 
 ## Deploy manual (cuando la cuota de GitHub Actions está agotada)
 
+### Camino recomendado: script
+
+```powershell
+pwsh scripts/deploy-vps.ps1              # sincroniza limpio + build --no-cache + up -d
+pwsh scripts/deploy-vps.ps1 -SkipBuild   # solo sincroniza (sin reconstruir)
+```
+
+Sube el working tree y hace `rsync --delete` **en el VPS** contra el directorio de deploy,
+así que los archivos que ya no existen en el repo desaparecen del VPS. Esto importa: el
+método viejo (extraer el tar *encima*) acumulaba basura y ya rompió un build — un
+`src/lib/firebase/` obsoleto que importaba `firebase/app` quedó dando vueltas en el VPS y,
+al activar el type-check del build, lo tumbó. El script nunca toca el `.env` ni el
+`docker-compose.migracion.yml` del VPS (excluidos del rsync y protegidos de `--delete`).
+
+### Procedimiento crudo (referencia)
+
 Procedimiento validado el 30/09/2026. Regla de oro: **el `.env` y el
 `docker-compose.migracion.yml` del VPS NO se sobreescriben nunca** — el compose del VPS
 tiene variables que el repo no tiene (`LLM_URL`, `COMMANDCODE_API_KEY`) y el `.env` guarda
