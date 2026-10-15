@@ -81,16 +81,6 @@ const nextUpcoming = (
   return ds.find((d) => d.getTime() >= now) || ds[ds.length - 1];
 };
 
-// Helper function to format date for display
-const formatDate = (date: string | Date | { toDate: () => Date } | undefined): string => {
-  const parsed = parseDate(date);
-  return parsed.toLocaleDateString("es-ES", {
-    month: "short",
-    day: "numeric",
-    year: "numeric"
-  });
-};
-
 export default function EventsPage(): JSX.Element {
   const { translations, language } = useLanguage();
   const [events, setEvents] = useState<Event[]>([]);

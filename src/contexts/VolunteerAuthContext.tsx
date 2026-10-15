@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
-import { getToken, getUser, clearSession, setSession, type StoredUser } from "@/lib/auth/client";
+import { getToken, clearSession, setSession } from "@/lib/auth/client";
 import type { VolunteerUser } from "@/types/volunteer";
 
 interface VolunteerAuthContextType {

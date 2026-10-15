@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 
 export default function Error({
@@ -11,10 +12,31 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }): JSX.Element {
+  const { language } = useLanguage();
+
   useEffect(() => {
     // Log error for debugging
     console.error("Application error:", error);
   }, [error]);
+
+  const translations = {
+    en: {
+      title: "Something went wrong",
+      body: "We apologize for the inconvenience. An unexpected error has occurred.",
+      retry: "Try Again",
+      home: "Go Home",
+      ref: "Error reference",
+    },
+    es: {
+      title: "Algo salió mal",
+      body: "Lamentamos el inconveniente. Ocurrió un error inesperado.",
+      retry: "Reintentar",
+      home: "Ir al Inicio",
+      ref: "Referencia del error",
+    },
+  };
+
+  const t = translations[language] || translations.en;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-6">
@@ -28,10 +50,10 @@ export default function Error({
 
         {/* Message */}
         <h2 className="text-3xl font-bold text-gray-900 mb-4">
-          Something went wrong!
+          {t.title}
         </h2>
         <p className="text-gray-600 mb-8 text-lg">
-          We apologize for the inconvenience. An unexpected error has occurred.
+          {t.body}
         </p>
 
         {/* Actions */}
@@ -41,22 +63,22 @@ export default function Error({
             className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white font-semibold rounded-xl hover:bg-primary-hover transition-colors"
           >
             <RefreshCw className="w-5 h-5" />
-            Try Again
+            {t.retry}
           </button>
-          
+
           <Link
             href="/"
             className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-700 font-semibold rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
           >
             <Home className="w-5 h-5" />
-            Go Home
+            {t.home}
           </Link>
         </div>
 
         {/* Error reference */}
         {error.digest && (
           <p className="mt-8 text-xs text-gray-400">
-            Error reference: {error.digest}
+            {t.ref}: {error.digest}
           </p>
         )}
       </div>

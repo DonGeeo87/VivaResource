@@ -9,7 +9,7 @@ import { useToast } from "@/components/Toast";
 import { formatMountainDate } from "@/lib/timezone";
 import type { Timestamp } from "@/lib/db-client";
 
-import { db, addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from "@/lib/db-client";
+import { db, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from "@/lib/db-client";
 
 const safeFormatDate = (date: string | Date | Timestamp | { toDate: () => Date } | undefined, lang: string): string => {
   if (!date) return "-";

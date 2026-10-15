@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
-import { loginWithJwt, getToken, getUser, clearSession, setSession, type StoredUser } from "@/lib/auth/client";
+import { loginWithJwt, getToken, getUser, clearSession, type StoredUser } from "@/lib/auth/client";
 
 interface AuthContextType {
   user: StoredUser | null;

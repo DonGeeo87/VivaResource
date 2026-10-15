@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Search, Trash2, Calendar, MapPin, Users, X, Download, Copy } from "lucide-react";
-import { Timestamp, db } from "@/lib/db-client";
+import { Timestamp } from "@/lib/db-client";
 import { getCurrentUserId, getToken } from "@/lib/auth/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatMountainDate } from "@/lib/timezone";
-import { AdminButton, PageHeader, Pagination, EmptyState } from "@/components/admin";
+import { AdminButton, PageHeader, Pagination } from "@/components/admin";
 
 interface Event {
   id: string;

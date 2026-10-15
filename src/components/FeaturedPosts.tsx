@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ChevronRight, Calendar } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";

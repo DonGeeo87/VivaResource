@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { db, doc, getDoc, collection, query, where, getDocs, deleteDoc } from "@/lib/db-client";
-import { getCurrentUserId, getToken, authFetch } from "@/lib/auth/client";
+import { getToken, authFetch } from "@/lib/auth/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatMountainDate } from "@/lib/timezone";
 import {

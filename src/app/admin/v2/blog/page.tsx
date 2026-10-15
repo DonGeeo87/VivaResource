@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, Edit, Trash2, Eye, Sparkles, Check, X } from "lucide-react";
+import { Search, Trash2, Eye, Sparkles } from "lucide-react";
 import { blogTemplates } from "@/data/blog-templates";
 import { authFetch } from "@/lib/auth/client";
 

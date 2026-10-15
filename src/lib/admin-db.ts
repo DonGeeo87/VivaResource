@@ -40,17 +40,6 @@ async function init() {
   }
 }
 
-// --- Document helpers ---
-
-function docToObj(doc: any) {
-  if (!doc) return null;
-  return {
-    id: doc.id,
-    exists: true,
-    data: () => ({ id: doc.id, ...doc.data }),
-  };
-}
-
 // --- Public API ---
 
 // --- Query builder (encadenable: where + orderBy + limit + get) ---

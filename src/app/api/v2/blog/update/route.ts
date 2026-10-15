@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authorizeStaff } from "@/lib/auth/guard";
-import { updatePost, deletePost, getPostById } from "@/lib/db";
+import { updatePost, deletePost } from "@/lib/db";
 
 export async function PUT(request: NextRequest): Promise<NextResponse> {
   try {

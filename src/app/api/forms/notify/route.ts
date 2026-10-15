@@ -20,7 +20,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     const body = await request.json();
-    const { formId, formTitle, submissionId, submissionData } = body;
+    const { formId, submissionId, submissionData } = body;
 
     if (!formId || !submissionData) {
       return NextResponse.json(

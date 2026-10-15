@@ -116,7 +116,7 @@ export default function FreeResourcesPage(): JSX.Element {
           body: "Nuestro equipo es bilingüe: cada familia recibe atención en el idioma que prefiere, en persona, por teléfono y por correo electrónico.",
           links: [
             { href: `${prefix}/contact`, label: "Escribir al equipo" },
-            { href: `${prefix}/volunteer-opportunities-es`, label: "Sumarse como voluntario bilingüe" },
+            { href: `${prefix}/blog/volunteer-opportunities-es`, label: "Sumarse como voluntario bilingüe" },
           ],
         },
       ]
@@ -172,7 +172,7 @@ export default function FreeResourcesPage(): JSX.Element {
           body: "Our team is bilingual: every family is served in the language they prefer, in person, by phone and by email. This page exists because Spanish-speaking families asked for it.",
           links: [
             { href: `${prefix}/contact`, label: "Write to the team" },
-            { href: `${prefix}/volunteer-opportunities-en`, label: "Volunteer as a bilingual neighbor" },
+            { href: `${prefix}/blog/volunteer-opportunities-en`, label: "Volunteer as a bilingual neighbor" },
           ],
         },
       ];

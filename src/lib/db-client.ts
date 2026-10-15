@@ -144,7 +144,7 @@ function createDocRef(collection: string, id: string): DocRef {
         return { id, exists: false, data: () => null };
       }
     },
-    set: async (data: any, options?: { merge?: boolean }) => {
+    set: async (data: any, _options?: { merge?: boolean }) => {
       await request(`/${collection}`, {
         method: "PUT",
         body: JSON.stringify({ id, ...data }),
@@ -193,11 +193,11 @@ function createColRef(collection: string): ColRef {
           wheres.push({ field: f, op: o, value: String(v) });
           return build();
         },
-        orderBy: (f: string, dir?: "asc" | "desc") => {
+        orderBy: (_f: string, _dir?: "asc" | "desc") => {
           // OrderBy se maneja a nivel de query(); aquí solo ignoramos para no romper encadenado
           return build();
         },
-        limit: (n: number) => {
+        limit: (_n: number) => {
           return build();
         },
       });
@@ -316,7 +316,7 @@ export function onSnapshot(
 
 // writeBatch - stub compatible
 export function writeBatch(_db?: unknown) {
-  let ops: any[] = [];
+  const ops: any[] = [];
   return {
     set: (ref: DocRef, data: any) => { ops.push({ type: "set", ref, data }); },
     update: (ref: DocRef, data: any) => { ops.push({ type: "update", ref, data }); },
