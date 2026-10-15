@@ -34,6 +34,7 @@ export default function Pagination({
 
   const btnBase =
     "inline-flex items-center justify-center w-8 h-8 text-sm rounded-md border transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-40 disabled:cursor-not-allowed";
+  const idle = "border-outline-low text-on-surface-variant hover:bg-surface-low";
 
   return (
     <nav
@@ -43,7 +44,7 @@ export default function Pagination({
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage <= 1}
-        className={`${btnBase} border-gray-200 text-gray-600 hover:bg-gray-50`}
+        className={`${btnBase} ${idle}`}
         aria-label="Anterior"
       >
         <ChevronLeft className="w-4 h-4" />
@@ -51,13 +52,10 @@ export default function Pagination({
 
       {start > 1 && (
         <>
-          <button
-            onClick={() => onPageChange(1)}
-            className={`${btnBase} border-gray-200 text-gray-600 hover:bg-gray-50`}
-          >
+          <button onClick={() => onPageChange(1)} className={`${btnBase} ${idle}`}>
             1
           </button>
-          {start > 2 && <span className="px-1 text-gray-400">…</span>}
+          {start > 2 && <span className="px-1 text-outline">…</span>}
         </>
       )}
 
@@ -69,7 +67,7 @@ export default function Pagination({
           className={`${btnBase} ${
             p === currentPage
               ? "border-primary bg-primary text-white font-medium"
-              : "border-gray-200 text-gray-600 hover:bg-gray-50"
+              : idle
           }`}
         >
           {p}
@@ -78,11 +76,8 @@ export default function Pagination({
 
       {end < totalPages && (
         <>
-          {end < totalPages - 1 && <span className="px-1 text-gray-400">…</span>}
-          <button
-            onClick={() => onPageChange(totalPages)}
-            className={`${btnBase} border-gray-200 text-gray-600 hover:bg-gray-50`}
-          >
+          {end < totalPages - 1 && <span className="px-1 text-outline">…</span>}
+          <button onClick={() => onPageChange(totalPages)} className={`${btnBase} ${idle}`}>
             {totalPages}
           </button>
         </>
@@ -91,7 +86,7 @@ export default function Pagination({
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage >= totalPages}
-        className={`${btnBase} border-gray-200 text-gray-600 hover:bg-gray-50`}
+        className={`${btnBase} ${idle}`}
         aria-label="Siguiente"
       >
         <ChevronRight className="w-4 h-4" />

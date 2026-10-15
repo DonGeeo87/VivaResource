@@ -38,12 +38,12 @@ const AdminButton = forwardRef<HTMLButtonElement, AdminButtonProps>(
       "inline-flex items-center justify-center gap-1.5 rounded-md border font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-1 disabled:opacity-45 disabled:cursor-not-allowed whitespace-nowrap";
 
     const variants: Record<string, string> = {
-      primary: "bg-primary text-white border-primary hover:bg-primary/90",
-      secondary: "bg-white text-gray-700 border-gray-300 hover:bg-gray-50",
+      primary: "bg-primary text-white border-primary hover:bg-primary-hover",
+      secondary: "bg-surface-lowest text-on-surface-variant border-outline-low hover:bg-surface-low",
       outline: "bg-transparent text-primary border-primary hover:bg-primary/5",
       danger: "bg-red-50 text-red-600 border-red-200 hover:bg-red-100",
       ghost:
-        "bg-transparent text-gray-500 border-transparent hover:bg-gray-100 hover:text-gray-700",
+        "bg-transparent text-on-surface-variant border-transparent hover:bg-surface-low hover:text-on-surface",
     };
 
     const sizes: Record<string, string> = {

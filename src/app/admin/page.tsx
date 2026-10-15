@@ -25,6 +25,21 @@ import {
   getCountFromServer,
   db
 } from "@/lib/db-client";
+import {
+  PageHeader,
+  PageShell,
+  StatCard,
+  StatusBadge,
+  Card,
+  CardHeader,
+  CardBody,
+  Table,
+  Thead,
+  Th,
+  Tbody,
+  Tr,
+  Td,
+} from "@/components/admin";
 
 // Interfaces
 interface Stats {
@@ -36,8 +51,8 @@ interface Stats {
   volunteers: number;
   donations: number;
   newsletterSubscribers: number;
-    surveyResponses: number;
-  }
+  surveyResponses: number;
+}
 
 interface RecentEventRegistration {
   id: string;
@@ -94,8 +109,8 @@ export default function AdminDashboard(): JSX.Element {
     volunteers: 0,
     donations: 0,
     newsletterSubscribers: 0,
-        surveyResponses: 0,
-      });
+    surveyResponses: 0,
+  });
   const [loading, setLoading] = useState(true);
 
   const [recentRegistrations, setRecentRegistrations] = useState<RecentEventRegistration[]>([]);
@@ -131,10 +146,10 @@ export default function AdminDashboard(): JSX.Element {
 
         const donationsSnap = await getDocs(collection(db, "donations"));
 
-                const surveyQuery = query(collection(db, "survey_responses"));
-                const surveySnap = await getCountFromServer(surveyQuery);
+        const surveyQuery = query(collection(db, "survey_responses"));
+        const surveySnap = await getCountFromServer(surveyQuery);
 
-                setStats({
+        setStats({
           blogPosts: blogSnap.data().count,
           events: eventsSnap.data().count,
           eventAttendees: registrationsSnap.data().count,
@@ -143,8 +158,8 @@ export default function AdminDashboard(): JSX.Element {
           volunteers: volunteersSnap.data().count,
           donations: donationsSnap.size,
           newsletterSubscribers: newsletterSnap.data().count,
-                    surveyResponses: surveySnap.data().count
-                  });
+          surveyResponses: surveySnap.data().count
+        });
       } catch (error) {
         console.error("Error fetching stats:", error);
       } finally {
@@ -271,7 +286,7 @@ export default function AdminDashboard(): JSX.Element {
         const volSnap = await getDocs(volQuery);
         const volunteers: RecentVolunteer[] = volSnap.docs.map((doc) => {
           const data = doc.data();
-          
+
           let createdAt: Date;
           try {
             if (data?.created_at && typeof data.created_at.toDate === "function") {
@@ -423,73 +438,26 @@ export default function AdminDashboard(): JSX.Element {
   }, []);
 
   const kpiCards = [
-    {
-      title: language === "es" ? "Eventos Activos" : "Active Events",
-      value: stats.events,
-      icon: Calendar,
-      href: "/admin/events",
-      color: "bg-blue-500"
-    },
-    {
-      title: language === "es" ? "Asistentes a Eventos" : "Event Attendees",
-      value: stats.eventAttendees,
-      icon: Users,
-      href: "/admin/events",
-      color: "bg-indigo-500"
-    },
-    {
-      title: language === "es" ? "Formularios Activos" : "Active Forms",
-      value: stats.forms,
-      icon: ClipboardList,
-      href: "/admin/forms",
-      color: "bg-emerald-500"
-    },
-    {
-      title: language === "es" ? "Respuestas a Formularios" : "Form Responses",
-      value: stats.formSubmissions,
-      icon: MessageSquare,
-      href: "/admin/forms",
-      color: "bg-teal-500"
-    },
-    {
-      title: language === "es" ? "Voluntarios Registrados" : "Registered Volunteers",
-      value: stats.volunteers,
-      icon: Users,
-      href: "/admin/volunteers",
-      color: "bg-orange-500"
-    },
-    {
-          title: language === "es" ? "Donaciones" : "Donations",
-          value: stats.donations,
-          icon: Heart,
-          href: "/admin/donations",
-          color: "bg-rose-500"
-        },
-        {
-          title: "Blog Posts",
-          value: stats.blogPosts,
-          icon: FileText,
-          href: "/admin/blog",
-          color: "bg-cyan-500"
-        },
-        {
-          title: language === "es" ? "Encuestas" : "Surveys",
-          value: stats.surveyResponses,
-          icon: ClipboardList,
-          href: "/admin/surveys",
-          color: "bg-teal-500"
-        },
-        {
-              title: language === "es" ? "Suscriptores Newsletter" : "Newsletter Subscribers",
-              value: stats.newsletterSubscribers,
-              icon: Mail,
-              href: "/admin/newsletter",
-              color: "bg-purple-500"
-            },
-          ];
+    { title: language === "es" ? "Eventos Activos" : "Active Events", value: stats.events, icon: Calendar, href: "/admin/events" },
+    { title: language === "es" ? "Asistentes a Eventos" : "Event Attendees", value: stats.eventAttendees, icon: Users, href: "/admin/events" },
+    { title: language === "es" ? "Formularios Activos" : "Active Forms", value: stats.forms, icon: ClipboardList, href: "/admin/forms" },
+    { title: language === "es" ? "Respuestas a Formularios" : "Form Responses", value: stats.formSubmissions, icon: MessageSquare, href: "/admin/forms" },
+    { title: language === "es" ? "Voluntarios Registrados" : "Registered Volunteers", value: stats.volunteers, icon: Users, href: "/admin/volunteers" },
+    { title: language === "es" ? "Donaciones" : "Donations", value: stats.donations, icon: Heart, href: "/admin/donations" },
+    { title: "Blog Posts", value: stats.blogPosts, icon: FileText, href: "/admin/blog" },
+    { title: language === "es" ? "Encuestas" : "Surveys", value: stats.surveyResponses, icon: ClipboardList, href: "/admin/surveys" },
+    { title: language === "es" ? "Suscriptores Newsletter" : "Newsletter Subscribers", value: stats.newsletterSubscribers, icon: Mail, href: "/admin/newsletter" },
+  ];
+
+  const quickActions = [
+    { href: "/admin/blog/new", icon: FileText, title: language === "es" ? "Crear Blog Post" : "Create Blog Post", desc: language === "es" ? "Escribir un nuevo artículo" : "Write a new article" },
+    { href: "/admin/events/new", icon: Calendar, title: language === "es" ? "Crear Evento" : "Create Event", desc: language === "es" ? "Publicar un nuevo evento" : "Publish a new event" },
+    { href: "/admin/volunteers", icon: Users, title: language === "es" ? "Revisar Voluntarios" : "Review Volunteers", desc: language === "es" ? "Gestionar solicitudes" : "Manage requests" },
+  ];
 
   function formatDate(date: Date): string {
-    return date.toLocaleDateString("es-CL", {
+    const locale = language === "es" ? "es-ES" : "en-US";
+    return date.toLocaleDateString(locale, {
       day: "2-digit",
       month: "short",
       year: "numeric",
@@ -498,347 +466,300 @@ export default function AdminDashboard(): JSX.Element {
     });
   }
 
-  function getStatusBadge(status: string): JSX.Element {
-    const statusColors: Record<string, string> = {
-      pending: "bg-yellow-100 text-yellow-800",
-      approved: "bg-green-100 text-green-800",
-      rejected: "bg-red-100 text-red-800",
-      published: "bg-green-100 text-green-800",
-      closed: "bg-gray-100 text-gray-800",
-      draft: "bg-gray-100 text-gray-800"
-    };
-    return (
-      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[status] || "bg-gray-100 text-gray-800"}`}>
-        {status}
-      </span>
-    );
-  }
+  const activityRows = (items: { id: string; primary: string; secondary: string; when: Date; href?: string }[]) =>
+    items.map((item) => {
+      const content = (
+        <div className="flex items-center gap-3 py-2.5">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-on-surface truncate">{item.primary}</p>
+            <p className="text-xs text-on-surface-variant truncate">{item.secondary}</p>
+          </div>
+          <span className="text-xs text-on-surface-variant whitespace-nowrap">{formatDate(item.when)}</span>
+        </div>
+      );
+      return item.href ? (
+        <Link key={item.id} href={item.href} className="block hover:bg-surface-low -mx-2 px-2 rounded-md transition-colors">
+          {content}
+        </Link>
+      ) : (
+        <div key={item.id}>{content}</div>
+      );
+    });
 
   return (
-    <div>
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-on-surface">Dashboard</h1>
-        <p className="text-on-surface-variant mt-1">{language === "es" ? "Bienvenido al panel de administración" : "Welcome to the admin panel"}</p>
+    <PageShell>
+      <PageHeader
+        title="Dashboard"
+        description={language === "es" ? "Bienvenido al panel de administración" : "Welcome to the admin panel"}
+      />
+
+      {/* KPIs */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {kpiCards.map((card) => (
+          <StatCard
+            key={card.title}
+            label={card.title}
+            value={card.value}
+            icon={<card.icon className="w-5 h-5" />}
+            href={card.href}
+            loading={loading}
+          />
+        ))}
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {kpiCards.map((card) => (
+      {/* Acciones rápidas */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {quickActions.map((action) => (
           <Link
-            key={card.title}
-            href={card.href}
-            className="bg-surface-lowest rounded-xl p-6 shadow-ambient border border-outline-low hover:shadow-ambient-md transition-shadow"
+            key={action.href}
+            href={action.href}
+            className="group flex items-center gap-4 p-4 bg-surface-lowest border border-outline-low rounded-lg hover:border-primary/30 hover:bg-surface-low transition-colors"
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className={`${card.color} p-3 rounded-lg`}>
-                <card.icon className="w-6 h-6 text-white" />
-              </div>
-              <ArrowRight className="w-5 h-5 text-on-surface-variant" />
+            <div className="w-11 h-11 rounded-lg bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+              <action.icon className="w-5 h-5" />
             </div>
-            <p className="text-3xl font-bold text-on-surface">
-              {loading ? "..." : card.value}
-            </p>
-            <p className="text-on-surface-variant text-sm mt-1">{card.title}</p>
+            <div className="min-w-0">
+              <p className="font-semibold text-sm text-on-surface">{action.title}</p>
+              <p className="text-xs text-on-surface-variant truncate">{action.desc}</p>
+            </div>
+            <ArrowRight className="w-4 h-4 text-outline ml-auto group-hover:text-primary transition-colors" />
           </Link>
         ))}
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Link
-          href="/admin/blog/new"
-          className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white hover:from-blue-600 hover:to-blue-700 transition-all"
-        >
-          <FileText className="w-8 h-8 mb-4" />
-          <h3 className="font-semibold text-lg">{language === "es" ? "Crear Blog Post" : "Create Blog Post"}</h3>
-          <p className="text-blue-100 text-sm mt-1">{language === "es" ? "Escribir un nuevo artículo" : "Write a new article"}</p>
-        </Link>
-
-        <Link
-          href="/admin/events/new"
-          className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white hover:from-green-600 hover:to-green-700 transition-all"
-        >
-          <Calendar className="w-8 h-8 mb-4" />
-          <h3 className="font-semibold text-lg">{language === "es" ? "Crear Evento" : "Create Event"}</h3>
-          <p className="text-green-100 text-sm mt-1">{language === "es" ? "Publicar un nuevo evento" : "Publish a new event"}</p>
-        </Link>
-
-        <Link
-          href="/admin/volunteers"
-          className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white hover:from-orange-600 hover:to-orange-700 transition-all"
-        >
-          <Users className="w-8 h-8 mb-4" />
-          <h3 className="font-semibold text-lg">{language === "es" ? "Revisar Voluntarios" : "Review Volunteers"}</h3>
-          <p className="text-orange-100 text-sm mt-1">{language === "es" ? "Gestionar solicitudes" : "Manage requests"}</p>
-        </Link>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Recent Event Registrations */}
-        <div className="bg-surface-lowest rounded-xl p-6 shadow-ambient border border-outline-low">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-lg text-on-surface flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-blue-500" />
-              {language === "es" ? "Registros a Eventos" : "Event Registrations"}
-            </h2>
-            <Link href="/admin/events" className="text-sm text-primary hover:underline flex items-center gap-1">
-              {language === "es" ? "Ver todos" : "View all"} <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-          <div className="space-y-3">
+      {/* Actividad reciente */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader
+            title={language === "es" ? "Registros a Eventos" : "Event Registrations"}
+            icon={<Calendar className="w-4 h-4 text-primary" />}
+            actions={
+              <Link href="/admin/events" className="text-xs text-primary hover:underline flex items-center gap-1">
+                {language === "es" ? "Ver todos" : "View all"} <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            }
+          />
+          <CardBody className="divide-y divide-outline-low">
             {loading ? (
-              Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="animate-pulse flex items-center gap-3 p-3 bg-surface-low rounded-lg">
-                  <div className="w-10 h-10 bg-surface-high rounded-full" />
-                  <div className="flex-1">
-                    <div className="h-4 bg-surface-high rounded w-3/4 mb-2" />
-                    <div className="h-3 bg-surface-high rounded w-1/2" />
+              <div className="space-y-3 py-2">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="animate-pulse flex items-center gap-3">
+                    <div className="flex-1">
+                      <div className="h-4 bg-surface-high rounded w-3/4 mb-2" />
+                      <div className="h-3 bg-surface-high rounded w-1/2" />
+                    </div>
                   </div>
-                </div>
-              ))
+                ))}
+              </div>
             ) : recentRegistrations.length === 0 ? (
-              <p className="text-on-surface-variant text-sm text-center py-4">{language === "es" ? "Sin registros recientes" : "No recent registrations"}</p>
+              <p className="text-on-surface-variant text-sm text-center py-6">
+                {language === "es" ? "Sin registros recientes" : "No recent registrations"}
+              </p>
             ) : (
-              recentRegistrations.map((reg) => (
-                <div key={reg.id} className="flex items-center gap-3 p-3 bg-surface-low rounded-lg hover:bg-surface-high transition-colors">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Users className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-on-surface truncate">{reg.name}</p>
-                    <p className="text-xs text-on-surface-variant truncate">{reg.eventName}</p>
-                  </div>
-                  <span className="text-xs text-on-surface-variant whitespace-nowrap">{formatDate(reg.createdAt)}</span>
-                </div>
-              ))
+              activityRows(recentRegistrations.map((reg) => ({
+                id: reg.id,
+                primary: reg.name,
+                secondary: reg.eventName || "",
+                when: reg.createdAt,
+              })))
             )}
-          </div>
-        </div>
+          </CardBody>
+        </Card>
 
-        {/* Recent Form Submissions */}
-        <div className="bg-surface-lowest rounded-xl p-6 shadow-ambient border border-outline-low">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-lg text-on-surface flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-emerald-500" />
-              {language === "es" ? "Respuestas a Formularios" : "Form Responses"}
-            </h2>
-            <Link href="/admin/forms" className="text-sm text-primary hover:underline flex items-center gap-1">
-              {language === "es" ? "Ver todos" : "View all"} <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-          <div className="space-y-3">
+        <Card>
+          <CardHeader
+            title={language === "es" ? "Respuestas a Formularios" : "Form Responses"}
+            icon={<MessageSquare className="w-4 h-4 text-primary" />}
+            actions={
+              <Link href="/admin/forms" className="text-xs text-primary hover:underline flex items-center gap-1">
+                {language === "es" ? "Ver todos" : "View all"} <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            }
+          />
+          <CardBody className="divide-y divide-outline-low">
             {loading ? (
-              Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="animate-pulse flex items-center gap-3 p-3 bg-surface-low rounded-lg">
-                  <div className="w-10 h-10 bg-surface-high rounded-full" />
-                  <div className="flex-1">
+              <div className="space-y-3 py-2">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="animate-pulse">
                     <div className="h-4 bg-surface-high rounded w-3/4 mb-2" />
                     <div className="h-3 bg-surface-high rounded w-1/2" />
                   </div>
-                </div>
-              ))
+                ))}
+              </div>
             ) : recentSubmissions.length === 0 ? (
-              <p className="text-on-surface-variant text-sm text-center py-4">{language === "es" ? "Sin respuestas recientes" : "No recent responses"}</p>
+              <p className="text-on-surface-variant text-sm text-center py-6">
+                {language === "es" ? "Sin respuestas recientes" : "No recent responses"}
+              </p>
             ) : (
-              recentSubmissions.map((sub) => (
-                <div key={sub.id} className="flex items-center gap-3 p-3 bg-surface-low rounded-lg hover:bg-surface-high transition-colors">
-                  <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
-                    <ClipboardList className="w-5 h-5 text-emerald-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-on-surface truncate">{sub.formTitle}</p>
-                    <p className="text-xs text-on-surface-variant truncate">{sub.email || (language === "es" ? "Sin email" : "No email")}</p>
-                  </div>
-                  <span className="text-xs text-on-surface-variant whitespace-nowrap">{formatDate(sub.submittedAt)}</span>
-                </div>
-              ))
+              activityRows(recentSubmissions.map((sub) => ({
+                id: sub.id,
+                primary: sub.formTitle || "",
+                secondary: sub.email || (language === "es" ? "Sin email" : "No email"),
+                when: sub.submittedAt,
+              })))
             )}
-          </div>
-        </div>
+          </CardBody>
+        </Card>
 
-        {/* Recent Volunteers */}
-        <div className="bg-surface-lowest rounded-xl p-6 shadow-ambient border border-outline-low">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-lg text-on-surface flex items-center gap-2">
-              <Heart className="w-5 h-5 text-orange-500" />
-              {language === "es" ? "Nuevos Voluntarios" : "New Volunteers"}
-            </h2>
-            <Link href="/admin/volunteers" className="text-sm text-primary hover:underline flex items-center gap-1">
-              {language === "es" ? "Ver todos" : "View all"} <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-          <div className="space-y-3">
+        <Card>
+          <CardHeader
+            title={language === "es" ? "Nuevos Voluntarios" : "New Volunteers"}
+            icon={<Heart className="w-4 h-4 text-primary" />}
+            actions={
+              <Link href="/admin/volunteers" className="text-xs text-primary hover:underline flex items-center gap-1">
+                {language === "es" ? "Ver todos" : "View all"} <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            }
+          />
+          <CardBody className="divide-y divide-outline-low">
             {loading ? (
-              Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="animate-pulse flex items-center gap-3 p-3 bg-surface-low rounded-lg">
-                  <div className="w-10 h-10 bg-surface-high rounded-full" />
-                  <div className="flex-1">
+              <div className="space-y-3 py-2">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="animate-pulse">
                     <div className="h-4 bg-surface-high rounded w-3/4 mb-2" />
                     <div className="h-3 bg-surface-high rounded w-1/2" />
                   </div>
-                </div>
-              ))
+                ))}
+              </div>
             ) : recentVolunteers.length === 0 ? (
-              <p className="text-on-surface-variant text-sm text-center py-4">{language === "es" ? "Sin voluntarios recientes" : "No recent volunteers"}</p>
+              <p className="text-on-surface-variant text-sm text-center py-6">
+                {language === "es" ? "Sin voluntarios recientes" : "No recent volunteers"}
+              </p>
             ) : (
               recentVolunteers.map((vol) => (
-                <Link
-                  key={vol.id}
-                  href={`/admin/volunteers/${vol.id}`}
-                  className="flex items-center gap-3 p-3 bg-surface-low rounded-lg hover:bg-surface-high transition-colors"
-                >
-                  <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                    <Users className="w-5 h-5 text-orange-600" />
-                  </div>
+                <Link key={vol.id} href={`/admin/volunteers/${vol.id}`} className="flex items-center gap-3 py-2.5 hover:bg-surface-low -mx-2 px-2 rounded-md transition-colors">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-on-surface truncate">{vol.name}</p>
-                    <div className="flex items-center gap-2">
-                      {getStatusBadge(vol.status)}
-                    </div>
+                    <StatusBadge status={vol.status}>{vol.status}</StatusBadge>
                   </div>
                   <span className="text-xs text-on-surface-variant whitespace-nowrap">{formatDate(vol.createdAt)}</span>
                 </Link>
               ))
             )}
-          </div>
-        </div>
+          </CardBody>
+        </Card>
       </div>
 
-      {/* Event Metrics */}
-      <div className="bg-surface-lowest rounded-xl p-6 shadow-ambient border border-outline-low mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="font-semibold text-lg text-on-surface flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-indigo-500" />
-            {language === "es" ? "Métricas por Evento" : "Event Metrics"}
-          </h2>
-          <Link href="/admin/events" className="text-sm text-primary hover:underline flex items-center gap-1">
-            {language === "es" ? "Ver todos" : "View all"} <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-        {loading ? (
-          <div className="space-y-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div className="h-4 bg-surface-high rounded w-1/3 mb-2" />
-                <div className="h-3 bg-surface-high rounded w-full" />
-              </div>
-            ))}
-          </div>
-        ) : eventMetrics.length === 0 ? (
-          <p className="text-on-surface-variant text-center py-8">{language === "es" ? "No hay eventos publicados" : "No published events"}</p>
-        ) : (
-          <div className="space-y-4">
-            {eventMetrics.map((event) => {
-              const capacity = event.capacity || 100;
-              const percentage = Math.min((event.attendeeCount / capacity) * 100, 100);
-              return (
-                <Link
-                  key={event.id}
-                  href={`/admin/events/${event.id}`}
-                  className="block p-4 bg-surface-low rounded-lg hover:bg-surface-high transition-colors"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                      <Calendar className="w-5 h-5 text-blue-500" />
-                      <div>
-                        <p className="font-medium text-on-surface">{event.title}</p>
-                        <p className="text-sm text-on-surface-variant">
-                          {event.attendeeCount} {event.attendeeCount === 1 ? (language === "es" ? "asistente" : "attendee") : (language === "es" ? "asistentes" : "attendees")}
-                          {event.capacity && ` ${language === "es" ? "de" : "of"} ${event.capacity} ${language === "es" ? "disponibles" : "available"}`}
-                        </p>
+      {/* Métricas por evento */}
+      <Card>
+        <CardHeader
+          title={language === "es" ? "Métricas por Evento" : "Event Metrics"}
+          icon={<BarChart3 className="w-4 h-4 text-primary" />}
+          actions={
+            <Link href="/admin/events" className="text-xs text-primary hover:underline flex items-center gap-1">
+              {language === "es" ? "Ver todos" : "View all"} <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          }
+        />
+        <CardBody>
+          {loading ? (
+            <div className="space-y-4">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="h-4 bg-surface-high rounded w-1/3 mb-2" />
+                  <div className="h-3 bg-surface-high rounded w-full" />
+                </div>
+              ))}
+            </div>
+          ) : eventMetrics.length === 0 ? (
+            <p className="text-on-surface-variant text-center py-8">
+              {language === "es" ? "No hay eventos publicados" : "No published events"}
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {eventMetrics.map((event) => {
+                const capacity = event.capacity || 100;
+                const percentage = Math.min((event.attendeeCount / capacity) * 100, 100);
+                return (
+                  <Link key={event.id} href={`/admin/events/${event.id}`} className="block group">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Calendar className="w-4 h-4 text-primary flex-shrink-0" />
+                        <div className="min-w-0">
+                          <p className="font-medium text-sm text-on-surface truncate group-hover:text-primary transition-colors">
+                            {language === "es" && event.titleEs ? event.titleEs : event.title}
+                          </p>
+                          <p className="text-xs text-on-surface-variant">
+                            {event.attendeeCount} {event.attendeeCount === 1 ? (language === "es" ? "asistente" : "attendee") : (language === "es" ? "asistentes" : "attendees")}
+                            {event.capacity && ` ${language === "es" ? "de" : "of"} ${event.capacity}`}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-on-surface tabular-nums">{Math.round(percentage)}%</span>
+                        <Eye className="w-4 h-4 text-outline" />
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium text-on-surface">{Math.round(percentage)}%</span>
-                      <Eye className="w-4 h-4 text-on-surface-variant" />
+                    <div className="w-full bg-surface-high rounded-full h-1.5">
+                      <div
+                        className={`h-1.5 rounded-full transition-all ${percentage >= 80 ? "bg-red-500" : percentage >= 50 ? "bg-secondary" : "bg-primary"}`}
+                        style={{ width: `${percentage}%` }}
+                      />
                     </div>
-                  </div>
-                  <div className="w-full bg-surface-high rounded-full h-2">
-                    <div
-                      className={`h-2 rounded-full transition-all ${
-                        percentage >= 80 ? "bg-red-500" : percentage >= 50 ? "bg-yellow-500" : "bg-green-500"
-                      }`}
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </CardBody>
+      </Card>
 
-      {/* Form Metrics */}
-      <div className="bg-surface-lowest rounded-xl p-6 shadow-ambient border border-outline-low mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="font-semibold text-lg text-on-surface flex items-center gap-2">
-            <ClipboardList className="w-5 h-5 text-teal-500" />
-            {language === "es" ? "Métricas por Formulario" : "Form Metrics"}
-          </h2>
-          <Link href="/admin/forms" className="text-sm text-primary hover:underline flex items-center gap-1">
-            {language === "es" ? "Ver todos" : "View all"} <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-        {loading ? (
-          <div className="space-y-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="animate-pulse flex items-center justify-between p-4 bg-surface-low rounded-lg">
-                <div className="flex-1">
-                  <div className="h-4 bg-surface-high rounded w-1/3 mb-2" />
-                  <div className="h-3 bg-surface-high rounded w-1/4" />
-                </div>
-                <div className="h-8 bg-surface-high rounded w-24" />
-              </div>
-            ))}
-          </div>
-        ) : formMetrics.length === 0 ? (
-          <p className="text-on-surface-variant text-center py-8">{language === "es" ? "No hay formularios publicados" : "No published forms"}</p>
+      {/* Métricas por formulario */}
+      <Card>
+        <CardHeader
+          title={language === "es" ? "Métricas por Formulario" : "Form Metrics"}
+          icon={<ClipboardList className="w-4 h-4 text-primary" />}
+          actions={
+            <Link href="/admin/forms" className="text-xs text-primary hover:underline flex items-center gap-1">
+              {language === "es" ? "Ver todos" : "View all"} <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          }
+        />
+        {formMetrics.length === 0 && !loading ? (
+          <CardBody>
+            <p className="text-on-surface-variant text-center py-8">
+              {language === "es" ? "No hay formularios publicados" : "No published forms"}
+            </p>
+          </CardBody>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-outline-low">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-on-surface-variant">{language === "es" ? "Formulario" : "Form"}</th>
-                  <th className="text-center py-3 px-4 text-sm font-medium text-on-surface-variant">{language === "es" ? "Estado" : "Status"}</th>
-                  <th className="text-center py-3 px-4 text-sm font-medium text-on-surface-variant">{language === "es" ? "Respuestas" : "Responses"}</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-on-surface-variant">{language === "es" ? "Última respuesta" : "Last response"}</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-on-surface-variant">{language === "es" ? "Acciones" : "Actions"}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {formMetrics.map((form) => (
-                  <tr key={form.id} className="border-b border-outline-low hover:bg-surface-low">
-                    <td className="py-3 px-4">
-                      <p className="font-medium text-on-surface">{form.title || form.titleEs}</p>
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      {getStatusBadge(form.status)}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <span className="inline-flex items-center justify-center w-8 h-8 bg-teal-100 text-teal-700 rounded-full font-medium text-sm">
-                        {form.submissionCount}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right text-sm text-on-surface-variant">
-                      {form.lastSubmission ? formatDate(form.lastSubmission) : (language === "es" ? "Sin respuestas" : "No responses")}
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <Link
-                        href={`/admin/forms/${form.id}/responses`}
-                        className="text-sm text-primary hover:underline flex items-center justify-end gap-1"
-                      >
-                        {language === "es" ? "Ver respuestas" : "View responses"} <ArrowRight className="w-4 h-4" />
+          <Table>
+            <Thead>
+              <Th>{language === "es" ? "Formulario" : "Form"}</Th>
+              <Th align="center">{language === "es" ? "Estado" : "Status"}</Th>
+              <Th align="center">{language === "es" ? "Respuestas" : "Responses"}</Th>
+              <Th align="right">{language === "es" ? "Última respuesta" : "Last response"}</Th>
+              <Th align="right">{language === "es" ? "Acciones" : "Actions"}</Th>
+            </Thead>
+            <Tbody>
+              {loading ? (
+                [0, 1, 2].map((i) => (
+                  <Tr key={i}>
+                    <Td><div className="h-4 bg-surface-high rounded w-40 animate-pulse" /></Td>
+                    <Td><div className="h-4 bg-surface-high rounded w-16 mx-auto animate-pulse" /></Td>
+                    <Td><div className="h-4 bg-surface-high rounded w-8 mx-auto animate-pulse" /></Td>
+                    <Td><div className="h-4 bg-surface-high rounded w-24 ml-auto animate-pulse" /></Td>
+                    <Td><div className="h-4 bg-surface-high rounded w-24 ml-auto animate-pulse" /></Td>
+                  </Tr>
+                ))
+              ) : (
+                formMetrics.map((form) => (
+                  <Tr key={form.id}>
+                    <Td><span className="font-medium text-on-surface">{form.title || form.titleEs}</span></Td>
+                    <Td align="center"><StatusBadge status={form.status}>{form.status}</StatusBadge></Td>
+                    <Td align="center"><span className="tabular-nums font-medium text-on-surface">{form.submissionCount}</span></Td>
+                    <Td align="right">{form.lastSubmission ? formatDate(form.lastSubmission) : (language === "es" ? "Sin respuestas" : "No responses")}</Td>
+                    <Td align="right">
+                      <Link href={`/admin/forms/${form.id}/responses`} className="text-primary hover:underline inline-flex items-center gap-1 text-sm">
+                        {language === "es" ? "Ver respuestas" : "View responses"} <ArrowRight className="w-3.5 h-3.5" />
                       </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </Td>
+                  </Tr>
+                ))
+              )}
+            </Tbody>
+          </Table>
         )}
-      </div>
-    </div>
+      </Card>
+    </PageShell>
   );
 }

@@ -19,14 +19,14 @@ export default function PageHeader({
 }: PageHeaderProps): JSX.Element {
   return (
     <div
-      className={`flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6 ${className}`}
+      className={`flex flex-col md:flex-row md:items-center md:justify-between gap-3 ${className}`}
     >
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+      <div className="min-w-0">
+        <h1 className="text-2xl font-bold tracking-tight text-on-surface">
           {title}
         </h1>
         {description && (
-          <p className="text-sm text-gray-500 mt-0.5">{description}</p>
+          <p className="text-sm text-on-surface-variant mt-0.5">{description}</p>
         )}
       </div>
       {actions && (
