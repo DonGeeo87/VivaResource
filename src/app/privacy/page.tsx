@@ -61,8 +61,8 @@ export default function PrivacyPolicyPage(): JSX.Element {
             </h1>
             <p className="text-lg text-[#41474f] max-w-2xl leading-relaxed">
               {language === "es"
-                ? "Última actualización: Octubre 2024. Su confianza es nuestro recurso más valioso. Estamos comprometidos a proteger la dignidad y los datos de las familias a las que servimos."
-                : "Last updated: October 2024. Your trust is our most valuable resource. We are committed to protecting the dignity and data of the families we serve."}
+                ? "Última actualización: Octubre 2026. Su confianza es nuestro recurso más valioso. Estamos comprometidos a proteger la dignidad y los datos de las familias a las que servimos."
+                : "Last updated: October 2026. Your trust is our most valuable resource. We are committed to protecting the dignity and data of the families we serve."}
             </p>
           </div>
           <div className="hidden lg:block w-1/3 aspect-[4/3] bg-[#f3f3f3] rounded-xl overflow-hidden relative">
