@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Calendar, User } from "lucide-react";
 import SchemaMarkup from "@/components/SchemaMarkup";
-import { getPostBySlug as getPostFromDb } from "@/lib/db";
+import { getPostBySlug as getPostFromDb, getPosts } from "@/lib/db";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.vivaresource.com";
 
@@ -80,9 +80,12 @@ export async function generateMetadata({
 
   const title = post.title;
   const excerpt = post.excerpt;
+  // El slug ya lleva el idioma (foo-en / foo-es): esa es la URL canonica, sin
+  // prefijo /es, y es la que el sitemap publica.
+  const canonicalUrl = `${siteUrl}/blog/${post.slug}`;
 
   return {
-    title: `${title} | Viva Resource Blog - Colorado`,
+    title,
     description: excerpt || `Read about ${title.toLowerCase()} and community impact in Colorado.`,
     keywords: [
       title.toLowerCase(),
@@ -91,10 +94,15 @@ export async function generateMetadata({
       post.category,
       "rural Colorado community",
     ],
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
+      url: canonicalUrl,
       title: `${title} | Viva Resource`,
       description: excerpt || `Read about ${title.toLowerCase()} and community impact in Colorado.`,
       type: "article",
+      locale: post.language === "es" ? "es_US" : "en_US",
       images: post.featured_image
         ? [{ url: post.featured_image, width: 1200, height: 630, alt: title }]
         : [{ url: `${siteUrl}/og-viva.jpg`, width: 1200, height: 630, alt: "Viva Resource" }],
@@ -170,6 +178,29 @@ export default async function BlogPostPage({
   const excerpt = post.excerpt;
   const dateStr = formatDate(post.published_at || post.created_at);
 
+  const isEs = userLang === "es";
+  const blogBase = isEs ? "/es/blog" : "/blog";
+
+  // Posts relacionados: mismo idioma y, primero, la misma categoria. Antes cada
+  // post era una isla (cero enlaces internos) y Google solo los encontraba por
+  // el sitemap.
+  let related: Array<{ slug: string; title: string; excerpt: string; category: string }> = [];
+  try {
+    const all = await getPosts({ lang: userLang, limit: 50 });
+    const others = all.filter((candidate) => candidate.slug !== post.slug);
+    others.sort(
+      (a, b) => Number(b.category === post.category) - Number(a.category === post.category)
+    );
+    related = others.slice(0, 3).map((candidate) => ({
+      slug: candidate.slug,
+      title: candidate.title,
+      excerpt: candidate.excerpt,
+      category: candidate.category,
+    }));
+  } catch {
+    related = [];
+  }
+
   // Parse published_at for schema
   let publishedDate = new Date().toISOString();
   if (post.published_at) {
@@ -213,7 +244,7 @@ export default async function BlogPostPage({
       {/* Back to Blog Link */}
       <div className="max-w-4xl mx-auto px-6 pt-8">
         <Link
-          href="/blog"
+          href={blogBase}
           className="inline-flex items-center gap-2 text-primary font-bold text-sm hover:underline"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -281,20 +312,48 @@ export default async function BlogPostPage({
         </div>
       </section>
 
+      {/* Related posts: enlaces internos reales dentro del blog */}
+      {related.length > 0 && (
+        <section className="max-w-4xl mx-auto px-6 pb-20">
+          <h2 className="font-headline text-2xl font-bold text-on-surface mb-6">
+            {isEs ? "Sigue leyendo" : "Keep reading"}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {related.map((item) => (
+              <Link
+                key={item.slug}
+                href={`${blogBase}/${item.slug}`}
+                className="block p-6 rounded-xl bg-surface-low hover:bg-primary-container transition-colors"
+              >
+                <span className="text-secondary font-bold uppercase tracking-widest text-[10px]">
+                  {getCategoryLabel(item.category)}
+                </span>
+                <h3 className="font-headline text-lg font-bold text-on-surface mt-2 mb-2">
+                  {item.title}
+                </h3>
+                <p className="text-on-surface-variant text-sm line-clamp-3">{item.excerpt}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Bottom CTA */}
       <section className="bg-surface-low py-16 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="font-headline text-3xl font-bold text-on-surface mb-4">
-            Enjoyed this article?
+            {isEs ? "¿Te sirvió este artículo?" : "Enjoyed this article?"}
           </h2>
           <p className="text-on-surface-variant mb-8">
-            Explore more stories of impact and community empowerment.
+            {isEs
+              ? "Explora más guías y recursos para tu familia."
+              : "Explore more stories of impact and community empowerment."}
           </p>
           <Link
-            href="/blog"
+            href={blogBase}
             className="inline-flex items-center gap-2 bg-primary text-on-primary px-8 py-4 rounded-full font-headline font-bold text-sm hover:opacity-90 transition-all"
           >
-            Read More Articles
+            {isEs ? "Ver más artículos" : "Read More Articles"}
           </Link>
         </div>
       </section>

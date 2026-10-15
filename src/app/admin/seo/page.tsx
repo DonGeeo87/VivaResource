@@ -26,6 +26,9 @@ interface SeoSettings {
   // General
   site_title: string;
   site_description: string;
+  // Portada en espanol (/es)
+  site_title_es: string;
+  site_description_es: string;
   site_keywords: string;
   canonical_url: string;
   site_locale: string;
@@ -58,6 +61,9 @@ const DEFAULT_SETTINGS: SeoSettings = {
   site_title: "Viva Resource | Community Resources in Rural Colorado",
   site_description:
     "Viva Resource is a 501(c)(3) nonprofit connecting rural Colorado communities with essential resources: food assistance, housing support, healthcare navigation, education, and legal aid referrals.",
+  site_title_es: "Viva Resource | Recursos comunitarios en Colorado rural",
+  site_description_es:
+    "Viva Resource es una organizacion 501(c)(3) sin fines de lucro que conecta a las comunidades rurales de Colorado con recursos esenciales: ayuda alimentaria, apoyo de vivienda, navegacion de salud, talleres educativos y referencias legales.",
   site_keywords:
     "community resources colorado, recursos comunitarios colorado, food assistance el paso county, rural colorado nonprofit, 501c3, housing support, healthcare navigation, ayuda comunitaria colorado",
   canonical_url: "https://www.vivaresource.com",
@@ -371,6 +377,47 @@ export default function AdminSeoPage(): JSX.Element {
                 <p className="mt-1 text-xs text-gray-500">
                   {settings.site_description.length}/160{" "}
                   {settings.site_description.length > 160 && (
+                    <span className="text-amber-600 font-medium">
+                      ({language === "es" ? "excede 160 caracteres" : "exceeds 160 chars"})
+                    </span>
+                  )}
+                </p>
+              </div>
+              {/* Version en espanol (/es): si queda vacia se usa el texto por defecto */}
+              <div className="pt-4 border-t border-gray-100">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {language === "es" ? "Título en español (portada /es)" : "Spanish Title (home /es)"}
+                </label>
+                <input
+                  type="text"
+                  value={settings.site_title_es}
+                  onChange={(e) => handleChange("site_title_es", e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                  placeholder="Viva Resource | Recursos comunitarios en Colorado rural"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  {settings.site_title_es.length}/60{" "}
+                  {settings.site_title_es.length > 60 && (
+                    <span className="text-amber-600 font-medium">
+                      ({language === "es" ? "excede 60 caracteres" : "exceeds 60 chars"})
+                    </span>
+                  )}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {language === "es" ? "Descripción en español (portada /es)" : "Spanish Description (home /es)"}
+                </label>
+                <textarea
+                  value={settings.site_description_es}
+                  onChange={(e) => handleChange("site_description_es", e.target.value)}
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                  placeholder="Organización 501(c)(3) que conecta a las comunidades rurales de Colorado con recursos esenciales..."
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  {settings.site_description_es.length}/160{" "}
+                  {settings.site_description_es.length > 160 && (
                     <span className="text-amber-600 font-medium">
                       ({language === "es" ? "excede 160 caracteres" : "exceeds 160 chars"})
                     </span>

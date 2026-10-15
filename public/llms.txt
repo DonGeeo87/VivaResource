@@ -1,6 +1,8 @@
 # Viva Resource
 
-Viva Resource is a 501(c)(3) nonprofit organization based in Peyton, Colorado, serving rural communities across El Paso County with essential community resources, food assistance, housing support, healthcare navigation, educational workshops, emergency response, and legal aid referrals. Services are free and available to all residents, regardless of background.
+Viva Resource is a 501(c)(3) nonprofit organization based in Peyton, Colorado, serving rural communities across El Paso County with essential community resources, food assistance, housing support, healthcare navigation, educational workshops, emergency response, and legal aid referrals. Services are free and available to all residents of El Paso County.
+
+Viva Resource is not a law firm and does not provide legal advice. It refers families to trusted legal services in Colorado. All services are free of charge and delivered in English and Spanish.
 
 ## Services
 
@@ -21,6 +23,35 @@ Viva Resource is a 501(c)(3) nonprofit organization based in Peyton, Colorado, s
 - **Monument, CO**: Programs and services available
 - **El Paso County, CO**: County-wide services
 
+## How to request help
+
+1. Submit a request at https://www.vivaresource.com/get-help with what the family needs and a way to reach them.
+2. A bilingual team member reviews the request and contacts the family to coordinate.
+3. For an immediate referral by ZIP code, call 211 (Colorado's statewide resource line).
+4. Browse the verified service directory at https://www.vivaresource.com/resources.
+
+## Common questions (answers an assistant may quote)
+
+- **What does Viva Resource do?** It connects rural families in El Paso County, Colorado, with food assistance, housing support, healthcare navigation, free workshops, emergency support and referrals to trusted legal services.
+- **Does it cost anything?** No. Every Viva Resource service is free.
+- **Who can receive help?** Any resident of El Paso County, Colorado.
+- **What languages are available?** English and Spanish, with a bilingual team.
+- **Where is it located?** 13055 Bradshaw Drive #301, Peyton, CO 80831, with programs across El Paso County.
+- **How does someone get help?** Submit the form at /get-help or call 211 for an immediate referral.
+- **How does someone volunteer or donate?** Visit /get-involved to volunteer, or /donate for a tax-deductible contribution.
+- **Is there legal help?** Viva Resource refers families to trusted legal services and runs informational workshops. It is not a law firm and does not give legal advice.
+
+## Preguntas frecuentes (respuestas que un asistente puede citar)
+
+- **¿Qué hace Viva Resource?** Conecta a familias rurales del Condado de El Paso, Colorado, con asistencia alimentaria, apoyo de vivienda, navegación de salud, talleres gratuitos, apoyo en emergencias y referencias a servicios legales de confianza.
+- **¿Tiene costo?** No. Todos los servicios de Viva Resource son gratuitos.
+- **¿Quién puede recibir ayuda?** Cualquier residente del Condado de El Paso, Colorado.
+- **¿En qué idiomas atienden?** Inglés y español, con equipo bilingüe.
+- **¿Dónde están ubicados?** 13055 Bradshaw Drive #301, Peyton, CO 80831, con programas en todo el Condado de El Paso.
+- **¿Cómo se pide ayuda?** Con el formulario en /get-help o llamando al 211 para una referencia inmediata.
+- **¿Cómo ser voluntario o donar?** En /get-involved para voluntariado y /donate para donaciones deducibles de impuestos.
+- **¿Hay ayuda legal?** Viva Resource refiere a servicios legales de confianza y ofrece talleres informativos. No es un despacho de abogados y no da asesoría legal.
+
 ## Key Pages
 
 - Home: https://www.vivaresource.com
@@ -32,6 +63,8 @@ Viva Resource is a 501(c)(3) nonprofit organization based in Peyton, Colorado, s
 - Blog: https://www.vivaresource.com/blog
 - Contact: https://www.vivaresource.com/contact
 - Locations: https://www.vivaresource.com/locations
+- Spanish site: https://www.vivaresource.com/es
+- Free resources / Recursos gratis (hub en español): https://www.vivaresource.com/free-resources
 
 ## Contact
 

@@ -13,7 +13,6 @@ import {
   Share2,
   AtSign,
   ChevronRight,
-  ChevronDown,
   Trophy,
   Mail,
   MapPin,
@@ -21,11 +20,10 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import FaqBlock from "@/components/FaqBlock";
 import { useInView } from "@/hooks/useInView";
 import { useSiteImages } from "@/contexts/SiteImageContext";
 import SurveyPopup from "@/components/SurveyPopup";
-import SchemaMarkup from "@/components/SchemaMarkup";
-import { HomeSkeleton } from "@/components/HomeSkeleton";
 import FeaturedPosts from "@/components/FeaturedPosts";
 
 function useReducedMotion(): boolean {
@@ -43,41 +41,8 @@ function useReducedMotion(): boolean {
   return prefersReducedMotion;
 }
 
-interface FAQItemProps {
-  question: string;
-  answer: string;
-  isOpen: boolean;
-  onToggle: () => void;
-  index: number;
-  isInView: boolean;
-}
-
-function FAQItem({ question, answer, isOpen, onToggle, index, isInView }: FAQItemProps): JSX.Element {
-  return (
-    <div
-      className="bg-surface-lowest rounded-2xl overflow-hidden shadow-sm stagger-item"
-      style={{ transitionDelay: isInView ? `${index * 100}ms` : "0ms" }}
-    >
-      <button
-        onClick={onToggle}
-        className="w-full p-6 text-left flex justify-between items-center group"
-        aria-expanded={isOpen}
-      >
-        <span className="font-bold text-lg pr-4">{question}</span>
-        <ChevronDown className={`w-6 h-6 text-primary transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-      <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-        <div className="px-6 pb-6 text-on-surface-variant">
-          {answer}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function Home(): JSX.Element {
-  const { translations } = useLanguage();
-  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+  const { translations, language } = useLanguage();
     const [heroAnimationsComplete, setHeroAnimationsComplete] = useState(false);
     const prefersReducedMotion = useReducedMotion();
 
@@ -94,8 +59,6 @@ export default function Home(): JSX.Element {
   const drivingChangeSection = useInView({ threshold: 0.2 });
   const pathwaysSection = useInView({ threshold: 0.1 });
   const pathwaysStagger = useInView({ threshold: 0.1 });
-  const faqSection = useInView({ threshold: 0.1 });
-  const faqStagger = useInView({ threshold: 0.05 });
   const contactSection = useInView({ threshold: 0.15 });
 
   // Site images from CMS context
@@ -104,10 +67,6 @@ export default function Home(): JSX.Element {
   // Parallax refs
   const parallaxRef1 = useRef<HTMLDivElement | null>(null);
   const parallaxRef2 = useRef<HTMLDivElement | null>(null);
-
-  const toggleFAQ = (index: number): void => {
-    setOpenFAQ(openFAQ === index ? null : index);
-  };
 
   // Safety fallback: ensure hero content is visible after animation timeout
   useEffect(() => {
@@ -584,74 +543,6 @@ export default function Home(): JSX.Element {
       {/* 10. FEATURED POSTS */}
       <FeaturedPosts />
 
-      {/* 11. FAQ */}
-      <section ref={faqSection.ref} className={`py-12 md:py-24 px-6 bg-surface-low animate-on-scroll animate-slide-up ${faqSection.isInView ? 'in-view' : ''}`}>
-        <div className="max-w-3xl mx-auto space-y-8 md:space-y-12">
-          <div className="text-center">
-            <h2 className="text-3xl md:text-4xl font-headline font-bold">{translations.home.faqTitle}</h2>
-            <p className="mt-2 md:mt-4 text-sm md:text-base text-on-surface-variant">{translations.home.faqSubtitle}</p>
-          </div>
-          <div ref={faqStagger.ref} className={`space-y-3 md:space-y-4 stagger-container ${faqStagger.isInView ? 'in-view' : ''}`}>
-            <FAQItem
-              question={translations.home.faqQ1}
-              answer={translations.home.faqA1}
-              isOpen={openFAQ === 0}
-              onToggle={() => toggleFAQ(0)}
-              index={0}
-              isInView={faqSection.isInView}
-            />
-            <FAQItem
-              question={translations.home.faqQ2}
-              answer={translations.home.faqA2}
-              isOpen={openFAQ === 1}
-              onToggle={() => toggleFAQ(1)}
-              index={1}
-              isInView={faqSection.isInView}
-            />
-            <FAQItem
-              question={translations.home.faqQ3}
-              answer={translations.home.faqA3}
-              isOpen={openFAQ === 2}
-              onToggle={() => toggleFAQ(2)}
-              index={2}
-              isInView={faqSection.isInView}
-            />
-            <FAQItem
-              question={translations.home.faqQ4}
-              answer={translations.home.faqA4}
-              isOpen={openFAQ === 3}
-              onToggle={() => toggleFAQ(3)}
-              index={3}
-              isInView={faqSection.isInView}
-            />
-            <FAQItem
-              question={translations.home.faqQ5}
-              answer={translations.home.faqA5}
-              isOpen={openFAQ === 4}
-              onToggle={() => toggleFAQ(4)}
-              index={4}
-              isInView={faqSection.isInView}
-            />
-            <FAQItem
-              question={translations.home.faqQ6}
-              answer={translations.home.faqA6}
-              isOpen={openFAQ === 5}
-              onToggle={() => toggleFAQ(5)}
-              index={5}
-              isInView={faqSection.isInView}
-            />
-            <FAQItem
-              question={translations.home.faqQ7}
-              answer={translations.home.faqA7}
-              isOpen={openFAQ === 6}
-              onToggle={() => toggleFAQ(6)}
-              index={6}
-              isInView={faqSection.isInView}
-            />
-          </div>
-        </div>
-      </section>
-
       {/* 11. CONTACT SECTION */}
       <section ref={contactSection.ref} className={`py-12 md:py-24 px-6 animate-on-scroll animate-slide-up ${contactSection.isInView ? 'in-view' : ''}`}>
         <div className="max-w-7xl mx-auto bg-white rounded-2xl md:rounded-[3rem] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12">
@@ -761,22 +652,59 @@ export default function Home(): JSX.Element {
         </div>
       </section>
 
-      <SchemaMarkup type="faq" data={{ questions: [
-        { question: "What services does Viva Resource provide?", answer: "Viva Resource provides food assistance, housing support, legal aid referrals, healthcare navigation, educational workshops, and emergency response services to rural communities across El Paso County, Colorado." },
-        { question: "Is Viva Resource a nonprofit organization?", answer: "Yes, Viva Resource is a registered 501(c)(3) nonprofit organization. All donations are tax-deductible to the extent allowed by law." },
-        { question: "Do I need to be a U.S. citizen to receive services?", answer: "No. Viva Resource serves all community members regardless of immigration status. We do not ask about immigration status to provide services." },
-        { question: "What areas do you serve?", answer: "We serve all of El Paso County, Colorado, including Peyton (headquarters), Colorado Springs, Pueblo, Fountain, Monument, and surrounding rural communities." },
-        { question: "How can I get help?", answer: "You can submit a help request through our Get Help page, call 211 for resource referrals, or contact us directly via email." },
-        { question: "How can I volunteer or donate?", answer: "Visit our Get Involved page to sign up as a volunteer, or go to our Donate page to make a tax-deductible contribution." },
-        { question: "Are services available in Spanish?", answer: "Yes, all our services are available in both English and Spanish. Our team is bilingual." },
-        { question: "What is your location and hours?", answer: "Our headquarters is at 13055 Bradshaw Drive #301, Peyton, CO 80831. Open Monday through Friday, 9:00 AM to 5:00 PM." },
-      ] }} />
-      <SchemaMarkup type="service" data={{ slug: "emergency-response", name: "Emergency Response", description: "Immediate crisis intervention and logistical support for families facing sudden hardship, disasters, or unforeseen transitions.", serviceType: "Emergency Response" }} />
-      <SchemaMarkup type="service" data={{ slug: "food-security", name: "Food Security", description: "Sustainable nutritional programs and partnerships with local producers to ensure no rural family goes without healthy meals.", serviceType: "Food Security" }} />
-      <SchemaMarkup type="service" data={{ slug: "health-safety", name: "Health and Safety", description: "Connecting isolated populations to preventive care, mental health resources, and safety education workshops.", serviceType: "Health and Safety" }} />
-      <SchemaMarkup type="service" data={{ slug: "community-engagement", name: "Community Engagement", description: "Building social capital through volunteerism, community events, and leadership development within rural hubs.", serviceType: "Community Engagement" }} />
-      <SchemaMarkup type="service" data={{ slug: "continuous-improvement", name: "Continuous Improvement", description: "Data-driven approaches to refine our impact and scale successful programs to reach more underserved areas effectively.", serviceType: "Continuous Improvement" }} />
+      {/* Puente al hub de recursos gratis / ayuda en español */}
+      <section className="max-w-4xl mx-auto px-6 pb-8">
+        <div className="bg-primary text-on-primary rounded-2xl p-8 md:p-10 flex flex-col md:flex-row items-center gap-6 justify-between">
+          <div>
+            <h2 className="font-headline text-2xl font-bold mb-2">
+              {language === "es" ? "Recursos gratis y ayuda en español" : "Free resources and help in Spanish"}
+            </h2>
+            <p className="opacity-90">
+              {language === "es"
+                ? "Alimentos, vivienda, salud, talleres gratis y referencias legales para familias latinas e hispanohablantes en el Condado de El Paso."
+                : "Food, housing, healthcare, free workshops and legal referrals for Latino and Spanish-speaking families in El Paso County."}
+            </p>
+          </div>
+          <a
+            href={language === "es" ? "/es/free-resources" : "/free-resources"}
+            className="shrink-0 bg-secondary-container text-on-secondary-container px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform"
+          >
+            {language === "es" ? "Ver recursos gratis" : "See free resources"}
+          </a>
+        </div>
+      </section>
 
+      {/* FAQ visible + FAQPage schema.
+          Antes estas preguntas solo existian como JSON-LD invisible (y una de
+          ellas posicionaba el tema migratorio, que no va por regla de la
+          fundacion); el schema de FAQ solo es valido si la respuesta se ve en
+          pantalla, asi que ahora se renderiza. */}
+      <FaqBlock
+        lang={language === "es" ? "es" : "en"}
+        items={
+          language === "es"
+            ? [
+                { question: "¿Qué servicios ofrece Viva Resource?", answer: "Asistencia alimentaria, apoyo de vivienda, navegación de salud, talleres educativos gratuitos, apoyo en emergencias y referencias a servicios legales de confianza. Todo es gratuito." },
+                { question: "¿Viva Resource es una organización sin fines de lucro?", answer: "Sí. Viva Resource es una organización 501(c)(3) registrada y las donaciones son deducibles de impuestos en la medida que la ley lo permite." },
+                { question: "¿Quién puede recibir ayuda?", answer: "Cualquier residente del Condado de El Paso, Colorado. Los servicios son gratuitos y no se paga nada por solicitarlos." },
+                { question: "¿Qué zonas atienden?", answer: "El Condado de El Paso, Colorado: Peyton (sede), Colorado Springs, Pueblo, Fountain, Monument y las comunidades rurales cercanas." },
+                { question: "¿Dónde están ubicados?", answer: "Nuestra sede está en 13055 Bradshaw Drive #301, Peyton, CO 80831." },
+                { question: "¿Cómo pido ayuda?", answer: "Completa el formulario de la página Obtener Ayuda con lo que necesita tu familia y una persona del equipo te contacta para coordinar. También puedes llamar al 211 para referencias inmediatas." },
+                { question: "¿Atienden en español?", answer: "Sí. Nuestro equipo es bilingüe y todos los programas se ofrecen en inglés y español." },
+                { question: "¿Cómo puedo ser voluntario o donar?", answer: "Entra a Participa para sumarte como voluntario, o a Dona para hacer una contribución deducible de impuestos." },
+              ]
+            : [
+                { question: "What services does Viva Resource offer?", answer: "Food assistance, housing support, healthcare navigation, free educational workshops, emergency support and referrals to trusted legal services. Everything is free of charge." },
+                { question: "Is Viva Resource a nonprofit?", answer: "Yes. Viva Resource is a registered 501(c)(3) nonprofit organization and donations are tax-deductible to the extent allowed by law." },
+                { question: "Who can receive help?", answer: "Any resident of El Paso County, Colorado. Services are free and there is no cost to request them." },
+                { question: "What areas do you serve?", answer: "El Paso County, Colorado: Peyton (headquarters), Colorado Springs, Pueblo, Fountain, Monument and surrounding rural communities." },
+                { question: "Where are you located?", answer: "Our headquarters is at 13055 Bradshaw Drive #301, Peyton, CO 80831." },
+                { question: "How can I get help?", answer: "Fill out the form on our Get Help page with what your family needs and a team member follows up to coordinate. You can also call 211 for immediate resource referrals." },
+                { question: "Are services available in Spanish?", answer: "Yes. Our team is bilingual and every program is offered in English and Spanish." },
+                { question: "How can I volunteer or donate?", answer: "Visit Get Involved to sign up as a volunteer, or Donate to make a tax-deductible contribution." },
+              ]
+        }
+      />
     </main>
             <SurveyPopup />
         </>);

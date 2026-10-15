@@ -1,21 +1,20 @@
 import Link from "next/link";
-import { MapPin, ArrowRight, Users, HeartHandshake } from "lucide-react";
+import type { Metadata } from "next";
+import { MapPin, ArrowRight, HeartHandshake } from "lucide-react";
 import { locations } from "@/data/locations";
+import { generatePageMeta } from "@/lib/metadata";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.vivaresource.com";
-
-export const metadata = {
-  title: "Locations | Viva Resource — Colorado Community Services",
-  description: "Find Viva Resource services near you in Peyton, Colorado Springs, Pueblo, Fountain, Monument, and across El Paso County, Colorado.",
-  keywords: "Viva Resource locations, Colorado community services, Peyton CO, Colorado Springs, Pueblo CO, El Paso County nonprofit",
-  openGraph: {
-    title: "Locations | Viva Resource",
-    description: "Find community services near you across Colorado.",
-    url: `${siteUrl}/locations`,
-    locale: "en_US",
-    siteName: "Viva Resource",
-  },
-};
+export function generateMetadata(): Metadata {
+  return generatePageMeta({
+    title: "Locations: Where We Serve in Colorado",
+    description: "Find Viva Resource services near you: Peyton, Colorado Springs, Pueblo, Fountain, Monument and across El Paso County, Colorado.",
+    titleEs: "Ubicaciones: dónde servimos en Colorado",
+    descriptionEs:
+      "Encuentra los servicios de Viva Resource cerca de ti: Peyton, Colorado Springs, Pueblo, Fountain, Monument y todo el Condado de El Paso, Colorado.",
+    path: "/locations",
+    keywords: ["Viva Resource locations", "ubicaciones Colorado", "Colorado community services", "Peyton CO", "El Paso County nonprofit"],
+  });
+}
 
 export default function LocationsIndexPage() {
   return (

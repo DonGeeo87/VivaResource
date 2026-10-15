@@ -1,5 +1,10 @@
 import '@testing-library/jest-dom';
 
+// Los tests de auth firman/verifican tokens: sin JWT_SECRET, jwt.ts rechaza
+// todo. Se fija aqui (antes de que los tests importen el modulo) para que
+// `npm test` funcione en un clon limpio.
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'vitest-jwt-secret';
+
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,

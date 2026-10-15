@@ -14,9 +14,18 @@ const staticRoutes: MetadataRoute.Sitemap = [
   { url: `${siteUrl}/blog`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
   { url: `${siteUrl}/contact`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
   { url: `${siteUrl}/resources`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
+  { url: `${siteUrl}/free-resources`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
   { url: `${siteUrl}/get-help`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
   { url: `${siteUrl}/get-involved`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
   { url: `${siteUrl}/donate`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
+  { url: `${siteUrl}/locations`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
+  // Paginas por ciudad: son busquedas locales ("recursos comunitarios Peyton").
+  ...["peyton", "colorado-springs", "pueblo", "fountain", "monument"].map((slug) => ({
+    url: `${siteUrl}/locations/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  })),
   { url: `${siteUrl}/privacy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
 ];
 

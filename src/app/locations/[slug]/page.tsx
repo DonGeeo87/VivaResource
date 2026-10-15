@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { MapPin, ArrowRight, HeartHandshake, Users, Home, Utensils, Stethoscope, GraduationCap, AlertTriangle, Phone, Globe } from "lucide-react";
 import { locations, Location } from "@/data/locations";
+import { generatePageMeta, langContext } from "@/lib/metadata";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.vivaresource.com";
 
@@ -15,18 +16,22 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const loc = locations.find((l) => l.slug === params.slug);
   if (!loc) return { title: "Location Not Found" };
 
-  return {
-    title: `${loc.name}, CO | Community Resources & Support Services | Viva Resource`,
+  return generatePageMeta({
+    path: `/locations/${loc.slug}`,
+    title: `${loc.name}, CO: Community Resources and Support`,
     description: loc.description,
-    keywords: `${loc.name} Colorado, ${loc.name} community resources, ${loc.name} community services, ${loc.county} nonprofit, ayuda comunitaria ${loc.name}, ${loc.name} food assistance, ${loc.name} housing support`,
-    openGraph: {
-      title: `${loc.name}, CO | Viva Resource`,
-      description: loc.description,
-      url: `${siteUrl}/locations/${loc.slug}`,
-      locale: "en_US",
-      siteName: "Viva Resource",
-    },
-  };
+    titleEs: `${loc.nameEs}, CO: recursos y apoyo para la comunidad`,
+    descriptionEs: loc.descriptionEs,
+    keywords: [
+      `${loc.name} Colorado`,
+      `${loc.name} community resources`,
+      `${loc.name} community services`,
+      `${loc.county} nonprofit`,
+      `ayuda comunitaria ${loc.name}`,
+      `${loc.name} food assistance`,
+      `${loc.name} housing support`,
+    ],
+  });
 }
 
 const serviceIcons: Record<string, React.ReactNode> = {
@@ -149,6 +154,10 @@ export default function LocationPage({ params }: { params: { slug: string } }) {
     );
   }
 
+  const { lang } = langContext();
+  const isEs = lang === "es";
+  const prefix = isEs ? "/es" : "";
+
   return (
     <>
       <LocationSchema loc={loc} />
@@ -160,28 +169,28 @@ export default function LocationPage({ params }: { params: { slug: string } }) {
               <div className="inline-flex items-center gap-2 bg-secondary-container/20 border border-secondary-container/30 px-4 py-1.5 rounded-full mb-4">
                 <MapPin className="w-4 h-4 text-secondary-container" />
                 <span className="text-secondary-container text-sm font-bold tracking-wider uppercase">
-                  {loc.county}
+                  {isEs ? loc.countyEs : loc.county}
                 </span>
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-extrabold text-white leading-tight tracking-tighter mb-4">
                 {loc.name}, Colorado
               </h1>
               <p className="text-xl text-on-primary-container font-body leading-relaxed max-w-2xl">
-                {loc.description}
+                {isEs ? loc.descriptionEs : loc.description}
               </p>
               <div className="flex flex-wrap gap-4 mt-8">
                 <a
-                  href="/get-help"
+                  href={`${prefix}/get-help`}
                   className="inline-flex items-center gap-2 bg-secondary text-on-secondary px-6 py-3 rounded-full font-bold hover:opacity-90 transition-all"
                 >
-                  Get Help / Obtener Ayuda
+                  {isEs ? "Obtener Ayuda" : "Get Help"}
                   <ArrowRight className="w-4 h-4" />
                 </a>
                 <a
-                  href="/contact"
+                  href={`${prefix}/contact`}
                   className="inline-flex items-center gap-2 bg-white/20 text-white px-6 py-3 rounded-full font-bold hover:bg-white/30 transition-all backdrop-blur-sm border border-white/30"
                 >
-                  Contact Us / Contáctenos
+                  {isEs ? "Contáctenos" : "Contact Us"}
                 </a>
               </div>
             </div>
@@ -193,15 +202,19 @@ export default function LocationPage({ params }: { params: { slug: string } }) {
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-headline font-extrabold text-primary mb-4">
-                Services in {loc.name} / Servicios en {loc.name}
+                {isEs ? `Servicios en ${loc.name}` : `Services in ${loc.name}`}
               </h2>
               <p className="text-on-surface-variant max-w-2xl mx-auto">
-                We provide the following services to the {loc.name} community and surrounding areas.
+                {isEs
+                  ? `Ofrecemos los siguientes servicios a la comunidad de ${loc.name} y sus alrededores.`
+                  : `We provide the following services to the ${loc.name} community and surrounding areas.`}
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {loc.services.map((service, i) => {
                 const esService = loc.servicesEs[i] || service;
+                const primary = isEs ? esService : service;
+                const secondary = isEs ? service : esService;
                 return (
                   <div
                     key={service}
@@ -210,8 +223,8 @@ export default function LocationPage({ params }: { params: { slug: string } }) {
                     <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                       {serviceIcons[service] || serviceIcons[esService] || <HeartHandshake className="w-5 h-5 text-primary" />}
                     </div>
-                    <h3 className="font-headline font-bold text-lg text-on-surface mb-2">{service}</h3>
-                    <p className="text-sm text-on-surface-variant">{esService}</p>
+                    <h3 className="font-headline font-bold text-lg text-on-surface mb-2">{primary}</h3>
+                    <p className="text-sm text-on-surface-variant">{secondary}</p>
                   </div>
                 );
               })}
@@ -224,27 +237,29 @@ export default function LocationPage({ params }: { params: { slug: string } }) {
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
               <MapPin className="w-10 h-10 text-primary mx-auto mb-4" />
-              <h3 className="font-headline font-bold text-lg mb-2">Location / Ubicación</h3>
+              <h3 className="font-headline font-bold text-lg mb-2">{isEs ? "Ubicación" : "Location"}</h3>
               <p className="text-on-surface-variant text-sm">
                 {loc.slug === "peyton"
                   ? "13055 Bradshaw Drive #301, Peyton, CO 80831"
-                  : `Serving the ${loc.name} area`}
+                  : isEs
+                    ? `Sirviendo el área de ${loc.name}`
+                    : `Serving the ${loc.name} area`}
               </p>
-              <p className="text-on-surface-variant text-sm mt-1">{loc.county}</p>
+              <p className="text-on-surface-variant text-sm mt-1">{isEs ? loc.countyEs : loc.county}</p>
             </div>
             <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
               <Users className="w-10 h-10 text-primary mx-auto mb-4" />
-              <h3 className="font-headline font-bold text-lg mb-2">Distance / Distancia</h3>
+              <h3 className="font-headline font-bold text-lg mb-2">{isEs ? "Distancia" : "Distance"}</h3>
               <p className="text-on-surface-variant text-sm">
                 {loc.distanceFromPeyton === "0 mi"
-                  ? "Headquarters / Sede Central"
-                  : `${loc.distanceFromPeyton} from Peyton / de Peyton`}
+                  ? isEs ? "Sede Central" : "Headquarters"
+                  : isEs ? `${loc.distanceFromPeyton} de Peyton` : `${loc.distanceFromPeyton} from Peyton`}
               </p>
             </div>
             <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
               <Globe className="w-10 h-10 text-primary mx-auto mb-4" />
-              <h3 className="font-headline font-bold text-lg mb-2">Languages / Idiomas</h3>
-              <p className="text-on-surface-variant text-sm">English & Spanish / Inglés y Español</p>
+              <h3 className="font-headline font-bold text-lg mb-2">{isEs ? "Idiomas" : "Languages"}</h3>
+              <p className="text-on-surface-variant text-sm">{isEs ? "Inglés y Español" : "English & Spanish"}</p>
             </div>
           </div>
         </section>
@@ -254,17 +269,19 @@ export default function LocationPage({ params }: { params: { slug: string } }) {
           <div className="max-w-4xl mx-auto text-center">
             <HeartHandshake className="w-16 h-16 text-primary mx-auto mb-6" />
             <h2 className="text-3xl md:text-4xl font-headline font-extrabold text-primary mb-4">
-              Need Help in {loc.name}?
+              {isEs ? `¿Necesitas ayuda en ${loc.name}?` : `Need Help in ${loc.name}?`}
             </h2>
             <p className="text-on-surface-variant text-lg mb-8 max-w-2xl mx-auto">
-              Our team is ready to assist you with resources, referrals, and support. Reach out today.
+              {isEs
+                ? "Nuestro equipo está listo para ayudarte con recursos, referencias y apoyo. Contáctanos hoy."
+                : "Our team is ready to assist you with resources, referrals, and support. Reach out today."}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <a
-                href="/get-help"
+                href={`${prefix}/get-help`}
                 className="inline-flex items-center gap-2 bg-secondary text-on-secondary px-8 py-4 rounded-full font-bold text-lg hover:opacity-90 transition-all"
               >
-                Get Help / Obtener Ayuda
+                {isEs ? "Obtener Ayuda" : "Get Help"}
                 <ArrowRight className="w-5 h-5" />
               </a>
               <a
@@ -272,7 +289,7 @@ export default function LocationPage({ params }: { params: { slug: string } }) {
                 className="inline-flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:opacity-90 transition-all"
               >
                 <Phone className="w-5 h-5" />
-                Call 211 / Llame al 211
+                {isEs ? "Llame al 211" : "Call 211"}
               </a>
             </div>
           </div>

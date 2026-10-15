@@ -5,8 +5,9 @@ import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import LanguageDir from "@/components/LanguageDir";
 import ClientLayout from "@/components/ClientLayout";
-import SchemaMarkup from "@/components/SchemaMarkup";
+import SiteSchema from "@/components/SiteSchema";
 import { SiteImageProvider } from "@/contexts/SiteImageContext";
+import { blogSlugLang } from "@/lib/metadata";
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -69,9 +70,19 @@ export async function generateMetadata(): Promise<Metadata> {
   const defaultTitle = "Viva Resource | Community Resources in Rural Colorado";
   const defaultDescription =
     "Viva Resource is a 501(c)(3) nonprofit connecting rural Colorado communities with essential resources: food assistance, housing support, healthcare navigation, educational workshops, emergency response, and legal aid referrals. Free bilingual support for all residents of El Paso County, Colorado.";
+  // La portada en espanol (/es) tambien necesita su propio title/description:
+  // antes servia los ingleses y Google no la distinguia de la version en ingles.
+  const defaultTitleEs = "Viva Resource | Recursos comunitarios en Colorado rural";
+  const defaultDescriptionEs =
+    "Viva Resource es una organizacion 501(c)(3) sin fines de lucro que conecta a las comunidades rurales de Colorado con recursos esenciales: ayuda alimentaria, apoyo de vivienda, navegacion de salud, talleres educativos y referencias legales. Apoyo bilingue y gratuito para el Condado de El Paso.";
 
-  const title = s.site_title || defaultTitle;
-  const description = s.site_description || defaultDescription;
+  const isEs = currentLang() === "es";
+  const title = isEs
+    ? s.site_title_es || defaultTitleEs
+    : s.site_title || defaultTitle;
+  const description = isEs
+    ? s.site_description_es || defaultDescriptionEs
+    : s.site_description || defaultDescription;
   const canonical = s.canonical_url || siteUrl;
   const ogImage = s.og_default_image || `${siteUrl}/og-viva.jpg`;
   const ogImageAlt = s.og_image_alt || "Viva Resource — Community Resources in Rural Colorado";
@@ -196,13 +207,20 @@ export default function RootLayout({
         {(() => {
           const base = canonicalForLang(siteUrl, "/");
           const withoutEs = currentPath().replace(/^\/es(?=\/|$)/, "") || "/";
-          const enUrl = canonicalForLang(siteUrl, withoutEs);
-          const esUrl = canonicalForLang(siteUrl, `/es${withoutEs === "/" ? "" : withoutEs}`);
+          // Los posts del blog llevan el idioma en el slug (foo-en / foo-es), asi
+          // que su par de idiomas se arma con el slug base, no con el prefijo /es.
+          const post = blogSlugLang(withoutEs);
+          const enUrl = post
+            ? `${siteUrl}/blog/${post.base}-en`
+            : canonicalForLang(siteUrl, withoutEs);
+          const esUrl = post
+            ? `${siteUrl}/blog/${post.base}-es`
+            : canonicalForLang(siteUrl, `/es${withoutEs === "/" ? "" : withoutEs}`);
           return (
             <>
               <link rel="alternate" hrefLang="en" href={enUrl} />
               <link rel="alternate" hrefLang="es" href={esUrl} />
-              <link rel="alternate" hrefLang="x-default" href={base} />
+              <link rel="alternate" hrefLang="x-default" href={post ? enUrl : base} />
             </>
           );
         })()}
@@ -210,7 +228,7 @@ export default function RootLayout({
       <body
         className={`${plusJakarta.variable} ${publicSans.variable} font-body antialiased bg-surface text-on-surface`}
       >
-        <SchemaMarkup />
+        <SiteSchema />
           <LanguageProvider initialLanguage={lang}>
           <SiteImageProvider>
           <LanguageDir />

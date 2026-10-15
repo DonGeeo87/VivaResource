@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import FaqBlock from "@/components/FaqBlock";
 import {
   ArrowRight,
   ExternalLink,
@@ -402,6 +403,50 @@ export default function ResourcesPage() {
           </a>
         </div>
       </section>
+
+      {/* Puente al hub de recursos gratis / ayuda en español */}
+      <section className="max-w-4xl mx-auto px-6 pt-16">
+        <div className="bg-primary text-on-primary rounded-2xl p-8 md:p-10 flex flex-col md:flex-row items-center gap-6 justify-between">
+          <div>
+            <h2 className="font-headline text-2xl font-bold mb-2">
+              {isES ? "¿Buscas recursos gratis y ayuda en español?" : "Looking for free resources and help in Spanish?"}
+            </h2>
+            <p className="opacity-90">
+              {isES
+                ? "Reunimos en una sola página los servicios gratuitos para familias latinas e hispanohablantes del Condado de El Paso."
+                : "We gathered every free service for Latino and Spanish-speaking families in El Paso County on one page."}
+            </p>
+          </div>
+          <a
+            href={isES ? "/es/free-resources" : "/free-resources"}
+            className="shrink-0 bg-secondary-container text-on-secondary-container px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform"
+          >
+            {isES ? "Ver recursos gratis" : "See free resources"}
+          </a>
+        </div>
+      </section>
+
+      {/* FAQ visible + FAQPage: respuestas directas para busquedas de recursos */}
+      <FaqBlock
+        lang={isES ? "es" : "en"}
+        items={
+          isES
+            ? [
+                { question: "¿Dónde encuentro una despensa de alimentos cerca de mí en el Condado de El Paso?", answer: "Filtra por categoría en este directorio y revisa las ciudades en la página de Ubicaciones. Si necesitas una referencia inmediata en tu código postal, llama al 211." },
+                { question: "¿Los recursos del directorio tienen costo?", answer: "La mayoría de los servicios listados son gratuitos o de bajo costo. Cada ficha indica de qué se trata y a quién llamar o escribir." },
+                { question: "¿Qué hago si no encuentro lo que busco?", answer: "Escríbenos desde la página de Contacto o envía una solicitud en Obtener Ayuda: el equipo busca el recurso contigo, sin costo." },
+                { question: "¿Hay ayuda con trámites o referencias legales?", answer: "Sí. Te conectamos con servicios legales de confianza en Colorado y organizamos talleres informativos. Viva Resource no es un despacho de abogados y no da asesoría legal: te referimos con quien sí puede ayudarte." },
+                { question: "¿El directorio y la atención están en español?", answer: "Sí. El equipo es bilingüe y atiende en inglés y español." },
+              ]
+            : [
+                { question: "Where can I find a food pantry near me in El Paso County?", answer: "Filter by category in this directory and check the cities on our Locations page. If you need an immediate referral for your ZIP code, call 211." },
+                { question: "Do the resources in this directory cost anything?", answer: "Most listed services are free or low cost. Each entry explains what it is and who to call or email." },
+                { question: "What if I cannot find what I need?", answer: "Write to us from the Contact page or send a request on Get Help: our team searches the resource with you, at no cost." },
+                { question: "Is there help with paperwork or legal referrals?", answer: "Yes. We connect families with trusted legal services in Colorado and run informational workshops. Viva Resource is not a law firm and does not give legal advice: we refer you to someone who can." },
+                { question: "Are the directory and the support available in Spanish?", answer: "Yes. Our team is bilingual and serves families in English and Spanish." },
+              ]
+        }
+      />
     </main>
   );
 }

@@ -13,6 +13,9 @@
 export interface SeoSettings {
   site_title?: string;
   site_description?: string;
+  /** Version en espanol de la portada (/es). */
+  site_title_es?: string;
+  site_description_es?: string;
   site_keywords?: string;
   canonical_url?: string;
   og_site_name?: string;
@@ -23,6 +26,13 @@ export interface SeoSettings {
   google_verification_code?: string;
   bing_verification_code?: string;
   fb_app_id?: string;
+  /** Redes sociales: alimentan el `sameAs` del schema de Organization. */
+  facebook_url?: string;
+  twitter_url?: string;
+  instagram_url?: string;
+  linkedin_url?: string;
+  youtube_url?: string;
+  tiktok_url?: string;
 }
 
 export async function getSeoSettings(): Promise<SeoSettings> {

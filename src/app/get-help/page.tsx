@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import FaqBlock from "@/components/FaqBlock";
 import Image from "next/image";
 import { db, addDoc, collection, doc, getDoc, serverTimestamp } from "@/lib/db-client";
 import {
@@ -694,6 +695,30 @@ export default function GetHelpPage() {
           <div className="absolute -top-12 -left-12 w-48 h-48 bg-primary-container/20 rounded-full blur-3xl" />
         </div>
       </section>
+
+      {/* FAQ visible + FAQPage: respuestas cortas para busquedas de ayuda */}
+      <FaqBlock
+        lang={language === "es" ? "es" : "en"}
+        items={
+          language === "es"
+            ? [
+                { question: "¿Cómo solicito ayuda?", answer: "Completa el formulario de esta página con lo que necesita tu familia y un dato de contacto. Una persona del equipo revisa la solicitud y te contacta para coordinar." },
+                { question: "¿Tiene algún costo solicitar ayuda?", answer: "No. Todos los servicios de Viva Resource son gratuitos: distribución de alimentos, talleres, apoyo de vivienda y referencias." },
+                { question: "¿Qué puedo pedir?", answer: "Alimentos, apoyo con la renta o la vivienda, ayuda para encontrar un doctor o una clínica, dudas de escuela y educación, y referencias a servicios legales de confianza." },
+                { question: "¿Me atienden en español?", answer: "Sí. Nuestro equipo es bilingüe y cada familia recibe atención en el idioma que prefiere." },
+                { question: "¿Qué pasa después de enviar el formulario?", answer: "Una persona del equipo revisa tu solicitud y te contacta por teléfono o correo electrónico con lo que dejaste. Si prefieres escribir primero, usa la página de Contacto." },
+                { question: "¿Necesito alimentos hoy mismo?", answer: "Llama al 211, la línea estatal de recursos de Colorado, para una referencia inmediata en tu código postal, y envíanos tu solicitud para dar seguimiento." },
+              ]
+            : [
+                { question: "How do I request help?", answer: "Fill out the form on this page with what your family needs and a way to reach you. A team member reviews your request and contacts you to coordinate." },
+                { question: "Does it cost anything to ask for help?", answer: "No. Every Viva Resource service is free: food distributions, workshops, housing support and referrals." },
+                { question: "What can I ask for?", answer: "Food, help with rent or housing, help finding a doctor or a clinic, school and education questions, and referrals to trusted legal services." },
+                { question: "Can I be helped in Spanish?", answer: "Yes. Our team is bilingual and every family is attended in the language they prefer." },
+                { question: "What happens after I submit the form?", answer: "A team member reviews your request and reaches out using the phone or email you provided. If you would rather write first, use the Contact page." },
+                { question: "I need food today.", answer: "Call 211, Colorado's statewide resource line, for an immediate referral for your ZIP code, and send us your request so we can follow up." },
+              ]
+        }
+      />
 
       {/* Crisis Help Modal */}
       <CrisisModal

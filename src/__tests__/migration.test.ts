@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock fetch for db-client tests
 const mockFetch = vi.fn();
-global.fetch = mockFetch;
+global.fetch = mockFetch as unknown as typeof fetch;
 
 beforeEach(() => {
   mockFetch.mockClear();

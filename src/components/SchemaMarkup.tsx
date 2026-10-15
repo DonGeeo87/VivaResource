@@ -1,301 +1,101 @@
-"use client";
+import { SITE_URL } from "@/lib/metadata";
 
-import Script from "next/script";
-import { useEffect, useState } from "react";
-import { db, collection, getDocs } from "@/lib/db-client";
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.vivaresource.com";
+/**
+ * Structured data por pagina (article, breadcrumb, event, faq, service).
+ *
+ * Se renderiza con <script type="application/ld+json"> normal, NO con
+ * next/script: asi el bloque sale en el HTML del servidor y lo leen tanto
+ * Google como los bots que no ejecutan JavaScript (GPTBot, PerplexityBot,
+ * ClaudeBot). Antes este archivo usaba next/script + useEffect y el HTML
+ * servido no tenia ningun ld+json.
+ *
+ * Sin hooks ni "use client": se puede importar desde paginas de servidor o de
+ * cliente. El schema base del sitio (Organization, WebSite, catalogo de
+ * servicios) vive en SiteSchema.tsx, dentro del layout raiz.
+ */
 
 interface SchemaMarkupProps {
-  type?: "organization" | "localBusiness" | "event" | "article" | "breadcrumb" | "faq" | "service";
+  type?: "event" | "article" | "breadcrumb" | "faq" | "service" | "webpage";
   data?: Record<string, unknown>;
 }
 
-/**
- * Organization Schema - Always included in root layout
- * Reads social media URLs from Firestore seo_settings collection
- */
-function OrganizationSchema() {
-  const [sameAs, setSameAs] = useState<string[]>([]);
+interface FaqItem {
+  question: string;
+  answer: string;
+}
 
-  useEffect(() => {
-    async function fetchSocialUrls() {
-      try {
-        const snapshot = await getDocs(collection(db, "seo_settings"));
-        const settings: Record<string, string> = {};
-        snapshot.forEach((doc) => {
-          settings[doc.id] = doc.data()?.value as string;
-        });
-
-        const socialKeys = [
-          "facebook_url",
-          "twitter_url",
-          "instagram_url",
-          "linkedin_url",
-          "youtube_url",
-          "tiktok_url",
-        ];
-        const urls = socialKeys
-          .map((key) => settings[key])
-          .filter((url): url is string => !!url && url.startsWith("http"));
-        setSameAs(urls);
-      } catch {
-        // Use empty array if fetch fails
-      }
-    }
-    fetchSocialUrls();
-  }, []);
-
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "@id": `${siteUrl}#organization`,
-    name: "Viva Resource",
-    alternateName: "Viva Resource",
-    url: siteUrl,
-    logo: `${siteUrl}/logo.png`,
-    image: `${siteUrl}/logo-rectangular.png`,
-    description:
-      "Viva Resource is a 501(c)(3) nonprofit connecting rural Colorado communities with essential resources, community services, and advocacy.",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "13055 Bradshaw Drive #301",
-      addressLocality: "Peyton",
-      addressRegion: "CO",
-      postalCode: "80831",
-      addressCountry: "US",
-    },
-    contactPoint: {
-      "@type": "ContactPoint",
-      telephone: "+1-000-000-0000",
-      contactType: "customer service",
-      availableLanguage: ["English", "Spanish"],
-    },
-    sameAs,
-    foundingDate: "2008",
-    areaServed: {
-      "@type": "State",
-      name: "Colorado",
-    },
-  };
-
+function scriptTag(id: string, schema: Record<string, unknown>): JSX.Element {
   return (
-    <Script
-      id="schema-organization"
+    <script
+      id={id}
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
     />
   );
 }
 
-/**
- * LocalBusiness Schema - For Colorado location
- */
-function LocalBusinessSchema() {
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    "@id": `${siteUrl}#localbusiness`,
-    name: "Viva Resource",
-    image: `${siteUrl}/logo-rectangular.png`,
-    url: siteUrl,
-    telephone: "",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "13055 Bradshaw Drive #301",
-      addressLocality: "Peyton",
-      addressRegion: "CO",
-      postalCode: "80831",
-      addressCountry: "US",
-    },
-    geo: {
-      "@type": "GeoCoordinates",
-      latitude: 39.0639,
-      longitude: -104.4619,
-    },
-    openingHoursSpecification: [
-      {
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-        ],
-        opens: "09:00",
-        closes: "17:00",
-      },
-    ],
-    priceRange: "$$",
-    areaServed: [
-      {
-        "@type": "City",
-        name: "Peyton",
-        sameAs: "https://en.wikipedia.org/wiki/Peyton,_Colorado",
-      },
-      {
-        "@type": "City",
-        name: "Denver",
-        sameAs: "https://en.wikipedia.org/wiki/Denver",
-      },
-      {
-        "@type": "State",
-        name: "Colorado",
-      },
-    ],
-    serviceType: [
-      "Community Resources",
-      "Community Services",
-      "Food Assistance",
-      "Housing Support",
-      "Legal Aid Referrals",
-      "Healthcare Navigation",
-      "Educational Workshops",
-    ],
-    availableLanguage: ["English", "Spanish"],
-    isAcceptingNewCustomers: true,
-  };
-
-  return (
-    <Script
-      id="schema-localbusiness"
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  );
-}
-
-/**
- * WebSite Schema - For sitelinks search
- */
-function WebSiteSchema() {
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "@id": `${siteUrl}#website`,
-    url: siteUrl,
-    name: "Viva Resource",
-    description:
-      "Community resources and support services in rural Colorado, USA",
-    publisher: {
-      "@id": `${siteUrl}#organization`,
-    },
-    inLanguage: ["en", "es"],
-    potentialAction: {
-      "@type": "SearchAction",
-      target: `${siteUrl}/resources?q={search_term_string}`,
-      "query-input": "required name=search_term_string",
-    },
-  };
-
-  return (
-    <Script
-      id="schema-website"
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  );
-}
-
-/**
- * Event Schema - For individual event pages
- */
-function EventSchema({ data }: { data: Record<string, unknown> }) {
+function EventSchema({ data }: { data: Record<string, unknown> }): JSX.Element {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Event",
     name: (data.title as string) || "",
     description: (data.description as string) || "",
     startDate: (data.date as string) || "",
+    ...(data.endDate ? { endDate: (data.endDate as string) } : {}),
     location: {
       "@type": "Place",
       name: (data.location as string) || "Viva Resource",
       address: {
         "@type": "PostalAddress",
-        streetAddress: "13055 Bradshaw Drive #301",
-        addressLocality: "Peyton",
+        streetAddress: (data.streetAddress as string) || undefined,
+        addressLocality: (data.city as string) || "Colorado Springs",
         addressRegion: "CO",
-        postalCode: "80831",
         addressCountry: "US",
       },
     },
-    organizer: {
-      "@type": "Organization",
-      name: "Viva Resource",
-      url: siteUrl,
-    },
+    organizer: { "@type": "Organization", "@id": `${SITE_URL}#organization`, name: "Viva Resource", url: SITE_URL },
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    ...(data.image ? { image: (data.image as string) } : {}),
     offers: {
       "@type": "Offer",
       price: "0",
       priceCurrency: "USD",
       availability: "https://schema.org/InStock",
-      validFrom: new Date().toISOString(),
     },
+    inLanguage: [(data.language as string) || "en"],
   };
-
-  return (
-    <Script
-      id="schema-event"
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  );
+  return scriptTag("schema-event", schema);
 }
 
-/**
- * Article Schema - For blog posts
- */
-function ArticleSchema({ data }: { data: Record<string, unknown> }) {
+function ArticleSchema({ data }: { data: Record<string, unknown> }): JSX.Element {
+  const lang = (data.language as string) === "es" ? "es" : "en";
   const schema = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: (data.title as string) || "",
     description: (data.excerpt as string) || "",
-    image: (data.featured_image as string) || `${siteUrl}/logo-rectangular.png`,
+    image: (data.featured_image as string) || `${SITE_URL}/logo-rectangular.png`,
     datePublished: (data.published_at as string) || new Date().toISOString(),
-    dateModified: (data.updated_at as string) || new Date().toISOString(),
-    author: {
-      "@type": "Organization",
-      name: (data.author as string) || "Viva Resource",
-      url: siteUrl,
-    },
+    dateModified: (data.updated_at as string) || (data.published_at as string) || new Date().toISOString(),
+    author: { "@type": "Organization", "@id": `${SITE_URL}#organization`, name: "Viva Resource", url: SITE_URL },
     publisher: {
       "@type": "Organization",
+      "@id": `${SITE_URL}#organization`,
       name: "Viva Resource",
-      logo: {
-        "@type": "ImageObject",
-        url: `${siteUrl}/logo.png`,
-      },
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` },
     },
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `${siteUrl}/blog/${data.slug as string}`,
-    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/blog/${data.slug as string}` },
     keywords: (data.keywords as string) || "community resources Colorado, community services",
-    articleSection: (data.category as string) || "News",
-    inLanguage: ["en", "es"],
+    articleSection: (data.category as string) || "Resources",
+    isAccessibleForFree: true,
+    inLanguage: lang,
   };
-
-  return (
-    <Script
-      id="schema-article"
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  );
+  return scriptTag("schema-article", schema);
 }
 
-/**
- * BreadcrumbList Schema - For navigation structure
- */
-function BreadcrumbSchema({ data }: { data?: { items: { name: string; url: string }[] } }) {
-  const items = data?.items || [
-    { name: "Home", url: siteUrl },
-  ];
-
+function BreadcrumbSchema({ data }: { data?: { items: { name: string; url: string }[] } }): JSX.Element {
+  const items = data?.items || [{ name: "Home", url: SITE_URL }];
   const schema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -306,106 +106,57 @@ function BreadcrumbSchema({ data }: { data?: { items: { name: string; url: strin
       item: item.url,
     })),
   };
-
-  return (
-    <Script
-      id="schema-breadcrumb"
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  );
+  return scriptTag("schema-breadcrumb", schema);
 }
 
-/**
- * FAQPage Schema - For frequently asked questions
- */
-function FAQPageSchema({ data }: { data: { questions: { question: string; answer: string }[] } }) {
+function FAQPageSchema({ data }: { data: { questions: FaqItem[] } }): JSX.Element | null {
   const items = data?.questions || [];
   if (items.length === 0) return null;
-
   const schema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     mainEntity: items.map((item) => ({
       "@type": "Question",
       name: item.question,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: item.answer,
-      },
+      acceptedAnswer: { "@type": "Answer", text: item.answer },
     })),
   };
-
-  return (
-    <Script
-      id="schema-faqpage"
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  );
+  return scriptTag("schema-faqpage", schema);
 }
 
-/**
- * Service Schema - For individual services/programs
- */
-function ServiceSchema({ data }: { data: Record<string, unknown> }) {
+function ServiceSchema({ data }: { data: Record<string, unknown> }): JSX.Element {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Service",
-    "@id": `${siteUrl}#service-${(data.slug as string) || "default"}`,
+    "@id": `${SITE_URL}#service-${(data.slug as string) || "default"}`,
     name: (data.name as string) || "",
     description: (data.description as string) || "",
-    provider: {
-      "@type": "Organization",
-      "@id": `${siteUrl}#organization`,
-      name: "Viva Resource",
-      url: siteUrl,
-    },
-    areaServed: {
-      "@type": "State",
-      name: "Colorado",
-    },
-    audience: {
-      "@type": "Audience",
-      name: "Rural community members in Colorado",
-    },
+    provider: { "@type": "Organization", "@id": `${SITE_URL}#organization`, name: "Viva Resource", url: SITE_URL },
+    areaServed: { "@type": "AdministrativeArea", name: "El Paso County, Colorado" },
+    audience: { "@type": "Audience", name: "Residents of rural Colorado" },
     serviceType: (data.serviceType as string) || "Community Service",
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-    },
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD", availability: "https://schema.org/InStock" },
     availableLanguage: ["English", "Spanish"],
   };
-
-  return (
-    <Script
-      id={`schema-service-${(data.slug as string) || "default"}`}
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  );
+  return scriptTag(`schema-service-${(data.slug as string) || "default"}`, schema);
 }
 
-/**
- * Main SchemaMarkup Component
- * By default renders organization + localBusiness + website schemas
- * Can be customized with type and data props for specific pages
- */
-export default function SchemaMarkup({ type, data }: SchemaMarkupProps): JSX.Element {
-  // Always render base schemas in root layout
-  if (!type) {
-    return (
-      <>
-        <OrganizationSchema />
-        <LocalBusinessSchema />
-        <WebSiteSchema />
-      </>
-    );
-  }
+function WebPageSchema({ data }: { data: Record<string, unknown> }): JSX.Element {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": (data.url as string) || SITE_URL,
+    url: (data.url as string) || SITE_URL,
+    name: (data.title as string) || "Viva Resource",
+    description: (data.description as string) || "",
+    isPartOf: { "@id": `${SITE_URL}#website` },
+    about: { "@id": `${SITE_URL}#organization` },
+    inLanguage: (data.language as string) === "es" ? "es" : "en",
+  };
+  return scriptTag("schema-webpage", schema);
+}
 
-  // Render specific schema based on type
+export default function SchemaMarkup({ type, data }: SchemaMarkupProps): JSX.Element {
   switch (type) {
     case "event":
       return <EventSchema data={data || {}} />;
@@ -414,9 +165,11 @@ export default function SchemaMarkup({ type, data }: SchemaMarkupProps): JSX.Ele
     case "breadcrumb":
       return <BreadcrumbSchema data={data as { items: { name: string; url: string }[] } | undefined} />;
     case "faq":
-      return <FAQPageSchema data={data as { questions: { question: string; answer: string }[] }} />;
+      return <FAQPageSchema data={(data as { questions: FaqItem[] }) || { questions: [] }} />;
     case "service":
       return <ServiceSchema data={data || {}} />;
+    case "webpage":
+      return <WebPageSchema data={data || {}} />;
     default:
       return <></>;
   }
