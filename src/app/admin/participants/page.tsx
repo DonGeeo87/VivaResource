@@ -2,7 +2,29 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Search, Filter, Download, User, Upload, Plus, X, Save, Loader2 } from "lucide-react";
+import { Download, Upload, Plus, Loader2, Users } from "lucide-react";
+import {
+  PageShell,
+  PageHeader,
+  Card,
+  CardHeader,
+  CardBody,
+  Modal,
+  AdminButton,
+  Toolbar,
+  SearchInput,
+  FilterSelect,
+  Field,
+  Input,
+  Table,
+  Thead,
+  Th,
+  Tbody,
+  Tr,
+  Td,
+  TableEmpty,
+  TableSkeleton,
+} from "@/components/admin";
 
 import { db, addDoc, collection, getDocs, orderBy, query, serverTimestamp } from "@/lib/db-client";
 import { getToken } from "@/lib/auth/client";
@@ -66,20 +88,15 @@ export default function ParticipantsPage(): JSX.Element {
     cancel: language === "es" ? "Cancelar" : "Cancel",
     save: language === "es" ? "Guardar" : "Save",
     importingFile: language === "es" ? "Importando..." : "Importing...",
-    importSuccess: language === "es" ? "Importado successfully" : "Import completed successfully",
-    selectFile: language === "es" ? "Seleccionar archivo Excel" : "Select Excel file",
     saveSuccess: language === "es" ? "Contacto guardado" : "Contact saved",
-    required: language === "es" ? " Campo requerido" : "Required field",
+    required: language === "es" ? "Completa nombre y apellido" : "Name and last name are required",
   };
 
   const fetchParticipants = async () => {
     try {
       const q = query(collection(db, "participants"), orderBy("apellido"));
       const snapshot = await getDocs(q);
-      const data: Participant[] = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Participant[];
+      const data: Participant[] = snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as Participant[];
       setParticipants(data);
     } catch (error) {
       console.error("Error fetching participants:", error);
@@ -93,7 +110,7 @@ export default function ParticipantsPage(): JSX.Element {
   }, []);
 
   const talleres = Array.from(
-    new Set(participants.map((p) => p.taller).filter((t) => t && t !== "Información no disponible"))
+    new Set(participants.map((p) => p.taller).filter((tt) => tt && tt !== "Información no disponible"))
   );
   const fuentes = Array.from(new Set(participants.map((p) => p.fuente).filter((f) => f)));
 
@@ -110,11 +127,8 @@ export default function ParticipantsPage(): JSX.Element {
     const headers = ["Nombre", "Apellido", "Email", "Teléfono", "Ciudad", "Taller", "Fuente"];
     const csv = [
       headers.join(","),
-      ...filtered.map((p) =>
-        [p.nombre, p.apellido, p.email, p.telefono, p.ciudad, `"${p.taller}"`, p.fuente].join(",")
-      ),
+      ...filtered.map((p) => [p.nombre, p.apellido, p.email, p.telefono, p.ciudad, `"${p.taller}"`, p.fuente].join(",")),
     ].join("\n");
-
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -128,13 +142,9 @@ export default function ParticipantsPage(): JSX.Element {
       alert(t.required);
       return;
     }
-
     setSaving(true);
     try {
-      await addDoc(collection(db, "participants"), {
-        ...newParticipant,
-        createdAt: serverTimestamp(),
-      });
+      await addDoc(collection(db, "participants"), { ...newParticipant, createdAt: serverTimestamp() });
       setShowAddModal(false);
       setNewParticipant(defaultValues);
       await fetchParticipants();
@@ -148,18 +158,15 @@ export default function ParticipantsPage(): JSX.Element {
   const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setImporting(true);
     try {
       const formData = new FormData();
       formData.append("file", file);
-
       const res = await fetch("/api/participants/import", {
         method: "POST",
         headers: { Authorization: `Bearer ${getToken() ?? ""}` },
         body: formData,
       });
-
       if (res.ok) {
         await fetchParticipants();
         setShowImportModal(false);
@@ -172,256 +179,147 @@ export default function ParticipantsPage(): JSX.Element {
     }
   };
 
-  if (!isHydrated) return <div className="p-8 text-center">Loading...</div>;
+  const setField = (key: keyof Participant, value: string) =>
+    setNewParticipant((prev) => ({ ...prev, [key]: value }));
+
+  if (!isHydrated) {
+    return <PageShell><TableSkeleton rows={3} cols={4} /></PageShell>;
+  }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">{t.title}</h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            <Upload className="w-4 h-4" />
-            {t.importData}
-          </button>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
-          >
-            <Plus className="w-4 h-4" />
-            {t.addData}
-          </button>
-          <button
-            onClick={handleExport}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-          >
-            <Download className="w-4 h-4" />
-            {t.exportData}
-          </button>
-        </div>
-      </div>
+    <PageShell>
+      <PageHeader
+        title={t.title}
+        description={`${t.total}: ${filtered.length} / ${participants.length}`}
+        actions={
+          <>
+            <AdminButton variant="secondary" icon={<Upload className="w-4 h-4" />} onClick={() => setShowImportModal(true)}>
+              {t.importData}
+            </AdminButton>
+            <AdminButton variant="secondary" icon={<Download className="w-4 h-4" />} onClick={handleExport}>
+              {t.exportData}
+            </AdminButton>
+            <AdminButton icon={<Plus className="w-4 h-4" />} onClick={() => setShowAddModal(true)}>
+              {t.addData}
+            </AdminButton>
+          </>
+        }
+      />
 
-      <div className="flex flex-wrap gap-4 mb-6">
-        <div className="relative flex-1 min-w-[250px]">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder={t.search}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border rounded-lg"
-          />
-        </div>
+      <Card>
+        <CardHeader title={t.title} icon={<Users className="w-4 h-4 text-primary" />} actions={<span className="text-xs text-on-surface-variant tabular-nums">{filtered.length}</span>} />
+        <CardBody className="space-y-4">
+          <Toolbar>
+            <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder={t.search} />
+            <FilterSelect value={filterTaller} onChange={setFilterTaller}>
+              <option value="all">{t.all} - {t.taller}</option>
+              {talleres.map((taller) => (
+                <option key={taller} value={taller}>{taller.length > 50 ? taller.substring(0, 50) + "…" : taller}</option>
+              ))}
+            </FilterSelect>
+            <FilterSelect value={filterFuente} onChange={setFilterFuente}>
+              <option value="all">{t.all} - {t.fuente}</option>
+              {fuentes.map((f) => (
+                <option key={f} value={f}>{f}</option>
+              ))}
+            </FilterSelect>
+          </Toolbar>
 
-        <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-gray-400" />
-          <select
-            value={filterTaller}
-            onChange={(e) => setFilterTaller(e.target.value)}
-            className="px-4 py-2 border rounded-lg"
-          >
-            <option value="all">{t.all} - {t.taller}</option>
-            {talleres.map((taller) => (
-              <option key={taller} value={taller}>
-                {taller.length > 50 ? taller.substring(0, 50) + "..." : taller}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={filterFuente}
-            onChange={(e) => setFilterFuente(e.target.value)}
-            className="px-4 py-2 border rounded-lg"
-          >
-            <option value="all">{t.all} - {t.fuente}</option>
-            {fuentes.map((f) => (
-              <option key={f} value={f}>
-                {f}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="mb-4 text-sm text-gray-600">
-        {t.total}: {filtered.length} / {participants.length}
-      </div>
-
-      <div className="overflow-x-auto bg-white rounded-lg shadow">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
-            <tr>
-              <th className="px-4 py-3 text-left font-medium">{t.nombre}</th>
-              <th className="px-4 py-3 text-left font-medium">{t.apellido}</th>
-              <th className="px-4 py-3 text-left font-medium">{t.email}</th>
-              <th className="px-4 py-3 text-left font-medium">{t.telefono}</th>
-              <th className="px-4 py-3 text-left font-medium">{t.ciudad}</th>
-              <th className="px-4 py-3 text-left font-medium">{t.taller}</th>
-              <th className="px-4 py-3 text-left font-medium">{t.fuente}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                  Loading...
-                </td>
-              </tr>
-            ) : filtered.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                  <User className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                  <p>{language === "es" ? "No hay participantes" : "No participants found"}</p>
-                </td>
-              </tr>
-            ) : (
-              filtered.map((p, i) => (
-                <tr key={p.id || i} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-3">{p.nombre}</td>
-                  <td className="px-4 py-3">{p.apellido}</td>
-                  <td className="px-4 py-3">{p.email || t.noData}</td>
-                  <td className="px-4 py-3">{p.telefono || t.noData}</td>
-                  <td className="px-4 py-3">{p.ciudad || t.noData}</td>
-                  <td className="px-4 py-3 max-w-[200px] truncate" title={p.taller || ""}>
-                    {p.taller || t.noData}
-                  </td>
-                  <td className="px-4 py-3 text-gray-500">{p.fuente || t.noData}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Add Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">{t.addTitle}</h2>
-              <button onClick={() => setShowAddModal(false)} className="p-1 hover:bg-gray-100 rounded">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">{t.nombre} *</label>
-                <input
-                  type="text"
-                  value={newParticipant.nombre}
-                  onChange={(e) => setNewParticipant({ ...newParticipant, nombre: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">{t.apellido} *</label>
-                <input
-                  type="text"
-                  value={newParticipant.apellido}
-                  onChange={(e) => setNewParticipant({ ...newParticipant, apellido: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">{t.email}</label>
-                <input
-                  type="email"
-                  value={newParticipant.email}
-                  onChange={(e) => setNewParticipant({ ...newParticipant, email: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">{t.telefono}</label>
-                <input
-                  type="tel"
-                  value={newParticipant.telefono}
-                  onChange={(e) => setNewParticipant({ ...newParticipant, telefono: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">{t.ciudad}</label>
-                <input
-                  type="text"
-                  value={newParticipant.ciudad}
-                  onChange={(e) => setNewParticipant({ ...newParticipant, ciudad: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  placeholder="Información no disponible"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">{t.taller}</label>
-                <input
-                  type="text"
-                  value={newParticipant.taller}
-                  onChange={(e) => setNewParticipant({ ...newParticipant, taller: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  placeholder="Información no disponible"
-                />
-              </div>
-            </div>
-            <div className="flex gap-2 mt-6">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50"
-              >
-                {t.cancel}
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50"
-              >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                {t.save}
-              </button>
-            </div>
+          <div className="-mx-4 border-y border-outline-low">
+            <Table>
+              <Thead>
+                <Th>{t.nombre}</Th>
+                <Th>{t.apellido}</Th>
+                <Th>{t.email}</Th>
+                <Th>{t.telefono}</Th>
+                <Th>{t.ciudad}</Th>
+                <Th>{t.taller}</Th>
+                <Th>{t.fuente}</Th>
+              </Thead>
+              <Tbody>
+                {loading ? (
+                  <TableSkeleton rows={5} cols={7} />
+                ) : filtered.length === 0 ? (
+                  <TableEmpty colSpan={7}>{language === "es" ? "No hay participantes" : "No participants found"}</TableEmpty>
+                ) : (
+                  filtered.map((p, i) => (
+                    <Tr key={p.id || i}>
+                      <Td><span className="font-medium text-on-surface">{p.nombre}</span></Td>
+                      <Td>{p.apellido}</Td>
+                      <Td>{p.email || t.noData}</Td>
+                      <Td>{p.telefono || t.noData}</Td>
+                      <Td>{p.ciudad || t.noData}</Td>
+                      <Td className="max-w-[200px] truncate"><span title={p.taller || ""}>{p.taller || t.noData}</span></Td>
+                      <Td>{p.fuente || t.noData}</Td>
+                    </Tr>
+                  ))
+                )}
+              </Tbody>
+            </Table>
           </div>
-        </div>
-      )}
+        </CardBody>
+      </Card>
 
-      {/* Import Modal */}
-      {showImportModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">{t.importTitle}</h2>
-              <button onClick={() => setShowImportModal(false)} className="p-1 hover:bg-gray-100 rounded">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <p className="text-gray-600 mb-4 text-sm">
-              {language === "es"
-                ? "Selecciona un archivo Excel (.xlsx) con las columnas: Nombre, Apellido, Email, Teléfono, Ciudad, Taller"
-                : "Select an Excel file (.xlsx) with columns: Name, Last Name, Email, Phone, City, Workshop"}
-            </p>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".xlsx,.xls"
-              onChange={handleImportExcel}
-              className="w-full px-3 py-2 border rounded-lg mb-4"
-            />
-            {importing && (
-              <div className="flex items-center gap-2 justify-center py-4">
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span>{t.importingFile}</span>
-              </div>
-            )}
-            <div className="flex gap-2 mt-4">
-              <button
-                onClick={() => setShowImportModal(false)}
-                className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50"
-              >
-                {t.cancel}
-              </button>
-            </div>
-          </div>
+      <Modal
+        open={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        title={t.addTitle}
+        footer={
+          <>
+            <AdminButton variant="secondary" onClick={() => setShowAddModal(false)}>{t.cancel}</AdminButton>
+            <AdminButton onClick={handleSave} disabled={saving} icon={saving ? <Loader2 className="w-4 h-4 animate-spin" /> : undefined}>
+              {t.save}
+            </AdminButton>
+          </>
+        }
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Field label={t.nombre} htmlFor="p-nombre" required>
+            <Input id="p-nombre" value={newParticipant.nombre} onChange={(e) => setField("nombre", e.target.value)} />
+          </Field>
+          <Field label={t.apellido} htmlFor="p-apellido" required>
+            <Input id="p-apellido" value={newParticipant.apellido} onChange={(e) => setField("apellido", e.target.value)} />
+          </Field>
+          <Field label={t.email} htmlFor="p-email">
+            <Input id="p-email" type="email" value={newParticipant.email} onChange={(e) => setField("email", e.target.value)} />
+          </Field>
+          <Field label={t.telefono} htmlFor="p-telefono">
+            <Input id="p-telefono" type="tel" value={newParticipant.telefono} onChange={(e) => setField("telefono", e.target.value)} />
+          </Field>
+          <Field label={t.ciudad} htmlFor="p-ciudad">
+            <Input id="p-ciudad" value={newParticipant.ciudad} onChange={(e) => setField("ciudad", e.target.value)} placeholder="Información no disponible" />
+          </Field>
+          <Field label={t.taller} htmlFor="p-taller">
+            <Input id="p-taller" value={newParticipant.taller} onChange={(e) => setField("taller", e.target.value)} placeholder="Información no disponible" />
+          </Field>
         </div>
-      )}
-    </div>
+      </Modal>
+
+      <Modal
+        open={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        title={t.importTitle}
+        footer={<AdminButton variant="secondary" onClick={() => setShowImportModal(false)}>{t.cancel}</AdminButton>}
+      >
+        <p className="text-sm text-on-surface-variant mb-4">
+          {language === "es"
+            ? "Selecciona un archivo Excel (.xlsx) con las columnas: Nombre, Apellido, Email, Teléfono, Ciudad, Taller"
+            : "Select an Excel file (.xlsx) with columns: Name, Last Name, Email, Phone, City, Workshop"}
+        </p>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".xlsx,.xls"
+          onChange={handleImportExcel}
+          className="w-full text-sm text-on-surface-variant file:mr-3 file:rounded-md file:border file:border-outline-low file:bg-surface-low file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-surface-high"
+        />
+        {importing && (
+          <div className="flex items-center gap-2 justify-center py-4 text-on-surface-variant">
+            <Loader2 className="w-5 h-5 animate-spin" />
+            <span>{t.importingFile}</span>
+          </div>
+        )}
+      </Modal>
+    </PageShell>
   );
 }

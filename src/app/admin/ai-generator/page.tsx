@@ -2,26 +2,27 @@
 
 import { useState, useEffect } from "react";
 import { db, Timestamp, addDoc, collection, deleteDoc, doc, getDocs, orderBy, query, serverTimestamp } from "@/lib/db-client";
-import {
-  Sparkles,
-  Copy,
-  Save,
-  Loader2,
-  FileText,
-  Mail,
-  Share2,
-  Clock,
-  Trash2,
-  Check,
-} from "lucide-react";
+import { Sparkles, Copy, Save, Loader2, FileText, Mail, Share2, Clock, Trash2, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { authFetch } from "@/lib/auth/client";
+import {
+  PageShell,
+  PageHeader,
+  Card,
+  CardHeader,
+  CardBody,
+  AdminButton,
+  Field,
+  Input,
+  StatusBadge,
+  EmptyState,
+} from "@/components/admin";
 
 function sanitizeHtml(html: string): string {
   return html
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, '')
-    .replace(/javascript:/gi, '');
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, "")
+    .replace(/javascript:/gi, "");
 }
 
 type ContentType = "blog" | "newsletter" | "social";
@@ -47,16 +48,16 @@ const languages: { value: Language; label: string }[] = [
   { value: "both", label: "Both (EN/ES)" },
 ];
 
+const TYPE_ICON: Record<ContentType, typeof FileText> = { blog: FileText, newsletter: Mail, social: Share2 };
+
 export default function AIGeneratorPage(): JSX.Element {
   const { language: lang, isHydrated } = useLanguage();
   const t = lang === "es" ? "es" : "en";
 
-  // Form state
   const [contentType, setContentType] = useState<ContentType>("blog");
   const [topic, setTopic] = useState("");
   const [language, setLanguage] = useState<Language>("both");
 
-  // Generation state
   const [generating, setGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -64,7 +65,6 @@ export default function AIGeneratorPage(): JSX.Element {
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // History state
   const [history, setHistory] = useState<GenerationHistory[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
@@ -75,16 +75,10 @@ export default function AIGeneratorPage(): JSX.Element {
   const fetchHistory = async () => {
     setLoadingHistory(true);
     try {
-      const q = query(
-        collection(db, "ai_generated_content"),
-        orderBy("created_at", "desc")
-      );
+      const q = query(collection(db, "ai_generated_content"), orderBy("created_at", "desc"));
       const snapshot = await getDocs(q);
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as GenerationHistory[];
-      setHistory(data.slice(0, 10)); // Only show last 10
+      const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as GenerationHistory[];
+      setHistory(data.slice(0, 10));
     } catch (error) {
       console.error("Error fetching history:", error);
     } finally {
@@ -97,29 +91,20 @@ export default function AIGeneratorPage(): JSX.Element {
       setError(t === "es" ? "Por favor ingresa un tema o idea" : "Please enter a topic or idea");
       return;
     }
-
     setGenerating(true);
     setError(null);
     setGeneratedContent(null);
     setSaveSuccess(false);
-
     try {
       const response = await authFetch("/api/ai/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: contentType,
-          topic: topic.trim(),
-          language,
-        }),
+        body: JSON.stringify({ type: contentType, topic: topic.trim(), language }),
       });
-
       const data = await response.json();
-
       if (!response.ok) {
         throw new Error(data.error || (t === "es" ? "Error al generar contenido" : "Error generating content"));
       }
-
       setGeneratedContent(data.content);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : (t === "es" ? "Ocurrió un error desconocido" : "Unknown error occurred");
@@ -131,10 +116,8 @@ export default function AIGeneratorPage(): JSX.Element {
 
   const handleCopy = async () => {
     if (!generatedContent) return;
-
-    const textToCopy = JSON.stringify(generatedContent, null, 2);
     try {
-      await navigator.clipboard.writeText(textToCopy);
+      await navigator.clipboard.writeText(JSON.stringify(generatedContent, null, 2));
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -144,23 +127,18 @@ export default function AIGeneratorPage(): JSX.Element {
 
   const handleSaveDraft = async () => {
     if (!generatedContent || !topic.trim()) return;
-
     setSaving(true);
     setSaveSuccess(false);
-
     try {
       let collectionName = "";
       let docData: Record<string, unknown> = {};
-
       if (contentType === "blog") {
         collectionName = "blog_posts";
         const content = generatedContent as { title?: string; excerpt?: string; content?: string[] | string };
         docData = {
           title: content.title || topic,
           excerpt: content.excerpt || "",
-          content: Array.isArray(content.content)
-            ? content.content.join("\n\n")
-            : content.content || "",
+          content: Array.isArray(content.content) ? content.content.join("\n\n") : content.content || "",
           language: language === "both" ? "en" : language,
           status: "draft",
           created_at: serverTimestamp(),
@@ -180,15 +158,8 @@ export default function AIGeneratorPage(): JSX.Element {
         };
       } else if (contentType === "social") {
         collectionName = "ai_generated_content";
-        docData = {
-          type: contentType,
-          topic: topic.trim(),
-          language,
-          content: generatedContent,
-          created_at: serverTimestamp(),
-        };
+        docData = { type: contentType, topic: topic.trim(), language, content: generatedContent, created_at: serverTimestamp() };
       }
-
       await addDoc(collection(db, collectionName), docData);
       setSaveSuccess(true);
       fetchHistory();
@@ -202,7 +173,6 @@ export default function AIGeneratorPage(): JSX.Element {
 
   const handleDeleteHistory = async (id: string) => {
     if (!confirm(t === "es" ? "¿Estás seguro de que quieres eliminar este elemento?" : "Are you sure you want to delete this item?")) return;
-
     try {
       await deleteDoc(doc(db, "ai_generated_content", id));
       setHistory(history.filter((h) => h.id !== id));
@@ -212,20 +182,8 @@ export default function AIGeneratorPage(): JSX.Element {
   };
 
   const formatDate = (date: Timestamp | Date) => {
-    if (date instanceof Timestamp) {
-      return date.toDate().toLocaleString("en-US", {
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    }
-    return new Date(date).toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const d = date instanceof Timestamp ? date.toDate() : new Date(date);
+    return d.toLocaleString(lang === "es" ? "es-ES" : "en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
   };
 
   const renderContent = () => {
@@ -239,42 +197,34 @@ export default function AIGeneratorPage(): JSX.Element {
         en?: { title?: string; excerpt?: string; content?: string[] };
         es?: { title?: string; excerpt?: string; content?: string[] };
       };
-
       if (language === "both" && content.en && content.es) {
         return (
           <div className="space-y-6">
-            <div className="border-l-4 border-blue-500 pl-4">
-              <h3 className="font-semibold text-blue-700 mb-2">{t === "es" ? "Versión en Inglés" : "English Version"}</h3>
+            <div className="border-l-4 border-primary pl-4">
+              <h3 className="font-semibold text-primary mb-2">{t === "es" ? "Versión en Inglés" : "English Version"}</h3>
               <h2 className="text-xl font-bold mb-2">{content.en.title || ""}</h2>
-              <p className="text-gray-600 italic mb-4">{content.en.excerpt || ""}</p>
+              <p className="text-on-surface-variant italic mb-4">{content.en.excerpt || ""}</p>
               <div className="prose max-w-none">
-                {Array.isArray(content.en.content)
-                  ? content.en.content.map((p, i) => <p key={i} className="mb-4">{p}</p>)
-                  : <p>{content.en.content}</p>}
+                {Array.isArray(content.en.content) ? content.en.content.map((p, i) => <p key={i} className="mb-4">{p}</p>) : <p>{content.en.content}</p>}
               </div>
             </div>
-            <div className="border-l-4 border-green-500 pl-4">
-              <h3 className="font-semibold text-green-700 mb-2">Versión en Español</h3>
+            <div className="border-l-4 border-secondary pl-4">
+              <h3 className="font-semibold text-secondary mb-2">Versión en Español</h3>
               <h2 className="text-xl font-bold mb-2">{content.es.title || ""}</h2>
-              <p className="text-gray-600 italic mb-4">{content.es.excerpt || ""}</p>
+              <p className="text-on-surface-variant italic mb-4">{content.es.excerpt || ""}</p>
               <div className="prose max-w-none">
-                {Array.isArray(content.es.content)
-                  ? content.es.content.map((p, i) => <p key={i} className="mb-4">{p}</p>)
-                  : <p>{content.es.content}</p>}
+                {Array.isArray(content.es.content) ? content.es.content.map((p, i) => <p key={i} className="mb-4">{p}</p>) : <p>{content.es.content}</p>}
               </div>
             </div>
           </div>
         );
       }
-
       return (
         <div>
           <h2 className="text-xl font-bold mb-2">{content.title || ""}</h2>
-          <p className="text-gray-600 italic mb-4">{content.excerpt || ""}</p>
+          <p className="text-on-surface-variant italic mb-4">{content.excerpt || ""}</p>
           <div className="prose max-w-none">
-            {Array.isArray(content.content)
-              ? content.content.map((p, i) => <p key={i} className="mb-4">{p}</p>)
-              : <p>{content.content}</p>}
+            {Array.isArray(content.content) ? content.content.map((p, i) => <p key={i} className="mb-4">{p}</p>) : <p>{content.content}</p>}
           </div>
         </div>
       );
@@ -287,24 +237,22 @@ export default function AIGeneratorPage(): JSX.Element {
         en?: { subject?: string; body?: string };
         es?: { subject?: string; body?: string };
       };
-
       if (language === "both" && content.en && content.es) {
         return (
           <div className="space-y-6">
-            <div className="border-l-4 border-blue-500 pl-4">
-              <h3 className="font-semibold text-blue-700 mb-2">{t === "es" ? "Versión en Inglés" : "English Version"}</h3>
+            <div className="border-l-4 border-primary pl-4">
+              <h3 className="font-semibold text-primary mb-2">{t === "es" ? "Versión en Inglés" : "English Version"}</h3>
               <p className="font-medium mb-2">{t === "es" ? "Asunto:" : "Subject:"} {content.en.subject}</p>
               <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.en.body || "") }} />
             </div>
-            <div className="border-l-4 border-green-500 pl-4">
-              <h3 className="font-semibold text-green-700 mb-2">Versión en Español</h3>
+            <div className="border-l-4 border-secondary pl-4">
+              <h3 className="font-semibold text-secondary mb-2">Versión en Español</h3>
               <p className="font-medium mb-2">Asunto: {content.es.subject}</p>
               <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.es.body || "") }} />
             </div>
           </div>
         );
       }
-
       return (
         <div>
           <p className="font-medium mb-2">{t === "es" ? "Asunto:" : "Subject:"} {content.subject}</p>
@@ -319,279 +267,194 @@ export default function AIGeneratorPage(): JSX.Element {
         en?: { variations?: { text?: string; hashtags?: string[] }[] };
         es?: { variations?: { text?: string; hashtags?: string[] }[] };
       };
-
       const renderVariations = (vars: { text?: string; hashtags?: string[] }[]) => (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {vars.map((v, i) => (
-            <div key={i} className="bg-gray-50 p-4 rounded-lg">
-              <p className="font-medium text-sm text-gray-500 mb-2">{t === "es" ? "Variación" : "Variation"} {i + 1}</p>
-              <p className="mb-2">{v.text}</p>
-              <p className="text-blue-600 text-sm">
-                {Array.isArray(v.hashtags) ? v.hashtags.join(" ") : v.hashtags}
-              </p>
+            <div key={i} className="bg-surface-low p-4 rounded-md">
+              <p className="font-medium text-xs text-on-surface-variant mb-2 uppercase tracking-wider">{t === "es" ? "Variación" : "Variation"} {i + 1}</p>
+              <p className="mb-2 text-on-surface">{v.text}</p>
+              <p className="text-primary text-sm">{Array.isArray(v.hashtags) ? v.hashtags.join(" ") : v.hashtags}</p>
             </div>
           ))}
         </div>
       );
-
       if (language === "both" && content.en && content.es) {
         return (
           <div className="space-y-6">
-            <div className="border-l-4 border-blue-500 pl-4">
-              <h3 className="font-semibold text-blue-700 mb-2">{t === "es" ? "Versiones en Inglés" : "English Versions"}</h3>
+            <div className="border-l-4 border-primary pl-4">
+              <h3 className="font-semibold text-primary mb-2">{t === "es" ? "Versiones en Inglés" : "English Versions"}</h3>
               {content.en.variations && renderVariations(content.en.variations)}
             </div>
-            <div className="border-l-4 border-green-500 pl-4">
-              <h3 className="font-semibold text-green-700 mb-2">Versiones en Español</h3>
+            <div className="border-l-4 border-secondary pl-4">
+              <h3 className="font-semibold text-secondary mb-2">Versiones en Español</h3>
               {content.es.variations && renderVariations(content.es.variations)}
             </div>
           </div>
         );
       }
-
       return content.variations ? renderVariations(content.variations) : null;
     }
 
-    return <pre className="whitespace-pre-wrap">{JSON.stringify(generatedContent, null, 2)}</pre>;
+    return <pre className="whitespace-pre-wrap text-sm">{JSON.stringify(generatedContent, null, 2)}</pre>;
   };
 
   if (!isHydrated) return <></>;
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">{t === "es" ? "Generador de Contenido con IA" : "AI Content Generator"}</h1>
-        <p className="text-gray-600 mt-1">
-          {t === "es" ? "Genera contenido bilingüe para publicaciones de blog, boletines y redes sociales" : "Generate bilingual content for blog posts, newsletters, and social media"}
-        </p>
-      </div>
+    <PageShell>
+      <PageHeader
+        title={t === "es" ? "Generador de Contenido con IA" : "AI Content Generator"}
+        description={t === "es" ? "Genera contenido bilingüe para publicaciones de blog, boletines y redes sociales" : "Generate bilingual content for blog posts, newsletters, and social media"}
+      />
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Main Content Area */}
-        <div className="xl:col-span-2 space-y-6">
-          {/* Input Form */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
-              {t === "es" ? "Generar Contenido" : "Generate Content"}
-            </h2>
-
-            {/* Content Type Selector */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t === "es" ? "Tipo de Contenido" : "Content Type"}
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {contentTypes.map((type) => (
-                  <button
-                    key={type.value}
-                    onClick={() => setContentType(type.value)}
-                    className={`flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-colors ${
-                      contentType === type.value
-                        ? "border-primary bg-primary/5 text-primary"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    <type.icon className="w-4 h-4" />
-                    <span className="text-sm font-medium">{t === "es" ? type.labelEs : type.labelEn}</span>
-                  </button>
-                ))}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <div className="xl:col-span-2 space-y-4">
+          <Card>
+            <CardHeader title={t === "es" ? "Generar Contenido" : "Generate Content"} icon={<Sparkles className="w-4 h-4 text-primary" />} />
+            <CardBody className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">
+                  {t === "es" ? "Tipo de Contenido" : "Content Type"}
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {contentTypes.map((type) => (
+                    <button
+                      key={type.value}
+                      onClick={() => setContentType(type.value)}
+                      className={`flex items-center justify-center gap-2 p-2.5 rounded-md border text-sm font-medium transition-colors ${
+                        contentType === type.value ? "border-primary bg-primary/5 text-primary" : "border-outline-low text-on-surface-variant hover:bg-surface-low"
+                      }`}
+                    >
+                      <type.icon className="w-4 h-4" />
+                      <span className="hidden sm:inline">{t === "es" ? type.labelEs : type.labelEn}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Topic Input */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t === "es" ? "Tema / Idea *" : "Topic / Idea *"}
-              </label>
-              <input
-                type="text"
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                placeholder={t === "es" ? "ej., Recursos de inmigración para nuevos llegados en Colorado" : "e.g., Immigration resources for new arrivals in Colorado"}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !generating) handleGenerate();
-                }}
-              />
-            </div>
+              <Field label={t === "es" ? "Tema / Idea" : "Topic / Idea"} htmlFor="ai-topic" required>
+                <Input
+                  id="ai-topic"
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  placeholder={t === "es" ? "ej., Recursos de inmigración para nuevos llegados en Colorado" : "e.g., Immigration resources for new arrivals in Colorado"}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !generating) handleGenerate();
+                  }}
+                />
+              </Field>
 
-            {/* Language Selector */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t === "es" ? "Idioma" : "Language"}
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {languages.map((lang) => (
-                  <button
-                    key={lang.value}
-                    onClick={() => setLanguage(lang.value)}
-                    className={`p-3 rounded-lg border-2 text-sm font-medium transition-colors ${
-                      language === lang.value
-                        ? "border-primary bg-primary/5 text-primary"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    {lang.label}
-                  </button>
-                ))}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">
+                  {t === "es" ? "Idioma" : "Language"}
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {languages.map((l) => (
+                    <button
+                      key={l.value}
+                      onClick={() => setLanguage(l.value)}
+                      className={`p-2.5 rounded-md border text-sm font-medium transition-colors ${
+                        language === l.value ? "border-primary bg-primary/5 text-primary" : "border-outline-low text-on-surface-variant hover:bg-surface-low"
+                      }`}
+                    >
+                      {l.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Generate Button */}
-            <button
-              onClick={handleGenerate}
-              disabled={generating || !topic.trim()}
-              className="w-full flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {generating ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  {t === "es" ? "Generando..." : "Generating..."}
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-5 h-5" />
-                  {t === "es" ? "Generar Contenido" : "Generate Content"}
-                </>
-              )}
-            </button>
+              <AdminButton
+                fullWidth
+                size="md"
+                onClick={handleGenerate}
+                disabled={generating || !topic.trim()}
+                icon={generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              >
+                {generating ? (t === "es" ? "Generando..." : "Generating...") : (t === "es" ? "Generar Contenido" : "Generate Content")}
+              </AdminButton>
 
-            {/* Error Message */}
-            {error && (
-              <div className="mt-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
-                {error}
-              </div>
-            )}
-          </div>
+              {error && <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">{error}</div>}
+            </CardBody>
+          </Card>
 
-          {/* Generated Content */}
           {generatedContent && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">{t === "es" ? "Contenido Generado" : "Generated Content"}</h2>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleCopy}
-                    className="flex items-center gap-2 px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                    title={t === "es" ? "Copiar al portapapeles" : "Copy to clipboard"}
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="w-4 h-4 text-green-600" />
-                        <span className="text-green-600">{t === "es" ? "¡Copiado!" : "Copied!"}</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-4 h-4" />
-                        {t === "es" ? "Copiar" : "Copy"}
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={handleSaveDraft}
-                    disabled={saving}
-                    className="flex items-center gap-2 px-3 py-2 text-sm bg-primary text-white hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50"
-                  >
-                    {saving ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        {t === "es" ? "Guardando..." : "Saving..."}
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4" />
-                        {t === "es" ? "Guardar como Borrador" : "Save as Draft"}
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {saveSuccess && (
-                <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">
-                  {t === "es" ? "¡Contenido guardado como borrador exitosamente!" : "Content saved as draft successfully!"}
-                </div>
-              )}
-
-              <div className="prose max-w-none">{renderContent()}</div>
-            </div>
+            <Card>
+              <CardHeader
+                title={t === "es" ? "Contenido Generado" : "Generated Content"}
+                actions={
+                  <>
+                    <AdminButton variant="secondary" icon={copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />} onClick={handleCopy}>
+                      {copied ? (t === "es" ? "¡Copiado!" : "Copied!") : (t === "es" ? "Copiar" : "Copy")}
+                    </AdminButton>
+                    <AdminButton
+                      onClick={handleSaveDraft}
+                      disabled={saving}
+                      icon={saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    >
+                      {saving ? (t === "es" ? "Guardando..." : "Saving...") : (t === "es" ? "Guardar Borrador" : "Save Draft")}
+                    </AdminButton>
+                  </>
+                }
+              />
+              <CardBody>
+                {saveSuccess && (
+                  <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-md text-sm">
+                    {t === "es" ? "¡Contenido guardado como borrador exitosamente!" : "Content saved as draft successfully!"}
+                  </div>
+                )}
+                <div className="prose max-w-none">{renderContent()}</div>
+              </CardBody>
+            </Card>
           )}
         </div>
 
-        {/* Sidebar - History */}
-        <div className="xl:col-span-1">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sticky top-24">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-gray-500" />
-              {t === "es" ? "Generaciones Recientes" : "Recent Generations"}
-            </h2>
-
+        {/* Historial */}
+        <Card className="xl:col-span-1 self-start xl:sticky xl:top-24">
+          <CardHeader title={t === "es" ? "Generaciones Recientes" : "Recent Generations"} icon={<Clock className="w-4 h-4 text-primary" />} />
+          <CardBody className="space-y-2">
             {loadingHistory ? (
               <div className="space-y-3 animate-pulse">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className="p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-3 h-3 bg-gray-200 rounded" />
-                      <div className="h-3 w-12 bg-gray-200 rounded" />
-                    </div>
-                    <div className="h-4 w-full bg-gray-200 rounded mb-2" />
-                    <div className="flex items-center gap-2">
-                      <div className="h-3 w-8 bg-gray-200 rounded" />
-                      <div className="h-3 w-20 bg-gray-200 rounded" />
-                    </div>
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="p-3 bg-surface-low rounded-md">
+                    <div className="h-4 w-full bg-surface-high rounded mb-2" />
+                    <div className="h-3 w-20 bg-surface-high rounded" />
                   </div>
                 ))}
               </div>
             ) : history.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <Clock className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                <p className="text-sm">{t === "es" ? "No hay generaciones recientes" : "No recent generations"}</p>
-                <p className="text-xs text-gray-400 mt-1">
-                  {t === "es" ? "El contenido generado aparecerá aquí" : "Generated content will appear here"}
-                </p>
-              </div>
+              <EmptyState
+                icon={<Clock className="w-6 h-6 text-outline" />}
+                title={t === "es" ? "No hay generaciones recientes" : "No recent generations"}
+                description={t === "es" ? "El contenido generado aparecerá aquí" : "Generated content will appear here"}
+              />
             ) : (
-              <div className="space-y-3">
-                {history.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group"
-                  >
+              history.map((item) => {
+                const Icon = TYPE_ICON[item.type] || FileText;
+                return (
+                  <div key={item.id} className="p-3 bg-surface-low rounded-md hover:bg-surface-high transition-colors group">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          {item.type === "blog" && <FileText className="w-3 h-3 text-blue-500" />}
-                          {item.type === "newsletter" && <Mail className="w-3 h-3 text-green-500" />}
-                          {item.type === "social" && <Share2 className="w-3 h-3 text-purple-500" />}
-                          <span className="text-xs font-medium text-gray-500 uppercase">
-                            {item.type}
-                          </span>
+                          <Icon className="w-3.5 h-3.5 text-primary" />
+                          <span className="text-xs font-medium text-on-surface-variant uppercase">{item.type}</span>
                         </div>
-                        <p className="text-sm font-medium text-gray-900 truncate">{item.topic}</p>
+                        <p className="text-sm font-medium text-on-surface truncate">{item.topic}</p>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs text-gray-500">
-                            {item.language === "both" ? "EN/ES" : (item.language || "en").toUpperCase()}
-                          </span>
-                          <span className="text-xs text-gray-400">
-                            {formatDate(item.created_at)}
-                          </span>
+                          <StatusBadge tone="brand">{item.language === "both" ? "EN/ES" : (item.language || "en").toUpperCase()}</StatusBadge>
+                          <span className="text-xs text-on-surface-variant">{formatDate(item.created_at)}</span>
                         </div>
                       </div>
-                      <button
-                        onClick={() => handleDeleteHistory(item.id)}
-                        className="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 className="w-3 h-3" />
+                      <button onClick={() => handleDeleteHistory(item.id)} title={t === "es" ? "Eliminar" : "Delete"} className="p-1 text-on-surface-variant hover:text-red-500 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity">
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
-                ))}
-              </div>
+                );
+              })
             )}
-          </div>
-        </div>
+          </CardBody>
+        </Card>
       </div>
-    </div>
+    </PageShell>
   );
 }
