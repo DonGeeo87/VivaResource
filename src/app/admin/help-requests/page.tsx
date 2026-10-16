@@ -3,16 +3,31 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { db, Timestamp, collection, doc, getDocs, orderBy, query, updateDoc } from "@/lib/db-client";
+import { Eye, Mail, Phone, Tag, MessageSquare, Inbox } from "lucide-react";
 import {
-
-  Search,
-  Filter,
-  Eye,
-  Mail,
-  Phone,
-  Tag,
-  MessageSquare,
-} from "lucide-react";
+  PageShell,
+  PageHeader,
+  StatCard,
+  Card,
+  CardHeader,
+  CardBody,
+  StatusBadge,
+  Modal,
+  AdminButton,
+  Field,
+  Textarea,
+  Toolbar,
+  SearchInput,
+  FilterSelect,
+  Table,
+  Thead,
+  Th,
+  Tbody,
+  Tr,
+  Td,
+  TableEmpty,
+  TableSkeleton,
+} from "@/components/admin";
 
 interface HelpRequest {
   id: string;
@@ -28,13 +43,6 @@ interface HelpRequest {
 }
 
 type StatusFilter = "all" | "pending" | "in_progress" | "resolved" | "closed";
-
-const statusColors: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-700",
-  in_progress: "bg-blue-100 text-blue-700",
-  resolved: "bg-green-100 text-green-700",
-  closed: "bg-gray-100 text-gray-700",
-};
 
 const statusLabels: Record<string, { en: string; es: string }> = {
   pending: { en: "Pending", es: "Pendiente" },
@@ -54,11 +62,13 @@ const assistanceTypeLabels: Record<string, { en: string; es: string }> = {
 
 export default function AdminHelpRequestsPage(): JSX.Element {
   const { language } = useLanguage();
+  const isES = language === "es";
   const [requests, setRequests] = useState<HelpRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [selectedRequest, setSelectedRequest] = useState<HelpRequest | null>(null);
+  const [noteDraft, setNoteDraft] = useState("");
   const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
@@ -68,25 +78,15 @@ export default function AdminHelpRequestsPage(): JSX.Element {
   const fetchRequests = async () => {
     setLoading(true);
     try {
-      const q = query(
-        collection(db, "help_requests"),
-        orderBy("createdAt", "desc")
-      );
+      const q = query(collection(db, "help_requests"), orderBy("createdAt", "desc"));
       const snapshot = await getDocs(q);
-      const data = snapshot.docs.map((d) => ({
-        id: d.id,
-        ...d.data(),
-      })) as HelpRequest[];
+      const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as HelpRequest[];
       setRequests(data);
     } catch (error) {
       console.error("Error fetching help requests:", error);
-      // Fallback without ordering
       try {
         const snapshot = await getDocs(collection(db, "help_requests"));
-        const data = snapshot.docs.map((d) => ({
-          id: d.id,
-          ...d.data(),
-        })) as HelpRequest[];
+        const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as HelpRequest[];
         data.sort((a, b) => {
           const dateA = a.createdAt instanceof Timestamp ? a.createdAt.toDate() : new Date(a.createdAt);
           const dateB = b.createdAt instanceof Timestamp ? b.createdAt.toDate() : new Date(b.createdAt);
@@ -101,21 +101,17 @@ export default function AdminHelpRequestsPage(): JSX.Element {
     }
   };
 
+  const openRequest = (request: HelpRequest) => {
+    setSelectedRequest(request);
+    setNoteDraft(request.notes || "");
+  };
+
   const updateStatus = async (id: string, newStatus: HelpRequest["status"]) => {
     setUpdating(true);
     try {
-      await updateDoc(doc(db, "help_requests", id), {
-        status: newStatus,
-        updatedAt: Timestamp.now(),
-      });
-      setRequests((prev) =>
-        prev.map((r) =>
-          r.id === id ? { ...r, status: newStatus, updatedAt: Timestamp.now() } : r
-        )
-      );
-      if (selectedRequest?.id === id) {
-        setSelectedRequest((prev) => prev ? { ...prev, status: newStatus, updatedAt: Timestamp.now() } : null);
-      }
+      await updateDoc(doc(db, "help_requests", id), { status: newStatus, updatedAt: Timestamp.now() });
+      setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status: newStatus, updatedAt: Timestamp.now() } : r)));
+      setSelectedRequest((prev) => (prev && prev.id === id ? { ...prev, status: newStatus, updatedAt: Timestamp.now() } : prev));
     } catch (error) {
       console.error("Error updating request status:", error);
     } finally {
@@ -126,18 +122,9 @@ export default function AdminHelpRequestsPage(): JSX.Element {
   const addNote = async (id: string, note: string) => {
     setUpdating(true);
     try {
-      await updateDoc(doc(db, "help_requests", id), {
-        notes: note,
-        updatedAt: Timestamp.now(),
-      });
-      setRequests((prev) =>
-        prev.map((r) =>
-          r.id === id ? { ...r, notes: note, updatedAt: Timestamp.now() } : r
-        )
-      );
-      if (selectedRequest?.id === id) {
-        setSelectedRequest((prev) => prev ? { ...prev, notes: note, updatedAt: Timestamp.now() } : null);
-      }
+      await updateDoc(doc(db, "help_requests", id), { notes: note, updatedAt: Timestamp.now() });
+      setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, notes: note, updatedAt: Timestamp.now() } : r)));
+      setSelectedRequest((prev) => (prev && prev.id === id ? { ...prev, notes: note } : prev));
     } catch (error) {
       console.error("Error adding note:", error);
     } finally {
@@ -146,10 +133,11 @@ export default function AdminHelpRequestsPage(): JSX.Element {
   };
 
   const filteredRequests = requests.filter((r) => {
+    const term = search.toLowerCase();
     const matchesSearch =
-      r.fullName.toLowerCase().includes(search.toLowerCase()) ||
-      r.email.toLowerCase().includes(search.toLowerCase()) ||
-      r.description.toLowerCase().includes(search.toLowerCase());
+      r.fullName.toLowerCase().includes(term) ||
+      r.email.toLowerCase().includes(term) ||
+      r.description.toLowerCase().includes(term);
     const matchesStatus = statusFilter === "all" || r.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -163,341 +151,166 @@ export default function AdminHelpRequestsPage(): JSX.Element {
   };
 
   const formatDate = (date: Timestamp | Date) => {
-    const locale = language === "es" ? "es-ES" : "en-US";
-    if (date instanceof Timestamp) {
-      return date.toDate().toLocaleDateString(locale, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    }
-    return new Date(date).toLocaleDateString(locale, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const locale = isES ? "es-ES" : "en-US";
+    const value = date instanceof Timestamp ? date.toDate() : new Date(date);
+    return value.toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
   };
 
-  const t = {
-    title: language === "es" ? "Solicitudes de Apoyo" : "Help Requests",
-    subtitle:
-      language === "es"
-        ? "Gestiona y da seguimiento a las solicitudes de ayuda"
-        : "Manage and track help requests",
-    search: language === "es" ? "Buscar solicitudes..." : "Search requests...",
-    allStatus: language === "es" ? "Todos" : "All",
-    noRequests:
-      language === "es" ? "No se encontraron solicitudes" : "No requests found",
-    status: language === "es" ? "Estado" : "Status",
-    name: language === "es" ? "Nombre" : "Name",
-    email: language === "es" ? "Email" : "Email",
-    types: language === "es" ? "Tipos" : "Types",
-    contact: language === "es" ? "Contacto" : "Contact",
-    date: language === "es" ? "Fecha" : "Date",
-    description: language === "es" ? "Descripción" : "Description",
-    notes: language === "es" ? "Notas" : "Notes",
-    addNote: language === "es" ? "Agregar nota" : "Add note",
-    save: language === "es" ? "Guardar" : "Save",
-    back: language === "es" ? "← Volver" : "← Back",
-    caseDetails:
-      language === "es" ? "Detalles del caso" : "Case Details",
-    updateStatus:
-      language === "es" ? "Actualizar estado" : "Update status",
-  };
+  const typeLabel = (type: string) => assistanceTypeLabels[type]?.[isES ? "es" : "en"] || type;
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">{t.title}</h1>
-          <p className="text-gray-600 mt-1">{t.subtitle}</p>
-        </div>
+    <PageShell>
+      <PageHeader
+        title={isES ? "Solicitudes de Apoyo" : "Help Requests"}
+        description={isES ? "Gestiona y da seguimiento a las solicitudes de ayuda" : "Manage and track help requests"}
+      />
+
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <StatCard label={isES ? "Total" : "Total"} value={stats.total} icon={<Inbox className="w-5 h-5" />} tone="neutral" loading={loading} />
+        <StatCard label={statusLabels.pending[isES ? "es" : "en"]} value={stats.pending} icon={<Inbox className="w-5 h-5" />} tone="warning" loading={loading} />
+        <StatCard label={statusLabels.in_progress[isES ? "es" : "en"]} value={stats.in_progress} icon={<Inbox className="w-5 h-5" />} tone="info" loading={loading} />
+        <StatCard label={statusLabels.resolved[isES ? "es" : "en"]} value={stats.resolved} icon={<Inbox className="w-5 h-5" />} tone="success" loading={loading} />
+        <StatCard label={statusLabels.closed[isES ? "es" : "en"]} value={stats.closed} icon={<Inbox className="w-5 h-5" />} tone="neutral" loading={loading} />
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-          <p className="text-sm text-gray-600">
-            {language === "es" ? "Total" : "Total"}
-          </p>
-        </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
-          <p className="text-sm text-gray-600">
-            {statusLabels.pending[language === "es" ? "es" : "en"]}
-          </p>
-        </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <p className="text-2xl font-bold text-blue-600">{stats.in_progress}</p>
-          <p className="text-sm text-gray-600">
-            {statusLabels.in_progress[language === "es" ? "es" : "en"]}
-          </p>
-        </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <p className="text-2xl font-bold text-green-600">{stats.resolved}</p>
-          <p className="text-sm text-gray-600">
-            {statusLabels.resolved[language === "es" ? "es" : "en"]}
-          </p>
-        </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <p className="text-2xl font-bold text-gray-600">{stats.closed}</p>
-          <p className="text-sm text-gray-600">
-            {statusLabels.closed[language === "es" ? "es" : "en"]}
-          </p>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder={t.search}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-gray-400" />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-            >
-              <option value="all">{t.allStatus}</option>
+      <Card>
+        <CardHeader title={isES ? "Solicitudes" : "Requests"} actions={<span className="text-xs text-on-surface-variant tabular-nums">{filteredRequests.length}</span>} />
+        <CardBody className="space-y-4">
+          <Toolbar>
+            <SearchInput value={search} onChange={setSearch} placeholder={isES ? "Buscar solicitudes..." : "Search requests..."} />
+            <FilterSelect value={statusFilter} onChange={(v) => setStatusFilter(v as StatusFilter)}>
+              <option value="all">{isES ? "Todos" : "All"}</option>
               {Object.entries(statusLabels).map(([key, labels]) => (
-                <option key={key} value={key}>
-                  {labels[language === "es" ? "es" : "en"]}
-                </option>
+                <option key={key} value={key}>{labels[isES ? "es" : "en"]}</option>
               ))}
-            </select>
-          </div>
-        </div>
-      </div>
+            </FilterSelect>
+          </Toolbar>
 
-      {/* Content */}
-      {selectedRequest ? (
-        /* Detail View */
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <div className="p-6 border-b border-gray-100">
-            <button
-              onClick={() => setSelectedRequest(null)}
-              className="text-primary hover:text-primary/80 font-medium text-sm"
-            >
-              {t.back}
-            </button>
-            <div className="flex items-center gap-3 mt-4">
-              <h2 className="text-2xl font-bold text-gray-900">
-                {selectedRequest.fullName}
-              </h2>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  statusColors[selectedRequest.status]
-                }`}
-              >
-                {
-                  statusLabels[selectedRequest.status][
-                    language === "es" ? "es" : "en"
-                  ]
-                }
-              </span>
-            </div>
-            <p className="text-gray-500 text-sm mt-1">{selectedRequest.email}</p>
-          </div>
-
-          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Left Column */}
-            <div className="space-y-6">
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                  <Tag className="w-4 h-4 text-gray-400" />
-                  {t.types}
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {selectedRequest.assistanceTypes.map((type) => (
-                    <span
-                      key={type}
-                      className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
-                    >
-                      {assistanceTypeLabels[type]?.[language === "es" ? "es" : "en"] || type}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-gray-400" />
-                  {t.description}
-                </h3>
-                <p className="text-gray-600 bg-gray-50 p-4 rounded-lg">
-                  {selectedRequest.description || (language === "es" ? "Sin descripción" : "No description")}
-                </p>
-              </div>
-
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-gray-400" />
-                  {t.contact}
-                </h3>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Phone className="w-4 h-4" />
-                  <span>{selectedRequest.contactMethod}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column - Status & Notes */}
-            <div className="space-y-6">
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-3">{t.updateStatus}</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  {Object.entries(statusLabels).map(([key, labels]) => (
-                    <button
-                      key={key}
-                      onClick={() => updateStatus(selectedRequest.id, key as HelpRequest["status"])}
-                      disabled={updating || selectedRequest.status === key}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        selectedRequest.status === key
-                          ? "bg-primary text-white"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      } disabled:opacity-50`}
-                    >
-                      {labels[language === "es" ? "es" : "en"]}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-3">{t.notes}</h3>
-                <textarea
-                  defaultValue={selectedRequest.notes || ""}
-                  placeholder={language === "es" ? "Agregar notas internas..." : "Add internal notes..."}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary min-h-[120px]"
-                  id="notes-input"
-                />
-                <button
-                  onClick={() => {
-                    const input = document.getElementById("notes-input") as HTMLTextAreaElement;
-                    if (input?.value) addNote(selectedRequest.id, input.value);
-                  }}
-                  disabled={updating}
-                  className="mt-2 bg-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
-                >
-                  {t.save}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        /* List View */
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t.name}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t.types}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t.status}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t.date}
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {language === "es" ? "Acciones" : "Actions"}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
+          <div className="-mx-4 border-y border-outline-low">
+            <Table>
+              <Thead>
+                <Th>{isES ? "Nombre" : "Name"}</Th>
+                <Th>{isES ? "Tipos" : "Types"}</Th>
+                <Th align="center">{isES ? "Estado" : "Status"}</Th>
+                <Th>{isES ? "Fecha" : "Date"}</Th>
+                <Th align="right">{isES ? "Acciones" : "Actions"}</Th>
+              </Thead>
+              <Tbody>
                 {loading ? (
-                  [...Array(5)].map((_, i) => (
-                    <tr key={i} className="animate-pulse">
-                      <td className="px-6 py-4"><div className="h-4 w-40 bg-gray-200 rounded" /></td>
-                      <td className="px-6 py-4"><div className="h-4 w-24 bg-gray-200 rounded" /></td>
-                      <td className="px-6 py-4"><div className="h-5 w-16 bg-gray-200 rounded-full" /></td>
-                      <td className="px-6 py-4"><div className="h-4 w-24 bg-gray-200 rounded" /></td>
-                      <td className="px-6 py-4 text-right"><div className="h-8 w-8 bg-gray-200 rounded-lg ml-auto" /></td>
-                    </tr>
-                  ))
+                  <TableSkeleton rows={5} cols={5} />
                 ) : filteredRequests.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
-                      {t.noRequests}
-                    </td>
-                  </tr>
+                  <TableEmpty colSpan={5}>{isES ? "No se encontraron solicitudes" : "No requests found"}</TableEmpty>
                 ) : (
                   filteredRequests.map((request) => (
-                    <tr key={request.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                        <div className="font-medium text-gray-900">{request.fullName}</div>
-                        <div className="text-sm text-gray-500">{request.email}</div>
-                      </td>
-                      <td className="px-6 py-4">
+                    <Tr key={request.id}>
+                      <Td>
+                        <span className="font-medium text-on-surface">{request.fullName}</span>
+                        <span className="block text-xs text-on-surface-variant">{request.email}</span>
+                      </Td>
+                      <Td>
                         <div className="flex flex-wrap gap-1">
                           {request.assistanceTypes.slice(0, 2).map((type) => (
-                            <span
-                              key={type}
-                              className="px-2 py-0.5 bg-primary/10 text-primary rounded text-xs"
-                            >
-                              {assistanceTypeLabels[type]?.[language === "es" ? "es" : "en"] || type}
-                            </span>
+                            <StatusBadge key={type} tone="brand">{typeLabel(type)}</StatusBadge>
                           ))}
                           {request.assistanceTypes.length > 2 && (
-                            <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">
-                              +{request.assistanceTypes.length - 2}
-                            </span>
+                            <StatusBadge tone="neutral">+{request.assistanceTypes.length - 2}</StatusBadge>
                           )}
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
-                            statusColors[request.status]
-                          }`}
-                        >
-                          {
-                            statusLabels[request.status][
-                              language === "es" ? "es" : "en"
-                            ]
-                          }
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
-                        {formatDate(request.createdAt)}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={() => setSelectedRequest(request)}
-                          className="p-2 text-gray-400 hover:text-primary rounded-lg hover:bg-gray-100 transition-colors"
-                          title={t.caseDetails}
-                        >
+                      </Td>
+                      <Td align="center">
+                        <StatusBadge status={request.status}>{statusLabels[request.status][isES ? "es" : "en"]}</StatusBadge>
+                      </Td>
+                      <Td>{formatDate(request.createdAt)}</Td>
+                      <Td align="right">
+                        <button onClick={() => openRequest(request)} title={isES ? "Detalles" : "Details"} className="p-2 text-on-surface-variant hover:text-primary rounded-md hover:bg-surface-low">
                           <Eye className="w-4 h-4" />
                         </button>
-                      </td>
-                    </tr>
+                      </Td>
+                    </Tr>
                   ))
                 )}
-              </tbody>
-            </table>
+              </Tbody>
+            </Table>
           </div>
-        </div>
-      )}
-    </div>
+        </CardBody>
+      </Card>
+
+      <Modal
+        open={!!selectedRequest}
+        onClose={() => setSelectedRequest(null)}
+        title={isES ? "Detalles del caso" : "Case Details"}
+        size="lg"
+      >
+        {selectedRequest && (
+          <div className="space-y-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-lg font-semibold text-on-surface">{selectedRequest.fullName}</h3>
+                <p className="text-sm text-on-surface-variant">{selectedRequest.email}</p>
+              </div>
+              <StatusBadge status={selectedRequest.status}>{statusLabels[selectedRequest.status][isES ? "es" : "en"]}</StatusBadge>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="space-y-4">
+                <div>
+                  <h4 className="flex items-center gap-2 text-sm font-semibold text-on-surface mb-2"><Tag className="w-4 h-4 text-outline" />{isES ? "Tipos" : "Types"}</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {selectedRequest.assistanceTypes.map((type) => (
+                      <StatusBadge key={type} tone="brand">{typeLabel(type)}</StatusBadge>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="flex items-center gap-2 text-sm font-semibold text-on-surface mb-2"><MessageSquare className="w-4 h-4 text-outline" />{isES ? "Descripción" : "Description"}</h4>
+                  <p className="text-sm text-on-surface-variant bg-surface-low p-3 rounded-md">
+                    {selectedRequest.description || (isES ? "Sin descripción" : "No description")}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="flex items-center gap-2 text-sm font-semibold text-on-surface mb-2"><Mail className="w-4 h-4 text-outline" />{isES ? "Contacto" : "Contact"}</h4>
+                  <span className="flex items-center gap-2 text-sm text-on-surface-variant"><Phone className="w-4 h-4" />{selectedRequest.contactMethod}</span>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-semibold text-on-surface mb-2">{isES ? "Actualizar estado" : "Update status"}</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {Object.entries(statusLabels).map(([key, labels]) => (
+                      <button
+                        key={key}
+                        onClick={() => updateStatus(selectedRequest.id, key as HelpRequest["status"])}
+                        disabled={updating || selectedRequest.status === key}
+                        className={`px-3 py-1.5 rounded-md text-sm font-medium border transition-colors disabled:opacity-50 ${
+                          selectedRequest.status === key
+                            ? "bg-primary text-white border-primary"
+                            : "bg-surface-lowest text-on-surface-variant border-outline-low hover:bg-surface-low"
+                        }`}
+                      >
+                        {labels[isES ? "es" : "en"]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <Field label={isES ? "Notas internas" : "Internal notes"} htmlFor="notes-input">
+                  <Textarea
+                    id="notes-input"
+                    value={noteDraft}
+                    onChange={(e) => setNoteDraft(e.target.value)}
+                    placeholder={isES ? "Agregar notas internas..." : "Add internal notes..."}
+                    rows={4}
+                  />
+                </Field>
+                <AdminButton onClick={() => addNote(selectedRequest.id, noteDraft)} disabled={updating}>
+                  {isES ? "Guardar nota" : "Save note"}
+                </AdminButton>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
+    </PageShell>
   );
 }

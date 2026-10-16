@@ -1,9 +1,30 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Download, Mail, Trash2, Search, Send, History, Users, Eye, Clock } from "lucide-react";
+import { Download, Mail, Trash2, Send, History, Users, Eye, Clock } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import NewsletterBuilder, { newsletterTemplates, NewsletterBlock, NewsletterTemplate } from "@/components/forms/NewsletterBuilder";
+import {
+  PageShell,
+  PageHeader,
+  StatCard,
+  Card,
+  CardHeader,
+  CardBody,
+  StatusBadge,
+  AdminButton,
+  Toolbar,
+  SearchInput,
+  EmptyState,
+  Table,
+  Thead,
+  Th,
+  Tbody,
+  Tr,
+  Td,
+  TableEmpty,
+  TableSkeleton,
+} from "@/components/admin";
 
 import { db, Timestamp, collection, deleteDoc, doc, getDocs, orderBy, query } from "@/lib/db-client";
 import { getToken } from "@/lib/auth/client";
@@ -339,31 +360,27 @@ export default function AdminNewsletterPage(): JSX.Element {
   ).length;
 
   return (
-    <div>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Newsletter</h1>
-          <p className="text-gray-600 mt-1">{language === "es" ? "Gestiona los suscriptores y envía newsletters" : "Manage subscribers and send newsletters"}</p>
-        </div>
-        {activeTab === "subscribers" && (
-          <button
-            onClick={exportCSV}
-            className="mt-4 md:mt-0 inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors"
-          >
-            <Download className="w-5 h-5" />
-            {language === "es" ? "Exportar CSV" : "Export CSV"}
-          </button>
-        )}
-      </div>
+    <PageShell>
+      <PageHeader
+        title="Newsletter"
+        description={language === "es" ? "Gestiona los suscriptores y envía newsletters" : "Manage subscribers and send newsletters"}
+        actions={
+          activeTab === "subscribers" ? (
+            <AdminButton icon={<Download className="w-4 h-4" />} onClick={exportCSV}>
+              {language === "es" ? "Exportar CSV" : "Export CSV"}
+            </AdminButton>
+          ) : undefined
+        }
+      />
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 border-b border-gray-200">
+      <div className="flex gap-2 border-b border-outline-low">
         <button
           onClick={() => setActiveTab("subscribers")}
           className={`px-4 py-2 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${
             activeTab === "subscribers"
               ? "border-primary text-primary"
-              : "border-transparent text-gray-500 hover:text-gray-700"
+              : "border-transparent text-on-surface-variant hover:text-on-surface"
           }`}
         >
           <Users className="w-4 h-4" />
@@ -374,7 +391,7 @@ export default function AdminNewsletterPage(): JSX.Element {
           className={`px-4 py-2 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${
             activeTab === "send"
               ? "border-primary text-primary"
-              : "border-transparent text-gray-500 hover:text-gray-700"
+              : "border-transparent text-on-surface-variant hover:text-on-surface"
           }`}
         >
           <Send className="w-4 h-4" />
@@ -385,7 +402,7 @@ export default function AdminNewsletterPage(): JSX.Element {
           className={`px-4 py-2 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${
             activeTab === "history"
               ? "border-primary text-primary"
-              : "border-transparent text-gray-500 hover:text-gray-700"
+              : "border-transparent text-on-surface-variant hover:text-on-surface"
           }`}
         >
           <History className="w-4 h-4" />
@@ -393,131 +410,58 @@ export default function AdminNewsletterPage(): JSX.Element {
         </button>
       </div>
 
-      {/* Stats - Always visible */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-3 mb-2">
-            <Mail className="w-8 h-8 text-primary" />
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{subscribers.length}</p>
-              <p className="text-sm text-gray-600">{language === "es" ? "Total Suscriptores" : "Total Subscribers"}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div>
-            <p className="text-2xl font-bold text-gray-900">{activeSubscribers}</p>
-            <p className="text-sm text-gray-600">{language === "es" ? "Activos" : "Active"}</p>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div>
-            <p className="text-2xl font-bold text-gray-900">{recentSubscribers}</p>
-            <p className="text-sm text-gray-600">{language === "es" ? "Últimos 30 días" : "Last 30 days"}</p>
-          </div>
-        </div>
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StatCard label={language === "es" ? "Total Suscriptores" : "Total Subscribers"} value={subscribers.length} icon={<Mail className="w-5 h-5" />} loading={loading} />
+        <StatCard label={language === "es" ? "Activos" : "Active"} value={activeSubscribers} icon={<Users className="w-5 h-5" />} tone="success" loading={loading} />
+        <StatCard label={language === "es" ? "Últimos 30 días" : "Last 30 days"} value={recentSubscribers} icon={<Clock className="w-5 h-5" />} tone="info" loading={loading} />
       </div>
 
       {/* Tab Content */}
       {activeTab === "subscribers" && (
         <>
-          {/* Search */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder={language === "es" ? "Buscar suscriptores..." : "Search subscribers..."}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-              />
-            </div>
-          </div>
+          <Toolbar>
+            <SearchInput
+              value={search}
+              onChange={setSearch}
+              placeholder={language === "es" ? "Buscar suscriptores..." : "Search subscribers..."}
+            />
+          </Toolbar>
 
-          {/* Subscribers Table */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {language === "es" ? "Nombre" : "Name"}
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {language === "es" ? "Estado" : "Status"}
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {language === "es" ? "Fuente" : "Source"}
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {language === "es" ? "Fecha" : "Date"}
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {language === "es" ? "Acciones" : "Actions"}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {loading ? (
-                    [...Array(5)].map((_, i) => (
-                      <tr key={i} className="animate-pulse">
-                        <td className="px-6 py-4"><div className="h-4 w-40 bg-gray-200 rounded" /></td>
-                        <td className="px-6 py-4"><div className="h-4 w-28 bg-gray-200 rounded" /></td>
-                        <td className="px-6 py-4"><div className="h-5 w-16 bg-gray-200 rounded-full" /></td>
-                        <td className="px-6 py-4"><div className="h-4 w-20 bg-gray-200 rounded" /></td>
-                        <td className="px-6 py-4"><div className="h-4 w-24 bg-gray-200 rounded" /></td>
-                        <td className="px-6 py-4 text-right"><div className="h-8 w-8 bg-gray-200 rounded-lg ml-auto" /></td>
-                      </tr>
-                    ))
-                  ) : filteredSubscribers.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                        {language === "es" ? "No se encontraron suscriptores" : "No subscribers found"}
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredSubscribers.map((subscriber) => (
-                      <tr key={subscriber.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4">
-                          <div className="font-medium text-gray-900">{subscriber.email}</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-gray-600">{subscriber.name || "-"}</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
-                            subscriber.status === "active"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-100 text-gray-700"
-                          }`}>
-                            {subscriber.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-gray-600 text-sm">{subscriber.source}</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-gray-600 text-sm">{formatDate(subscriber.subscribed_at)}</span>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <button
-                            onClick={() => handleDelete(subscriber.id)}
-                            className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-gray-100"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <Card>
+            <Table>
+              <Thead>
+                <Th>Email</Th>
+                <Th>{language === "es" ? "Nombre" : "Name"}</Th>
+                <Th>{language === "es" ? "Estado" : "Status"}</Th>
+                <Th>{language === "es" ? "Fuente" : "Source"}</Th>
+                <Th>{language === "es" ? "Fecha" : "Date"}</Th>
+                <Th align="right">{language === "es" ? "Acciones" : "Actions"}</Th>
+              </Thead>
+              <Tbody>
+                {loading ? (
+                  <TableSkeleton rows={5} cols={6} />
+                ) : filteredSubscribers.length === 0 ? (
+                  <TableEmpty colSpan={6}>{language === "es" ? "No se encontraron suscriptores" : "No subscribers found"}</TableEmpty>
+                ) : (
+                  filteredSubscribers.map((subscriber) => (
+                    <Tr key={subscriber.id}>
+                      <Td><span className="font-medium text-on-surface">{subscriber.email}</span></Td>
+                      <Td>{subscriber.name || "—"}</Td>
+                      <Td><StatusBadge status={subscriber.status}>{subscriber.status}</StatusBadge></Td>
+                      <Td>{subscriber.source}</Td>
+                      <Td>{formatDate(subscriber.subscribed_at)}</Td>
+                      <Td align="right">
+                        <button onClick={() => handleDelete(subscriber.id)} title={language === "es" ? "Eliminar" : "Delete"} className="p-2 text-on-surface-variant hover:text-red-600 rounded-md hover:bg-surface-low">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </Td>
+                    </Tr>
+                  ))
+                )}
+              </Tbody>
+            </Table>
+          </Card>
         </>
       )}
 
@@ -553,7 +497,7 @@ export default function AdminNewsletterPage(): JSX.Element {
                     <button
                       key={template.id}
                       onClick={() => handleSelectTemplate(template)}
-                      className="group relative rounded-xl overflow-hidden border-2 border-outline-variant/20 hover:border-primary transition-all hover:shadow-lg text-left"
+                      className="group relative rounded-xl overflow-hidden border-2 border-outline-low/20 hover:border-primary transition-all hover:shadow-lg text-left"
                     >
                       {/* Template Preview Header */}
                       <div
@@ -606,9 +550,9 @@ export default function AdminNewsletterPage(): JSX.Element {
               </div>
 
               {/* Send Button */}
-              <div className="bg-surface-lowest rounded-xl shadow-sm border border-outline-variant/10 p-6 mt-6">
+              <div className="bg-surface-lowest rounded-xl shadow-sm border border-outline-low/10 p-6 mt-6">
                 {/* Send Mode Toggle */}
-                <div className="mb-4 pb-4 border-b border-outline-variant/10">
+                <div className="mb-4 pb-4 border-b border-outline-low/10">
                   <div className="flex items-center gap-2 mb-3">
                     <Users className="w-5 h-5 text-on-surface-variant" />
                     <h3 className="text-lg font-semibold text-on-surface">
@@ -640,15 +584,15 @@ export default function AdminNewsletterPage(): JSX.Element {
 
                   {/* Selected Subscribers List */}
                   {sendMode === "selected" && (
-                    <div className="border border-outline-variant/20 rounded-lg overflow-hidden max-h-64 overflow-y-auto">
-                      <div className="p-2 bg-surface-low border-b border-outline-variant/10 flex gap-2">
+                    <div className="border border-outline-low/20 rounded-lg overflow-hidden max-h-64 overflow-y-auto">
+                      <div className="p-2 bg-surface-low border-b border-outline-low/10 flex gap-2">
                         <button
                           onClick={selectAllSubscribers}
                           className="text-xs text-primary hover:underline"
                         >
                           {isES ? "Seleccionar todos" : "Select all"}
                         </button>
-                        <span className="text-outline-variant">|</span>
+                        <span className="text-outline-low">|</span>
                         <button
                           onClick={deselectAllSubscribers}
                           className="text-xs text-primary hover:underline"
@@ -659,13 +603,13 @@ export default function AdminNewsletterPage(): JSX.Element {
                       {subscribers.filter(s => s.status === "active").map((subscriber) => (
                         <label
                           key={subscriber.id}
-                          className="flex items-center gap-3 p-3 hover:bg-surface-low cursor-pointer border-b border-outline-variant/5 last:border-b-0"
+                          className="flex items-center gap-3 p-3 hover:bg-surface-low cursor-pointer border-b border-outline-low/5 last:border-b-0"
                         >
                           <input
                             type="checkbox"
                             checked={selectedSubscribers.has(subscriber.id)}
                             onChange={() => toggleSubscriberSelection(subscriber.id)}
-                            className="w-4 h-4 text-primary border-outline-variant/30 rounded focus:ring-primary"
+                            className="w-4 h-4 text-primary border-outline-low/30 rounded focus:ring-primary"
                           />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-on-surface truncate">
@@ -712,69 +656,43 @@ export default function AdminNewsletterPage(): JSX.Element {
       )}
 
       {activeTab === "history" && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-6 border-b border-gray-100">
-            <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-              <History className="w-5 h-5 text-primary" />
-              {language === "es" ? "Historial de Newsletters Enviados" : "Sent Newsletter History"}
-            </h2>
-          </div>
-          <div className="divide-y divide-gray-200">
+        <Card>
+          <CardHeader title={language === "es" ? "Historial de Newsletters Enviados" : "Sent Newsletter History"} icon={<History className="w-4 h-4 text-primary" />} />
+          <CardBody className="p-0 divide-y divide-outline-low">
             {loadingHistory ? (
-              <div className="px-6 py-12 text-center text-gray-500">
-                {language === "es" ? "Cargando historial..." : "Loading history..."}
-              </div>
+              <p className="px-4 py-12 text-center text-sm text-on-surface-variant">{language === "es" ? "Cargando historial..." : "Loading history..."}</p>
             ) : history.length === 0 ? (
-              <div className="px-6 py-12 text-center text-gray-500">
-                {language === "es" ? "No hay newsletters enviados aún" : "No newsletters sent yet"}
-              </div>
+              <EmptyState title={language === "es" ? "No hay newsletters enviados aún" : "No newsletters sent yet"} />
             ) : (
               history.map((entry) => (
-                <div key={entry.id} className="p-6 hover:bg-gray-50">
+                <div key={entry.id} className="p-4 hover:bg-surface-low transition-colors">
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Mail className="w-4 h-4 text-gray-400" />
-                        <h3 className="font-semibold text-gray-900">{entry.subject}</h3>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Mail className="w-4 h-4 text-outline" />
+                        <h3 className="font-medium text-on-surface">{entry.subject}</h3>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {formatDateTime(entry.sent_at)}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Eye className="w-3 h-3" />
-                          {entry.total_sent} {language === "es" ? "enviados" : "sent"}
-                        </span>
+                      <div className="flex items-center gap-4 text-sm text-on-surface-variant flex-wrap">
+                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{formatDateTime(entry.sent_at)}</span>
+                        <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{entry.total_sent} {language === "es" ? "enviados" : "sent"}</span>
                         {entry.total_failed > 0 && (
-                          <span className="text-red-600">
-                            {entry.total_failed} {language === "es" ? "fallidos" : "failed"}
-                          </span>
+                          <span className="text-red-600">{entry.total_failed} {language === "es" ? "fallidos" : "failed"}</span>
                         )}
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                          entry.status === "completed"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        }`}>
-                          {entry.status === "completed"
-                            ? (language === "es" ? "Completado" : "Completed")
-                            : (language === "es" ? "Con errores" : "With errors")}
-                        </span>
+                        <StatusBadge status={entry.status === "completed" ? "success" : "warning"}>
+                          {entry.status === "completed" ? (language === "es" ? "Completado" : "Completed") : (language === "es" ? "Con errores" : "With errors")}
+                        </StatusBadge>
                       </div>
                     </div>
-                    <button
-                      onClick={() => handleDeleteHistory(entry.id)}
-                      className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-gray-100"
-                    >
+                    <button onClick={() => handleDeleteHistory(entry.id)} title={language === "es" ? "Eliminar" : "Delete"} className="p-2 text-on-surface-variant hover:text-red-600 rounded-md hover:bg-surface-low">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
               ))
             )}
-          </div>
-        </div>
+          </CardBody>
+        </Card>
       )}
-    </div>
+    </PageShell>
   );
 }
